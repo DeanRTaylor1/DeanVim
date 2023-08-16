@@ -29,6 +29,11 @@ const (
 
 const TAB_STOP = 4
 
+type Position struct {
+	x int
+	y int
+}
+
 /** DATA **/
 
 func exitKey(key rune) bool {
@@ -47,6 +52,7 @@ type EditorConfig struct {
 	screenCols    int
 	terminalState *term.State
 	numRows       int
+	tabPositions  map[Position]bool
 	rows          [][]byte
 	rowOff        int
 	colOff        int
@@ -67,6 +73,7 @@ func newEditorConfig() *EditorConfig {
 		screenCols:    0,
 		terminalState: nil,
 		rows:          [][]byte{},
+		tabPositions:  map[Position]bool{},
 		numRows:       0,
 		rowOff:        0,
 		colOff:        0,
@@ -86,24 +93,54 @@ func getWindowSize(cfg *EditorConfig) error {
 
 /** file i/o **/
 
-func replaceTabsWithSpaces(line []byte) []byte {
+func findTabStart(cfg *EditorConfig) int {
+	for i := 1; i <= TAB_STOP; i++ {
+		pos := Position{cfg.cx - i, cfg.cy}
+		if cfg.tabPositions[pos] {
+			return cfg.cx - i
+		}
+	}
+	return cfg.cx
+}
+
+func adjustCursorForTab(cfg *EditorConfig) {
+	// Find the starting position of the current tab
+	tabStart := findTabStart(cfg)
+
+	// If the current position is within a tab, snap to the closest boundary
+	if tabStart != cfg.cx {
+		if cfg.cx-tabStart < TAB_STOP/2 {
+			cfg.cx = tabStart
+		} else {
+			cfg.cx = tabStart + TAB_STOP
+		}
+	}
+}
+
+func replaceTabsWithSpaces(line []byte, rowIndex int) ([]byte, map[Position]bool) {
 	var result []byte
+	tabPositions := make(map[Position]bool)
 	for _, b := range line {
 		if b == '\t' {
 			spacesNeeded := TAB_STOP - (len(result) % TAB_STOP)
-			for i := 0; i < spacesNeeded; i++ {
+			pos := Position{len(result) - 1, rowIndex} // Assuming the y coordinate is the row number
+			tabPositions[pos] = true
+			for j := 0; j < spacesNeeded; j++ {
 				result = append(result, ' ')
 			}
 		} else {
 			result = append(result, b)
 		}
 	}
-	return result
+	return result, tabPositions
 }
 
 func editorAppendRow(r []byte, cfg *EditorConfig) {
-	convertedLine := replaceTabsWithSpaces(r)
+	convertedLine, newTabPositions := replaceTabsWithSpaces(r, len(cfg.rows))
 	cfg.rows = append(cfg.rows, convertedLine)
+	for pos, val := range newTabPositions {
+		cfg.tabPositions[pos] = val
+	}
 }
 
 func editorOpen(cfg *EditorConfig, fileName string) error {
@@ -221,31 +258,51 @@ func editorMoveCursor(key rune, cfg *EditorConfig) {
 	if cfg.cy < cfg.numRows {
 		row = cfg.rows[cfg.cy]
 	}
+	spacesNeeded := TAB_STOP - (cfg.cx % TAB_STOP)
 	switch key {
 	case rune(ARROW_LEFT):
+		pos := Position{cfg.cx - TAB_STOP, cfg.cy}
 		if cfg.cx != 0 {
-			cfg.cx--
+			if cfg.tabPositions[pos] {
+				cfg.cx -= spacesNeeded
+			} else {
+				cfg.cx--
+			}
 		} else if cfg.cy > 0 {
 			cfg.cy--
-			cfg.cx = len(cfg.rows[cfg.cy])
+			if cfg.cy < len(cfg.rows) { // Check added here
+				cfg.cx = len(cfg.rows[cfg.cy])
+			}
 		}
 		break
 	case rune(ARROW_RIGHT):
-		if len(row) > 0 && cfg.cx < len(row) {
-			cfg.cx++
-		} else if cfg.cx == len(row) {
-			cfg.cy++
-			cfg.cx = 0
+		if cfg.cy == len(cfg.rows) {
+			break
+		}
+		pos := Position{cfg.cx, cfg.cy}
+		if cfg.cx < len(cfg.rows[cfg.cy]) {
+			if cfg.tabPositions[pos] {
+				cfg.cx += spacesNeeded // Skip the spaces that replaced the tab
+			} else {
+				cfg.cx++
+			}
+		} else if cfg.cx == len(cfg.rows[cfg.cy]) {
+			if cfg.cy < len(cfg.rows)-1 { // Check added here
+				cfg.cy++
+				cfg.cx = 0
+			}
 		}
 		break
 	case rune(ARROW_DOWN):
 		if cfg.cy < cfg.numRows {
 			cfg.cy++
+			adjustCursorForTab(cfg)
 		}
 		break
 	case rune(ARROW_UP):
 		if cfg.cy != 0 {
 			cfg.cy--
+			adjustCursorForTab(cfg)
 		}
 		break
 	}
