@@ -3,11 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"syscall"
-	"unicode"
+	"time"
 
 	"golang.org/x/term"
 )
@@ -25,6 +27,10 @@ const (
 	HOME_KEY    rune = 1006
 	END_KEY     rune = 1007
 	DEL_KEY     rune = 1008
+	BACKSPACE   rune = 127
+	QUIT_TIMES  int  = 3
+	QUIT_KEY    rune = 'q'
+	SAVE_KEY    rune = 's'
 )
 
 const TAB_STOP = 4
@@ -32,6 +38,10 @@ const TAB_STOP = 4
 type Position struct {
 	x int
 	y int
+}
+
+func CTRL_KEY(ch rune) rune {
+	return ch & 0x1f
 }
 
 /** DATA **/
@@ -52,10 +62,14 @@ type EditorConfig struct {
 	screenCols    int
 	terminalState *term.State
 	numRows       int
-	tabPositions  map[Position]bool
 	rows          [][]byte
 	rowOff        int
 	colOff        int
+	fileName      string
+	statusMsg     string
+	statusMsgTime time.Time
+	dirty         int
+	quitTimes     int
 }
 
 func newErow() *erow {
@@ -73,10 +87,14 @@ func newEditorConfig() *EditorConfig {
 		screenCols:    0,
 		terminalState: nil,
 		rows:          [][]byte{},
-		tabPositions:  map[Position]bool{},
 		numRows:       0,
 		rowOff:        0,
 		colOff:        0,
+		fileName:      "[Not Selected]",
+		statusMsg:     "",
+		statusMsgTime: time.Time{},
+		dirty:         0,
+		quitTimes:     QUIT_TIMES,
 	}
 }
 
@@ -93,38 +111,11 @@ func getWindowSize(cfg *EditorConfig) error {
 
 /** file i/o **/
 
-func findTabStart(cfg *EditorConfig) int {
-	for i := 1; i <= TAB_STOP; i++ {
-		pos := Position{cfg.cx - i, cfg.cy}
-		if cfg.tabPositions[pos] {
-			return cfg.cx - i
-		}
-	}
-	return cfg.cx
-}
-
-func adjustCursorForTab(cfg *EditorConfig) {
-	// Find the starting position of the current tab
-	tabStart := findTabStart(cfg)
-
-	// If the current position is within a tab, snap to the closest boundary
-	if tabStart != cfg.cx {
-		if cfg.cx-tabStart < TAB_STOP/2 {
-			cfg.cx = tabStart
-		} else {
-			cfg.cx = tabStart + TAB_STOP
-		}
-	}
-}
-
-func replaceTabsWithSpaces(line []byte, rowIndex int) ([]byte, map[Position]bool) {
+func replaceTabsWithSpaces(line []byte) []byte {
 	var result []byte
-	tabPositions := make(map[Position]bool)
 	for _, b := range line {
 		if b == '\t' {
 			spacesNeeded := TAB_STOP - (len(result) % TAB_STOP)
-			pos := Position{len(result) - 1, rowIndex} // Assuming the y coordinate is the row number
-			tabPositions[pos] = true
 			for j := 0; j < spacesNeeded; j++ {
 				result = append(result, ' ')
 			}
@@ -132,15 +123,136 @@ func replaceTabsWithSpaces(line []byte, rowIndex int) ([]byte, map[Position]bool
 			result = append(result, b)
 		}
 	}
-	return result, tabPositions
+	return result
+}
+
+func editorUpdateRow(line []byte, cfg *EditorConfig) {
+	if cfg.cy < 1 {
+		return
+	}
+	cfg.rows[cfg.cy] = line
 }
 
 func editorAppendRow(r []byte, cfg *EditorConfig) {
-	convertedLine, newTabPositions := replaceTabsWithSpaces(r, len(cfg.rows))
+	convertedLine := replaceTabsWithSpaces(r)
 	cfg.rows = append(cfg.rows, convertedLine)
-	for pos, val := range newTabPositions {
-		cfg.tabPositions[pos] = val
+	// editorUpdateRow(&convertedLine, cfg)
+}
+
+func editorDelRow(cfg *EditorConfig) {
+	if cfg.cy < 0 || cfg.cy >= cfg.numRows {
+		return
 	}
+
+	cfg.rows = append(cfg.rows[cfg.cy-1:], cfg.rows[:cfg.cy+1]...)
+
+	cfg.numRows--
+	cfg.dirty++
+}
+
+func editorRowInsertChar(row *[]byte, at int, char rune, cfg *EditorConfig) {
+	if at < 0 || at > len(*row) {
+		at = len(*row)
+	}
+
+	*row = append(*row, 0)
+	copy((*row)[at+1:], (*row)[at:])
+	(*row)[at] = byte(char)
+
+	editorUpdateRow(*row, cfg)
+	cfg.dirty++
+}
+
+func editorRowAppendString(cfg *EditorConfig) {
+	if cfg.cy > 0 {
+		cfg.rows[cfg.cy-1] = append(cfg.rows[cfg.cy-1], cfg.rows[cfg.cy]...)
+	}
+}
+
+func editorRowDelChar(row *[]byte, at int, cfg *EditorConfig) {
+	if at < 0 || at >= len(*row) {
+		return
+	}
+	copy((*row)[at:], (*row)[at+1:])
+	*row = (*row)[:len(*row)-1]
+
+	editorUpdateRow(*row, cfg)
+	cfg.dirty++
+}
+
+func editorInsertChar(char rune, cfg *EditorConfig) {
+	if cfg.cy == cfg.numRows {
+		editorAppendRow([]byte{}, cfg)
+		cfg.numRows++
+	}
+	editorRowInsertChar(&cfg.rows[cfg.cy], cfg.cx, char, cfg)
+
+	cfg.cx++
+}
+
+func editorDelChar(cfg *EditorConfig) {
+	if cfg.cy == cfg.numRows {
+		return
+	}
+	if cfg.cx == 0 && cfg.cy == 0 {
+		return
+	}
+
+	row := &cfg.rows[cfg.cy]
+	if cfg.cx > 0 {
+		editorRowDelChar(row, cfg.cx-1, cfg)
+		cfg.cx--
+	} else {
+		cfg.cx = len(cfg.rows[cfg.cy-1])
+		editorRowAppendString(cfg)
+		editorDelRow(cfg)
+		cfg.cy--
+	}
+}
+
+func editorRowsToString(cfg *EditorConfig) string {
+	var buffer strings.Builder
+	for _, row := range cfg.rows {
+		buffer.Write(row)
+		buffer.WriteByte('\n')
+	}
+	return buffer.String()
+}
+
+func editorSave(cfg *EditorConfig) (string, error) {
+	if cfg.fileName == "[Not Selected]" {
+		return "", errors.New("no filename provided")
+	}
+
+	startTime := time.Now()
+	content := editorRowsToString(cfg)
+
+	file, err := os.OpenFile(cfg.fileName, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	if err := file.Truncate(int64(len(content))); err != nil {
+		return "", fmt.Errorf("failed to truncate file: %w", err)
+	}
+
+	n, err := file.WriteString(content)
+	if err != nil {
+		return "", fmt.Errorf("failed to write to file: %w", err)
+	}
+	if n != len(content) {
+		return "", errors.New("unexpected number of bytes written to file")
+	}
+
+	elapsedTime := time.Since(startTime) // End timing
+	numLines := len(cfg.rows)
+	numBytes := len(content)
+	message := fmt.Sprintf("\"%s\", %dL, %dB, %.3fms: written", cfg.fileName, numLines, numBytes, float64(elapsedTime.Nanoseconds())/1e6)
+
+	cfg.dirty = 0
+
+	return message, nil
 }
 
 func editorOpen(cfg *EditorConfig, fileName string) error {
@@ -149,6 +261,7 @@ func editorOpen(cfg *EditorConfig, fileName string) error {
 		log.Fatal("Error opening file")
 	}
 	defer file.Close()
+	cfg.fileName = file.Name()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -166,6 +279,7 @@ func editorOpen(cfg *EditorConfig, fileName string) error {
 	if err := scanner.Err(); err != nil {
 		return err
 	}
+	cfg.dirty = 0
 
 	return nil
 }
@@ -258,51 +372,35 @@ func editorMoveCursor(key rune, cfg *EditorConfig) {
 	if cfg.cy < cfg.numRows {
 		row = cfg.rows[cfg.cy]
 	}
-	spacesNeeded := TAB_STOP - (cfg.cx % TAB_STOP)
+	// spacesNeeded := TAB_STOP - (cfg.cx % TAB_STOP)
 	switch key {
 	case rune(ARROW_LEFT):
-		pos := Position{cfg.cx - TAB_STOP, cfg.cy}
 		if cfg.cx != 0 {
-			if cfg.tabPositions[pos] {
-				cfg.cx -= spacesNeeded
-			} else {
-				cfg.cx--
-			}
+			cfg.cx--
 		} else if cfg.cy > 0 {
 			cfg.cy--
-			if cfg.cy < len(cfg.rows) { // Check added here
+			if cfg.cy < len(cfg.rows) {
 				cfg.cx = len(cfg.rows[cfg.cy])
 			}
 		}
 		break
 	case rune(ARROW_RIGHT):
-		if cfg.cy == len(cfg.rows) {
-			break
-		}
-		pos := Position{cfg.cx, cfg.cy}
-		if cfg.cx < len(cfg.rows[cfg.cy]) {
-			if cfg.tabPositions[pos] {
-				cfg.cx += spacesNeeded // Skip the spaces that replaced the tab
-			} else {
-				cfg.cx++
-			}
-		} else if cfg.cx == len(cfg.rows[cfg.cy]) {
-			if cfg.cy < len(cfg.rows)-1 { // Check added here
-				cfg.cy++
-				cfg.cx = 0
-			}
+		if cfg.cx < len(cfg.rows[cfg.cy])-1 {
+			cfg.cx++
+		} else if cfg.cx == len(cfg.rows[cfg.cy]) && cfg.cy < len(cfg.rows)-1 {
+			cfg.cy++
+			cfg.cx = 0
 		}
 		break
+
 	case rune(ARROW_DOWN):
 		if cfg.cy < cfg.numRows {
 			cfg.cy++
-			adjustCursorForTab(cfg)
 		}
 		break
 	case rune(ARROW_UP):
 		if cfg.cy != 0 {
 			cfg.cy--
-			adjustCursorForTab(cfg)
 		}
 		break
 	}
@@ -328,16 +426,37 @@ func processKeyPress(reader *bufio.Reader, cfg *EditorConfig) {
 	}
 
 	switch char {
-	case 17:
+	case '\r':
+		break
+	case CTRL_KEY(QUIT_KEY):
+		if cfg.dirty > 0 && cfg.quitTimes > 0 {
+			editorSetStatusMessage(cfg, "WARNING!!! File has unsaved changes. Press Ctrl-Q %d more times to quit.", cfg.quitTimes)
+			cfg.quitTimes--
+			return
+		}
 		fmt.Print("\033[2J")
 		fmt.Print("\x1b[H")
 		os.Exit(0)
+		break
+	case CTRL_KEY(SAVE_KEY):
+		msg, err := editorSave(cfg)
+		if err != nil {
+			editorSetStatusMessage(cfg, "%s", err.Error())
+			break
+		}
+		editorSetStatusMessage(cfg, "%s", msg)
 		break
 	case HOME_KEY:
 		cfg.cx = 0
 		break
 	case END_KEY:
-		cfg.cx = cfg.screenCols - 1
+		cfg.cx = len(cfg.rows[cfg.cy])
+		break
+	case BACKSPACE, CTRL_KEY('h'), DEL_KEY:
+		if char == DEL_KEY {
+			editorMoveCursor(ARROW_RIGHT, cfg)
+		}
+		editorDelChar(cfg)
 		break
 	case PAGE_DOWN, PAGE_UP:
 
@@ -350,15 +469,15 @@ func processKeyPress(reader *bufio.Reader, cfg *EditorConfig) {
 			}
 			times--
 		}
+	case CTRL_KEY('l'), '\x1b':
+		break
 	case rune(ARROW_DOWN), rune(ARROW_UP), rune(ARROW_RIGHT), rune(ARROW_LEFT):
 		editorMoveCursor(char, cfg)
 	default:
-		if unicode.IsControl(char) {
-			fmt.Printf("%d\n", char)
-		}
-		fmt.Printf("%d ('%c')\n", char, char)
+		editorInsertChar(char, cfg)
 		break
 	}
+	cfg.quitTimes = QUIT_TIMES
 }
 
 func editorScroll(cfg *EditorConfig) {
@@ -409,13 +528,57 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *EditorConfig) {
 			if rowLength > screenCols {
 				rowLength = screenCols
 			}
-			buffer.Write(cfg.rows[fileRow][cfg.colOff : cfg.colOff+rowLength])
+			if cfg.colOff < len(cfg.rows[fileRow]) {
+				buffer.Write(cfg.rows[fileRow][cfg.colOff : cfg.colOff+rowLength])
+			} else {
+				buffer.Write([]byte{})
+			}
 		}
 		buffer.WriteString("\x1b[K")
 
-		if i < screenRows-1 {
-			buffer.WriteString("\r\n")
-		}
+		buffer.WriteString("\r\n")
+	}
+}
+
+func editorDrawStatusBar(buf *bytes.Buffer, cfg *EditorConfig) {
+	buf.WriteString("\x1b[7m")
+
+	currentRow := cfg.cy + 1
+	if currentRow > cfg.numRows {
+		currentRow = cfg.numRows
+	}
+
+	dirty := ""
+	if cfg.dirty > 0 {
+		dirty = "(modified)"
+	}
+
+	status := fmt.Sprintf("%.20s - %d lines %s", cfg.fileName, cfg.numRows, dirty)
+	rStatus := fmt.Sprintf("%d/%d, cx: %d, rowLen: %d", currentRow, cfg.numRows, cfg.cx, len(cfg.rows[cfg.cy]))
+
+	rLen := len(rStatus)
+	if len(status) > cfg.screenCols {
+		status = status[:cfg.screenCols-rLen]
+	}
+
+	buf.WriteString(status)
+	for i := len(status); i < cfg.screenCols-rLen; i++ {
+		buf.WriteString(" ")
+	}
+
+	buf.WriteString(rStatus)
+	buf.WriteString("\x1b[m")
+	buf.WriteString("\r\n")
+}
+
+func editorDrawMessageBar(buf *bytes.Buffer, cfg *EditorConfig) {
+	buf.WriteString("\x1b[K") // Clear the line
+	msgLen := len(cfg.statusMsg)
+	if msgLen > cfg.screenCols {
+		msgLen = cfg.screenCols
+	}
+	if msgLen > 0 && time.Since(cfg.statusMsgTime).Seconds() < 5 {
+		buf.WriteString(cfg.statusMsg[:msgLen]) // Write the message if within 5 seconds
 	}
 }
 
@@ -427,6 +590,8 @@ func editorRefreshScreen(cfg *EditorConfig) {
 	buffer.WriteString("\x1b[H")
 
 	editorDrawRows(&buffer, cfg)
+	editorDrawStatusBar(&buffer, cfg)
+	editorDrawMessageBar(&buffer, cfg)
 
 	cursorPosition := fmt.Sprintf("\x1b[%d;%dH", (cfg.cy-cfg.rowOff)+1, (cfg.cx-cfg.colOff)+1)
 	buffer.WriteString(cursorPosition)
@@ -436,11 +601,17 @@ func editorRefreshScreen(cfg *EditorConfig) {
 	os.Stdout.Write(buffer.Bytes())
 }
 
+func editorSetStatusMessage(cfg *EditorConfig, format string, a ...interface{}) {
+	cfg.statusMsg = fmt.Sprintf(format, a...)
+	cfg.statusMsgTime = time.Now()
+}
+
 func initEditor(cfg *EditorConfig) {
 	err := getWindowSize(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
+	cfg.screenRows -= 2
 }
 
 func main() {
@@ -460,6 +631,8 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+
+	editorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit")
 
 	reader := bufio.NewReader(os.Stdin)
 
