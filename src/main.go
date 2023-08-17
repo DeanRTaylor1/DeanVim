@@ -140,11 +140,15 @@ func editorAppendRow(r []byte, cfg *EditorConfig) {
 }
 
 func editorDelRow(cfg *EditorConfig) {
-	if cfg.cy < 0 || cfg.cy >= cfg.numRows {
+	if cfg.cy <= 0 || cfg.cy >= cfg.numRows {
 		return
 	}
 
-	cfg.rows = append(cfg.rows[cfg.cy-1:], cfg.rows[:cfg.cy+1]...)
+	// Append the current row to the previous one
+	cfg.rows[cfg.cy-1] = append(cfg.rows[cfg.cy-1], cfg.rows[cfg.cy]...)
+
+	// Delete the current row
+	cfg.rows = append(cfg.rows[:cfg.cy], cfg.rows[cfg.cy+1:]...)
 
 	cfg.numRows--
 	cfg.dirty++
@@ -204,7 +208,6 @@ func editorDelChar(cfg *EditorConfig) {
 		cfg.cx--
 	} else {
 		cfg.cx = len(cfg.rows[cfg.cy-1])
-		editorRowAppendString(cfg)
 		editorDelRow(cfg)
 		cfg.cy--
 	}
