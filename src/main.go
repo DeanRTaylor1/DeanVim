@@ -388,6 +388,9 @@ func editorMoveCursor(key rune, cfg *EditorConfig) {
 		}
 		break
 	case rune(ARROW_RIGHT):
+		if cfg.cy == cfg.numRows {
+			break
+		}
 		if cfg.cx < len(cfg.rows[cfg.cy])-1 {
 			cfg.cx++
 		} else if cfg.cx == len(cfg.rows[cfg.cy]) && cfg.cy < len(cfg.rows)-1 {
@@ -408,14 +411,12 @@ func editorMoveCursor(key rune, cfg *EditorConfig) {
 		break
 	}
 
-	// Reevaluate the row after processing the key input
 	if cfg.cy < cfg.numRows {
 		row = cfg.rows[cfg.cy]
 	} else {
 		row = []byte{}
 	}
 
-	// Check if the cursor is past the end of the current row
 	rowLen := len(row)
 	if cfg.cx > rowLen {
 		cfg.cx = rowLen
@@ -453,6 +454,9 @@ func processKeyPress(reader *bufio.Reader, cfg *EditorConfig) {
 		cfg.cx = 0
 		break
 	case END_KEY:
+		if cfg.cy == cfg.numRows {
+			break
+		}
 		cfg.cx = len(cfg.rows[cfg.cy])
 		break
 	case BACKSPACE, CTRL_KEY('h'), DEL_KEY:
@@ -462,7 +466,6 @@ func processKeyPress(reader *bufio.Reader, cfg *EditorConfig) {
 		editorDelChar(cfg)
 		break
 	case PAGE_DOWN, PAGE_UP:
-
 		times := cfg.screenRows
 		for times > 0 {
 			if char == PAGE_UP {
@@ -557,7 +560,7 @@ func editorDrawStatusBar(buf *bytes.Buffer, cfg *EditorConfig) {
 	}
 
 	status := fmt.Sprintf("%.20s - %d lines %s", cfg.fileName, cfg.numRows, dirty)
-	rStatus := fmt.Sprintf("%d/%d, cx: %d, rowLen: %d", currentRow, cfg.numRows, cfg.cx, len(cfg.rows[cfg.cy]))
+	rStatus := fmt.Sprintf("%d/%d", currentRow, cfg.numRows)
 
 	rLen := len(rStatus)
 	if len(status) > cfg.screenCols {
