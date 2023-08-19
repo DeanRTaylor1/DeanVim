@@ -17,6 +17,11 @@ import (
 /** CONSTS **/
 const VERSION = "0.0.1"
 
+var (
+	lastMatch = -1
+	direction = 1
+)
+
 const (
 	ARROW_LEFT  rune = 1000
 	ARROW_RIGHT rune = 1001
@@ -31,6 +36,7 @@ const (
 	QUIT_TIMES  int  = 3
 	QUIT_KEY    rune = 'q'
 	SAVE_KEY    rune = 's'
+	ENTER_KEY   rune = '\r'
 )
 
 const TAB_STOP = 4
@@ -70,6 +76,7 @@ type EditorConfig struct {
 	statusMsgTime time.Time
 	dirty         int
 	quitTimes     int
+	reader        *bufio.Reader
 }
 
 func newErow() *erow {
@@ -95,6 +102,7 @@ func newEditorConfig() *EditorConfig {
 		statusMsgTime: time.Time{},
 		dirty:         0,
 		quitTimes:     QUIT_TIMES,
+		reader:        bufio.NewReader(os.Stdin),
 	}
 }
 
@@ -133,9 +141,15 @@ func editorUpdateRow(line []byte, cfg *EditorConfig) {
 	cfg.rows[cfg.cy] = line
 }
 
-func editorAppendRow(r []byte, cfg *EditorConfig) {
+func editorInsertRow(r []byte, at int, cfg *EditorConfig) {
+	if at < 0 || at > len(cfg.rows) {
+		convertedLine := replaceTabsWithSpaces(r)
+		cfg.rows = append(cfg.rows, convertedLine)
+		return
+	}
 	convertedLine := replaceTabsWithSpaces(r)
-	cfg.rows = append(cfg.rows, convertedLine)
+	cfg.rows = append(cfg.rows[:at], append([][]byte{convertedLine}, cfg.rows[at:]...)...)
+
 	// editorUpdateRow(&convertedLine, cfg)
 }
 
@@ -186,12 +200,30 @@ func editorRowDelChar(row *[]byte, at int, cfg *EditorConfig) {
 
 func editorInsertChar(char rune, cfg *EditorConfig) {
 	if cfg.cy == cfg.numRows {
-		editorAppendRow([]byte{}, cfg)
+		editorInsertRow([]byte{}, -1, cfg)
 		cfg.numRows++
 	}
 	editorRowInsertChar(&cfg.rows[cfg.cy], cfg.cx, char, cfg)
 
 	cfg.cx++
+}
+
+func editorInsertNewLine(cfg *EditorConfig) {
+	if cfg.cx == 0 {
+		row := []byte{}
+		at := cfg.cy
+		if cfg.cy == 0 {
+			at = cfg.cy
+		}
+		editorInsertRow(row, at, cfg)
+	} else {
+		row := cfg.rows[cfg.cy]
+		cfg.rows[cfg.cy] = row[:cfg.cx]
+		editorInsertRow(row[cfg.cx:], cfg.cy+1, cfg)
+		cfg.cx = 0
+	}
+	cfg.numRows++
+	cfg.cy++
 }
 
 func editorDelChar(cfg *EditorConfig) {
@@ -275,7 +307,7 @@ func editorOpen(cfg *EditorConfig, fileName string) error {
 		}
 		row := []byte(line[:linelen])
 
-		editorAppendRow(row, cfg)
+		editorInsertRow(row, -1, cfg)
 		cfg.numRows++
 	}
 
@@ -285,6 +317,60 @@ func editorOpen(cfg *EditorConfig, fileName string) error {
 	cfg.dirty = 0
 
 	return nil
+}
+
+func editorFindCallback(buf []rune, c rune, cfg *EditorConfig) {
+	if c == '\r' || c == '\x1b' {
+		lastMatch = -1
+		direction = 1
+		return
+	} else if c == ARROW_RIGHT || c == ARROW_DOWN {
+		direction = 1
+	} else if c == ARROW_LEFT || c == ARROW_UP {
+		direction = -1
+	} else {
+		lastMatch = -1
+		direction = 1
+	}
+
+	if lastMatch == -1 {
+		direction = 1
+	}
+	current := lastMatch
+	for i := 0; i < cfg.numRows; i++ {
+		current += direction
+		if current == -1 {
+			current = cfg.numRows - 1
+		} else if current == cfg.numRows {
+			current = 0
+		}
+
+		row := cfg.rows[current]
+		matchIndex := strings.Index(string(row), string(buf))
+		if matchIndex != -1 {
+			lastMatch = current
+			cfg.cy = current
+			cfg.cx = matchIndex
+			cfg.rowOff = cfg.numRows
+			break
+		}
+	}
+}
+
+func editorFind(cfg *EditorConfig) {
+	cx := cfg.cx
+	cy := cfg.cy
+	rowOff := cfg.rowOff
+	colOff := cfg.colOff
+
+	query := editorPrompt("Search: (ESC to cancel)", editorFindCallback, cfg)
+
+	if query == nil {
+		cfg.cx = cx
+		cfg.cy = cy
+		cfg.rowOff = rowOff
+		cfg.colOff = colOff
+	}
 }
 
 func enableRawMode(cfg *EditorConfig) error {
@@ -370,6 +456,47 @@ func readKey(reader *bufio.Reader) (rune, error) {
 	}
 }
 
+func editorPrompt(prompt string, cb func([]rune, rune, *EditorConfig), cfg *EditorConfig) []rune {
+	buf := []rune{}
+	for {
+		editorSetStatusMessage(cfg, "%s", fmt.Sprintf("%s %s", prompt, string(buf)))
+		editorRefreshScreen(cfg)
+		c, err := readKey(cfg.reader)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if c == DEL_KEY || c == CTRL_KEY('h') || c == BACKSPACE {
+			if len(buf) != 0 {
+				buf = buf[:len(buf)-1]
+				if cb != nil {
+					cb(buf, c, cfg)
+				}
+			}
+		} else if c == '\x1b' {
+			editorSetStatusMessage(cfg, "")
+			if cb != nil {
+				cb(buf, c, cfg)
+			}
+			return nil
+		} else if c == '\r' {
+			if len(buf) != 0 {
+				editorSetStatusMessage(cfg, "")
+				if cb != nil {
+					cb(buf, c, cfg)
+				}
+				return buf
+			}
+		} else if c != CTRL_KEY('c') && c < 128 {
+			buf = append(buf, c)
+		}
+
+		if cb != nil {
+			cb(buf, c, cfg)
+		}
+	}
+}
+
 func editorMoveCursor(key rune, cfg *EditorConfig) {
 	row := []byte{}
 	if cfg.cy < cfg.numRows {
@@ -430,7 +557,8 @@ func processKeyPress(reader *bufio.Reader, cfg *EditorConfig) {
 	}
 
 	switch char {
-	case '\r':
+	case ENTER_KEY:
+		editorInsertNewLine(cfg)
 		break
 	case CTRL_KEY(QUIT_KEY):
 		if cfg.dirty > 0 && cfg.quitTimes > 0 {
@@ -458,6 +586,9 @@ func processKeyPress(reader *bufio.Reader, cfg *EditorConfig) {
 			break
 		}
 		cfg.cx = len(cfg.rows[cfg.cy])
+		break
+	case CTRL_KEY('f'):
+		editorFind(cfg)
 		break
 	case BACKSPACE, CTRL_KEY('h'), DEL_KEY:
 		if char == DEL_KEY {
@@ -638,12 +769,10 @@ func main() {
 		}
 	}
 
-	editorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit")
-
-	reader := bufio.NewReader(os.Stdin)
+	editorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
 
 	for {
 		editorRefreshScreen(cfg)
-		processKeyPress(reader, cfg)
+		processKeyPress(cfg.reader, cfg)
 	}
 }
