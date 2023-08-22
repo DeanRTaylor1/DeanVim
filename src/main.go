@@ -10,12 +10,12 @@ import (
 	"strings"
 	"syscall"
 	"time"
-	"unicode"
 
 	"golang.org/x/term"
 
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/highlighting"
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
 )
 
@@ -64,13 +64,15 @@ func editorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 	}
 	cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars
 	cfg.CurrentBuffer.Rows[cfg.Cy].Length = row.Length
+	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy])
 }
 
 func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
-	// Replace tabs with spaces in the row's characters
+	// Replace tabs with sroww's characters
 	convertedChars := replaceTabsWithSpaces(row.Chars)
 	row.Chars = convertedChars
 	row.Length = len(convertedChars)
+	highlighting.EditorUpdateSyntax(row)
 
 	if at < 0 || at > len(cfg.CurrentBuffer.Rows) {
 		// If at is outside the valid range, append the row to the end
@@ -90,6 +92,7 @@ func editorDelRow(cfg *config.EditorConfig) {
 	// Append the current row's characters to the previous one
 	cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars = append(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars, cfg.CurrentBuffer.Rows[cfg.Cy].Chars...)
 	cfg.CurrentBuffer.Rows[cfg.Cy-1].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars) // Update the length of the previous row
+	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy-1])
 
 	// Delete the current row
 	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:cfg.Cy], cfg.CurrentBuffer.Rows[cfg.Cy+1:]...)
@@ -108,15 +111,11 @@ func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorC
 	row.Chars[at] = byte(char)
 	row.Length = len(row.Chars) // Update the length of the row
 
-	editorUpdateRow(row, cfg) // Update to accept a Row pointer
+	// Call EditorUpdateSyntax here to ensure the highlighting is updated as well
+	highlighting.EditorUpdateSyntax(row)
+
 	cfg.Dirty++
 }
-
-// func editorRowAppendString(cfg *config.EditorConfig) {
-// 	if cfg.Cy > 0 {
-// 		cfg.Rows[cfg.Cy-1] = append(cfg.Rows[cfg.Cy-1], cfg.Rows[cfg.Cy]...)
-// 	}
-// }
 
 func editorRowDelChar(row *config.Row, at int, cfg *config.EditorConfig) {
 	if at < 0 || at >= len(row.Chars) {
@@ -240,6 +239,7 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		row := config.NewRow() // Create a new Row using the NewRow function
 		row.Chars = []byte(line[:linelen])
 		row.Length = linelen
+		highlighting.EditorUpdateSyntax(row)
 
 		editorInsertRow(row, -1, cfg)
 		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
@@ -603,7 +603,6 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				buffer.WriteByte(byte(constants.TILDE))
 			}
 		} else {
-
 			rowLength := cfg.CurrentBuffer.Rows[fileRow].Length - cfg.ColOff
 			if rowLength < 0 {
 				rowLength = 0
@@ -612,19 +611,44 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				rowLength = screenCols
 			}
 			if cfg.ColOff < cfg.CurrentBuffer.Rows[fileRow].Length {
+				if len(cfg.CurrentBuffer.Rows[fileRow].Highlighting) < 1 {
+					panic("HIGHLIGHTING EMPTY")
+				}
+				highlights := cfg.CurrentBuffer.Rows[fileRow].Highlighting
 				for j := 0; j < rowLength; j++ {
-					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
-					if unicode.IsDigit(rune(c)) {
-						buffer.WriteString(constants.TEXT_RED)
-						buffer.WriteByte(c)
+					// if i == 0 {
+					// 	message := fmt.Sprintf(
+					// 		"Debug info for first row:\n"+
+					// 			"cfg.ColOff: %d\n"+
+					// 			"rowLength: %d\n"+
+					// 			"Length of Chars: %d\n"+
+					// 			"Length of Highlighting: %d\n",
+					// 		cfg.ColOff,
+					// 		rowLength,
+					// 		len(cfg.CurrentBuffer.Rows[fileRow].Chars),
+					// 		len(cfg.CurrentBuffer.Rows[fileRow].Highlighting),
+					// 	)
+					// 	config.LogToFile(message)
+					// }
+					if cfg.ColOff+j > rowLength {
+						panic("J OUT OF BOUNDS")
+					}
+					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j] // Include cfg.ColOff in character access
+					hl := highlights[cfg.ColOff+j]                           // Include cfg.ColOff in highlight access
+					if hl == constants.HL_NORMAL {
 						buffer.WriteString(constants.FOREGROUND_RESET)
+						buffer.WriteByte(c)
 					} else {
+						color := highlighting.EditorSyntaxToColor(hl) // Use hl instead of highlights[j]
+						buffer.WriteString(fmt.Sprintf("\x1b[%dm", color))
 						buffer.WriteByte(c)
 					}
 				}
+				buffer.WriteString(constants.FOREGROUND_RESET)
 			} else {
 				buffer.Write([]byte{})
 			}
+
 		}
 		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 

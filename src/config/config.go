@@ -2,6 +2,8 @@ package config
 
 import (
 	"bufio"
+	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -9,6 +11,29 @@ import (
 
 	"github.com/deanrtaylor1/go-editor/constants"
 )
+
+const logging = true
+
+func LogToFile(message string) {
+	if !logging {
+		return
+	}
+
+	// Open the log file in append mode, or create it if it doesn't exist
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	// Create a log entry with the current time
+	logEntry := fmt.Sprintf("%s: %s\n", time.Now().Format(time.RFC3339), message)
+
+	// Write the log entry to the file
+	if _, err := file.WriteString(logEntry); err != nil {
+		log.Fatal(err)
+	}
+}
 
 type Buffer struct {
 	Rows    []Row

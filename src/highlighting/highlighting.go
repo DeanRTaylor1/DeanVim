@@ -1,21 +1,32 @@
 package highlighting
 
 import (
-	"unicode"
+	"fmt"
 
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func EditorUpdateSyntax(r []byte, rowIndex int, cfg *config.EditorConfig) {
-	hl := make([]byte, len(r))
-	for i, c := range r {
+func EditorUpdateSyntax(row *config.Row) {
+	hl := make([]byte, row.Length)
+	for i, c := range row.Chars {
 		hl[i] = constants.HL_NORMAL
-		if unicode.IsNumber(rune(c)) {
+		if utils.IsDigit(c) {
 			hl[i] = constants.HL_NUMBER
 		}
 	}
-	cfg.CurrentBuffer.Rows[rowIndex].Highlighting = hl
+	message := fmt.Sprintf(
+		"EditorUpdateSyntax Debug Info:\n"+
+			"Length of row.Chars: %d\n"+
+			"Length of row.Highlighting: %d\n"+
+			"row.Length: %d\n",
+		len(row.Chars),
+		len(row.Highlighting),
+		row.Length,
+	)
+	config.LogToFile(message)
+	row.Highlighting = hl
 }
 
 func EditorSyntaxToColor(highlight byte) byte {

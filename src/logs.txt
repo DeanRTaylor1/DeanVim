@@ -11074,3 +11074,2216 @@
 2023-08-21T16:55:13+07:00: j: 1. fileRow: 11, Cy: 0, ColOff: 0, Length: 4, Content: dsds
 2023-08-21T16:55:13+07:00: j: 2. fileRow: 11, Cy: 0, ColOff: 0, Length: 4, Content: dsds
 2023-08-21T16:55:13+07:00: j: 3. fileRow: 11, Cy: 0, ColOff: 0, Length: 4, Content: dsds
+2023-08-22T13:57:52+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 6
+Length of Chars: 6
+Length of Highlighting: 6
+
+2023-08-22T13:57:52+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 6
+Length of Chars: 6
+Length of Highlighting: 6
+
+2023-08-22T13:57:52+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 6
+Length of Chars: 6
+Length of Highlighting: 6
+
+2023-08-22T13:57:52+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 6
+Length of Chars: 6
+Length of Highlighting: 6
+
+2023-08-22T13:57:52+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 6
+Length of Chars: 6
+Length of Highlighting: 6
+
+2023-08-22T13:57:52+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 6
+Length of Chars: 6
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T13:57:54+07:00: Debug info for first row:
+cfg.ColOff: 0
+rowLength: 7
+Length of Chars: 7
+Length of Highlighting: 6
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 0
+row.Length: 6
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 6
+row.Length: 6
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 0
+row.Length: 2
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 2
+row.Length: 2
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 22
+Length of row.Highlighting: 0
+row.Length: 22
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 22
+Length of row.Highlighting: 22
+row.Length: 22
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 63
+Length of row.Highlighting: 0
+row.Length: 63
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 63
+Length of row.Highlighting: 63
+row.Length: 63
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 0
+row.Length: 10
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 10
+row.Length: 10
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 172
+Length of row.Highlighting: 0
+row.Length: 172
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 172
+Length of row.Highlighting: 172
+row.Length: 172
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 19
+Length of row.Highlighting: 0
+row.Length: 19
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 19
+Length of row.Highlighting: 19
+row.Length: 19
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 0
+row.Length: 27
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 27
+row.Length: 27
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 0
+row.Length: 2
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 2
+row.Length: 2
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 0
+row.Length: 20
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 20
+row.Length: 20
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 0
+row.Length: 13
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 13
+row.Length: 13
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 17
+Length of row.Highlighting: 0
+row.Length: 17
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 17
+Length of row.Highlighting: 17
+row.Length: 17
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 0
+row.Length: 13
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 13
+row.Length: 13
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 0
+row.Length: 8
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 8
+row.Length: 8
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 0
+row.Length: 6
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 6
+row.Length: 6
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 0
+row.Length: 14
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 14
+row.Length: 14
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 0
+row.Length: 5
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 5
+row.Length: 5
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 0
+row.Length: 1
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 1
+row.Length: 1
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 0
+row.Length: 20
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 20
+row.Length: 20
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 0
+row.Length: 7
+
+2023-08-22T14:04:23+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 7
+row.Length: 7
+
+2023-08-22T14:04:24+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 4
+row.Length: 5
+
+2023-08-22T14:04:24+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 5
+row.Length: 6
+
+2023-08-22T14:04:25+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 0
+row.Length: 1
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 0
+row.Length: 6
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 6
+row.Length: 6
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 0
+row.Length: 2
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 2
+row.Length: 2
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 22
+Length of row.Highlighting: 0
+row.Length: 22
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 22
+Length of row.Highlighting: 22
+row.Length: 22
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 63
+Length of row.Highlighting: 0
+row.Length: 63
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 63
+Length of row.Highlighting: 63
+row.Length: 63
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 0
+row.Length: 10
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 10
+row.Length: 10
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 172
+Length of row.Highlighting: 0
+row.Length: 172
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 172
+Length of row.Highlighting: 172
+row.Length: 172
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 19
+Length of row.Highlighting: 0
+row.Length: 19
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 19
+Length of row.Highlighting: 19
+row.Length: 19
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 0
+row.Length: 27
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 27
+row.Length: 27
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 0
+row.Length: 2
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 2
+row.Length: 2
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 0
+row.Length: 20
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 20
+row.Length: 20
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 0
+row.Length: 13
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 13
+row.Length: 13
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 17
+Length of row.Highlighting: 0
+row.Length: 17
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 17
+Length of row.Highlighting: 17
+row.Length: 17
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 0
+row.Length: 13
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 13
+row.Length: 13
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 0
+row.Length: 8
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 8
+row.Length: 8
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 0
+row.Length: 6
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 6
+row.Length: 6
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 0
+row.Length: 14
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 14
+row.Length: 14
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 0
+row.Length: 5
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 5
+row.Length: 5
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 0
+row.Length: 1
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 1
+row.Length: 1
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 0
+row.Length: 20
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 20
+row.Length: 20
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 0
+row.Length: 7
+
+2023-08-22T14:05:50+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 7
+row.Length: 7
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 0
+row.Length: 6
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 6
+row.Length: 6
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 0
+row.Length: 2
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 2
+row.Length: 2
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 22
+Length of row.Highlighting: 0
+row.Length: 22
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 22
+Length of row.Highlighting: 22
+row.Length: 22
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 63
+Length of row.Highlighting: 0
+row.Length: 63
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 63
+Length of row.Highlighting: 63
+row.Length: 63
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 0
+row.Length: 10
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 10
+row.Length: 10
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 172
+Length of row.Highlighting: 0
+row.Length: 172
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 172
+Length of row.Highlighting: 172
+row.Length: 172
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 19
+Length of row.Highlighting: 0
+row.Length: 19
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 19
+Length of row.Highlighting: 19
+row.Length: 19
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 0
+row.Length: 27
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 27
+row.Length: 27
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 0
+row.Length: 2
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 2
+row.Length: 2
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 0
+row.Length: 20
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 20
+row.Length: 20
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 0
+row.Length: 13
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 13
+row.Length: 13
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 17
+Length of row.Highlighting: 0
+row.Length: 17
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 17
+Length of row.Highlighting: 17
+row.Length: 17
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 0
+row.Length: 13
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 13
+row.Length: 13
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 0
+row.Length: 8
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 8
+row.Length: 8
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 0
+row.Length: 6
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 6
+row.Length: 6
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 0
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 4
+Length of row.Highlighting: 4
+row.Length: 4
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 0
+row.Length: 14
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 14
+row.Length: 14
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 0
+row.Length: 5
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 5
+row.Length: 5
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 0
+row.Length: 3
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 3
+row.Length: 3
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 0
+row.Length: 1
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 1
+row.Length: 1
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 0
+row.Length: 20
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 20
+Length of row.Highlighting: 20
+row.Length: 20
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 0
+row.Length: 7
+
+2023-08-22T14:06:36+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 7
+row.Length: 7
+
+2023-08-22T14:06:37+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 6
+row.Length: 7
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 8
+Length of row.Highlighting: 7
+row.Length: 8
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 9
+Length of row.Highlighting: 8
+row.Length: 9
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 10
+Length of row.Highlighting: 9
+row.Length: 10
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 11
+Length of row.Highlighting: 10
+row.Length: 11
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 12
+Length of row.Highlighting: 11
+row.Length: 12
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 13
+Length of row.Highlighting: 12
+row.Length: 13
+
+2023-08-22T14:06:38+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 14
+Length of row.Highlighting: 13
+row.Length: 14
+
+2023-08-22T14:06:39+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 0
+row.Length: 1
+
+2023-08-22T14:06:39+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 2
+Length of row.Highlighting: 1
+row.Length: 2
+
+2023-08-22T14:06:39+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 3
+Length of row.Highlighting: 2
+row.Length: 3
+
+2023-08-22T14:06:39+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 5
+Length of row.Highlighting: 4
+row.Length: 5
+
+2023-08-22T14:06:39+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 6
+Length of row.Highlighting: 5
+row.Length: 6
+
+2023-08-22T14:06:40+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 7
+Length of row.Highlighting: 6
+row.Length: 7
+
+2023-08-22T14:06:40+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 1
+Length of row.Highlighting: 0
+row.Length: 1
+
+2023-08-22T14:06:40+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 0
+Length of row.Highlighting: 0
+row.Length: 0
+
+2023-08-22T14:06:42+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 21
+Length of row.Highlighting: 22
+row.Length: 21
+
+2023-08-22T14:06:43+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 25
+Length of row.Highlighting: 4
+row.Length: 25
+
+2023-08-22T14:06:43+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 26
+Length of row.Highlighting: 25
+row.Length: 26
+
+2023-08-22T14:06:44+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 27
+Length of row.Highlighting: 26
+row.Length: 27
+
+2023-08-22T14:06:44+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 28
+Length of row.Highlighting: 27
+row.Length: 28
+
+2023-08-22T14:06:44+07:00: EditorUpdateSyntax Debug Info:
+Length of row.Chars: 29
+Length of row.Highlighting: 28
+row.Length: 29
+
