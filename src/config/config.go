@@ -10,14 +10,14 @@ import (
 	"github.com/deanrtaylor1/go-editor/constants"
 )
 
-type buffer struct {
+type Buffer struct {
 	Rows    []Row
 	NumRows int
 }
 
 type Row struct {
-	Row          []byte
-	length       int
+	Chars        []byte
+	Length       int
 	Highlighting []byte
 }
 
@@ -27,8 +27,8 @@ type EditorConfig struct {
 	ScreenRows    int
 	ScreenCols    int
 	TerminalState *term.State
-	NumRows       int
-	Rows          [][]byte
+	// NumRows       int
+	CurrentBuffer *Buffer
 	RowOff        int
 	ColOff        int
 	FileName      string
@@ -37,7 +37,22 @@ type EditorConfig struct {
 	Dirty         int
 	QuitTimes     int
 	Reader        *bufio.Reader
-	Highlighting  [][]byte
+	// Highlighting  [][]byte
+}
+
+func NewRow() *Row {
+	return &Row{
+		Chars:        []byte{},
+		Length:       0,
+		Highlighting: []byte{},
+	}
+}
+
+func NewBuffer() *Buffer {
+	return &Buffer{
+		Rows:    []Row{},
+		NumRows: 0,
+	}
 }
 
 func NewEditorConfig() *EditorConfig {
@@ -47,8 +62,8 @@ func NewEditorConfig() *EditorConfig {
 		ScreenRows:    0,
 		ScreenCols:    0,
 		TerminalState: nil,
-		Rows:          [][]byte{},
-		NumRows:       0,
+		CurrentBuffer: NewBuffer(),
+		// NumRows:       0,
 		RowOff:        0,
 		ColOff:        0,
 		FileName:      "[Not Selected]",
@@ -57,6 +72,6 @@ func NewEditorConfig() *EditorConfig {
 		Dirty:         0,
 		QuitTimes:     constants.QUIT_TIMES,
 		Reader:        bufio.NewReader(os.Stdin),
-		Highlighting:  [][]byte{},
+		// Highlighting:  [][]byte{},
 	}
 }

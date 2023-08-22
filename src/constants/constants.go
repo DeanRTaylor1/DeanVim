@@ -32,6 +32,7 @@ const (
 
 	ESCAPE_MOVE_TO_COORDS = "\x1b[%d;%dH"
 	ESCAPE_SHOW_CURSOR    = "\x1b[?25h"
+	ESCAPE_CLEAR_SCREEN   = "\033[2J"
 )
 
 const (

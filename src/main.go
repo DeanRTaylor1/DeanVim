@@ -58,50 +58,57 @@ func replaceTabsWithSpaces(line []byte) []byte {
 	return result
 }
 
-func editorUpdateRow(line []byte, cfg *config.EditorConfig) {
+func editorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 	if cfg.Cy < 1 {
 		return
 	}
-	cfg.Rows[cfg.Cy] = line
+	cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars
+	cfg.CurrentBuffer.Rows[cfg.Cy].Length = row.Length
 }
 
-func editorInsertRow(r []byte, at int, cfg *config.EditorConfig) {
-	if at < 0 || at > len(cfg.Rows) {
-		convertedLine := replaceTabsWithSpaces(r)
-		cfg.Rows = append(cfg.Rows, convertedLine)
+func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
+	// Replace tabs with spaces in the row's characters
+	convertedChars := replaceTabsWithSpaces(row.Chars)
+	row.Chars = convertedChars
+	row.Length = len(convertedChars)
+
+	if at < 0 || at > len(cfg.CurrentBuffer.Rows) {
+		// If at is outside the valid range, append the row to the end
+		cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows, *row)
 		return
 	}
-	convertedLine := replaceTabsWithSpaces(r)
-	cfg.Rows = append(cfg.Rows[:at], append([][]byte{convertedLine}, cfg.Rows[at:]...)...)
 
-	// editorUpdateRow(&convertedLine, cfg)
+	// If at is within the valid range, insert the row at the specified position
+	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:at], append([]config.Row{*row}, cfg.CurrentBuffer.Rows[at:]...)...)
 }
 
 func editorDelRow(cfg *config.EditorConfig) {
-	if cfg.Cy <= 0 || cfg.Cy >= cfg.NumRows {
+	if cfg.Cy <= 0 || cfg.Cy >= cfg.CurrentBuffer.NumRows {
 		return
 	}
 
-	// Append the current row to the previous one
-	cfg.Rows[cfg.Cy-1] = append(cfg.Rows[cfg.Cy-1], cfg.Rows[cfg.Cy]...)
+	// Append the current row's characters to the previous one
+	cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars = append(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars, cfg.CurrentBuffer.Rows[cfg.Cy].Chars...)
+	cfg.CurrentBuffer.Rows[cfg.Cy-1].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars) // Update the length of the previous row
 
 	// Delete the current row
-	cfg.Rows = append(cfg.Rows[:cfg.Cy], cfg.Rows[cfg.Cy+1:]...)
+	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:cfg.Cy], cfg.CurrentBuffer.Rows[cfg.Cy+1:]...)
 
-	cfg.NumRows--
+	cfg.CurrentBuffer.NumRows-- // Update NumRows within CurrentBuffer
 	cfg.Dirty++
 }
 
-func editorRowInsertChar(row *[]byte, at int, char rune, cfg *config.EditorConfig) {
-	if at < 0 || at > len(*row) {
-		at = len(*row)
+func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorConfig) {
+	if at < 0 || at > len(row.Chars) {
+		at = len(row.Chars)
 	}
 
-	*row = append(*row, 0)
-	copy((*row)[at+1:], (*row)[at:])
-	(*row)[at] = byte(char)
+	row.Chars = append(row.Chars, 0)
+	copy(row.Chars[at+1:], row.Chars[at:])
+	row.Chars[at] = byte(char)
+	row.Length = len(row.Chars) // Update the length of the row
 
-	editorUpdateRow(*row, cfg)
+	editorUpdateRow(row, cfg) // Update to accept a Row pointer
 	cfg.Dirty++
 }
 
@@ -111,59 +118,60 @@ func editorRowInsertChar(row *[]byte, at int, char rune, cfg *config.EditorConfi
 // 	}
 // }
 
-func editorRowDelChar(row *[]byte, at int, cfg *config.EditorConfig) {
-	if at < 0 || at >= len(*row) {
+func editorRowDelChar(row *config.Row, at int, cfg *config.EditorConfig) {
+	if at < 0 || at >= len(row.Chars) {
 		return
 	}
-	copy((*row)[at:], (*row)[at+1:])
-	*row = (*row)[:len(*row)-1]
+	copy(row.Chars[at:], row.Chars[at+1:])
+	row.Chars = row.Chars[:len(row.Chars)-1] // Access the Row field
 
-	editorUpdateRow(*row, cfg)
+	row.Length = len(row.Chars) // Update the length of the row
+	editorUpdateRow(row, cfg)
 	cfg.Dirty++
 }
 
 func editorInsertChar(char rune, cfg *config.EditorConfig) {
-	if cfg.Cy == cfg.NumRows {
-		editorInsertRow([]byte{}, -1, cfg)
-		cfg.NumRows++
+	if cfg.Cy == cfg.CurrentBuffer.NumRows {
+		editorInsertRow(config.NewRow(), -1, cfg)
+		cfg.CurrentBuffer.NumRows++
 	}
-	editorRowInsertChar(&cfg.Rows[cfg.Cy], cfg.Cx, char, cfg)
+	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.Cx, char, cfg)
 
 	cfg.Cx++
 }
 
 func editorInsertNewLine(cfg *config.EditorConfig) {
 	if cfg.Cx == 0 {
-		row := []byte{}
+		newRow := config.NewRow()
 		at := cfg.Cy
-		if cfg.Cy == 0 {
-			at = cfg.Cy
-		}
-		editorInsertRow(row, at, cfg)
+		editorInsertRow(newRow, at, cfg)
 	} else {
-		row := cfg.Rows[cfg.Cy]
-		cfg.Rows[cfg.Cy] = row[:cfg.Cx]
-		editorInsertRow(row[cfg.Cx:], cfg.Cy+1, cfg)
+		row := cfg.CurrentBuffer.Rows[cfg.Cy]
+		cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars[:cfg.Cx]
+		cfg.CurrentBuffer.Rows[cfg.Cy].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
+		newRow := config.Row{Chars: row.Chars[cfg.Cx:]}
+		editorInsertRow(&newRow, cfg.Cy+1, cfg)
 		cfg.Cx = 0
 	}
-	cfg.NumRows++
+
+	cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
 	cfg.Cy++
 }
 
 func editorDelChar(cfg *config.EditorConfig) {
-	if cfg.Cy == cfg.NumRows {
+	if cfg.Cy == cfg.CurrentBuffer.NumRows {
 		return
 	}
 	if cfg.Cx == 0 && cfg.Cy == 0 {
 		return
 	}
 
-	row := &cfg.Rows[cfg.Cy]
+	row := &cfg.CurrentBuffer.Rows[cfg.Cy]
 	if cfg.Cx > 0 {
 		editorRowDelChar(row, cfg.Cx-1, cfg)
 		cfg.Cx--
 	} else {
-		cfg.Cx = len(cfg.Rows[cfg.Cy-1])
+		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length // Access the Row field
 		editorDelRow(cfg)
 		cfg.Cy--
 	}
@@ -171,8 +179,8 @@ func editorDelChar(cfg *config.EditorConfig) {
 
 func editorRowsToString(cfg *config.EditorConfig) string {
 	var buffer strings.Builder
-	for _, row := range cfg.Rows {
-		buffer.Write(row)
+	for _, row := range cfg.CurrentBuffer.Rows {
+		buffer.Write(row.Chars)
 		buffer.WriteByte('\n')
 	}
 	return buffer.String()
@@ -205,7 +213,7 @@ func editorSave(cfg *config.EditorConfig) (string, error) {
 	}
 
 	elapsedTime := time.Since(startTime) // End timing
-	numLines := len(cfg.Rows)
+	numLines := len(cfg.CurrentBuffer.Rows)
 	numBytes := len(content)
 	message := fmt.Sprintf("\"%s\", %dL, %dB, %.3fms: written", cfg.FileName, numLines, numBytes, float64(elapsedTime.Nanoseconds())/1e6)
 
@@ -229,10 +237,12 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		for linelen > 0 && (line[linelen-1] == '\n' || line[linelen-1] == '\r') {
 			linelen--
 		}
-		row := []byte(line[:linelen])
+		row := config.NewRow() // Create a new Row using the NewRow function
+		row.Chars = []byte(line[:linelen])
+		row.Length = linelen
 
 		editorInsertRow(row, -1, cfg)
-		cfg.NumRows++
+		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -261,21 +271,21 @@ func editorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 		direction = 1
 	}
 	current := lastMatch
-	for i := 0; i < cfg.NumRows; i++ {
+	for i := 0; i < cfg.CurrentBuffer.NumRows; i++ {
 		current += direction
 		if current == -1 {
-			current = cfg.NumRows - 1
-		} else if current == cfg.NumRows {
+			current = cfg.CurrentBuffer.NumRows - 1
+		} else if current == cfg.CurrentBuffer.NumRows {
 			current = 0
 		}
 
-		row := cfg.Rows[current]
+		row := cfg.CurrentBuffer.Rows[current].Chars
 		matchIndex := strings.Index(string(row), string(buf))
 		if matchIndex != -1 {
 			lastMatch = current
 			cfg.Cy = current
 			cfg.Cx = matchIndex
-			cfg.RowOff = cfg.NumRows
+			cfg.RowOff = cfg.CurrentBuffer.NumRows
 			break
 		}
 	}
@@ -423,8 +433,8 @@ func editorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig), cf
 
 func editorMoveCursor(key rune, cfg *config.EditorConfig) {
 	row := []byte{}
-	if cfg.Cy < cfg.NumRows {
-		row = cfg.Rows[cfg.Cy]
+	if cfg.Cy < cfg.CurrentBuffer.NumRows {
+		row = cfg.CurrentBuffer.Rows[cfg.Cy].Chars
 	}
 	// spacesNeeded := TAB_STOP - (cfg.Cx % TAB_STOP)
 	switch key {
@@ -433,36 +443,36 @@ func editorMoveCursor(key rune, cfg *config.EditorConfig) {
 			cfg.Cx--
 		} else if cfg.Cy > 0 {
 			cfg.Cy--
-			if cfg.Cy < len(cfg.Rows) {
-				cfg.Cx = len(cfg.Rows[cfg.Cy])
+			if cfg.Cy < len(cfg.CurrentBuffer.Rows) {
+				cfg.Cx = (cfg.CurrentBuffer.Rows[cfg.Cy].Length)
 			}
 		}
 		break
 	case rune(constants.SAVE_KEY):
-		if cfg.Cy == cfg.NumRows {
+		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.Cx < len(cfg.Rows[cfg.Cy])-1 {
+		if cfg.Cx < (cfg.CurrentBuffer.Rows[cfg.Cy].Length)-1 {
 			cfg.Cx++
-		} else if cfg.Cx == len(cfg.Rows[cfg.Cy]) && cfg.Cy < len(cfg.Rows)-1 {
+		} else if cfg.Cx == (cfg.CurrentBuffer.Rows[cfg.Cy].Length) && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
 			cfg.Cy++
 			cfg.Cx = 0
 		}
 		break
 	case rune(constants.ARROW_RIGHT):
-		if cfg.Cy == cfg.NumRows {
+		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.Cx < len(cfg.Rows[cfg.Cy])-1 {
+		if cfg.Cx < (cfg.CurrentBuffer.Rows[cfg.Cy].Length)-1 {
 			cfg.Cx++
-		} else if cfg.Cx == len(cfg.Rows[cfg.Cy]) && cfg.Cy < len(cfg.Rows)-1 {
+		} else if cfg.Cx == cfg.CurrentBuffer.Rows[cfg.Cy].Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
 			cfg.Cy++
 			cfg.Cx = 0
 		}
 		break
 
 	case rune(constants.ARROW_DOWN):
-		if cfg.Cy < cfg.NumRows {
+		if cfg.Cy < cfg.CurrentBuffer.NumRows {
 			cfg.Cy++
 		}
 		break
@@ -473,8 +483,8 @@ func editorMoveCursor(key rune, cfg *config.EditorConfig) {
 		break
 	}
 
-	if cfg.Cy < cfg.NumRows {
-		row = cfg.Rows[cfg.Cy]
+	if cfg.Cy < cfg.CurrentBuffer.NumRows {
+		row = cfg.CurrentBuffer.Rows[cfg.Cy].Chars
 	} else {
 		row = []byte{}
 	}
@@ -501,8 +511,8 @@ func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 			cfg.QuitTimes--
 			return
 		}
-		fmt.Print("\033[2J")
-		fmt.Print("\x1b[H")
+		fmt.Print(constants.ESCAPE_CLEAR_SCREEN)
+		fmt.Print(constants.ESCAPE_MOVE_TO_HOME_POS)
 		os.Exit(0)
 		break
 	case CTRL_KEY(constants.SAVE_KEY):
@@ -517,10 +527,10 @@ func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		cfg.Cx = 0
 		break
 	case constants.END_KEY:
-		if cfg.Cy == cfg.NumRows {
+		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		cfg.Cx = len(cfg.Rows[cfg.Cy])
+		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy].Length
 		break
 	case CTRL_KEY('f'):
 		editorFind(cfg)
@@ -572,8 +582,8 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	screenCols := cfg.ScreenCols
 	for i := 0; i < screenRows; i++ {
 		fileRow := i + cfg.RowOff
-		if fileRow >= cfg.NumRows {
-			if cfg.NumRows == 0 && i == screenRows/3 {
+		if fileRow >= cfg.CurrentBuffer.NumRows {
+			if cfg.CurrentBuffer.NumRows == 0 && i == screenRows/3 {
 				welcome := "Go editor -- version 0.1"
 				welcomelen := len(welcome)
 				if welcomelen > screenCols {
@@ -594,16 +604,16 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 			}
 		} else {
 
-			rowLength := len(cfg.Rows[fileRow]) - cfg.ColOff
+			rowLength := cfg.CurrentBuffer.Rows[fileRow].Length - cfg.ColOff
 			if rowLength < 0 {
 				rowLength = 0
 			}
 			if rowLength > screenCols {
 				rowLength = screenCols
 			}
-			if cfg.ColOff < len(cfg.Rows[fileRow]) {
+			if cfg.ColOff < cfg.CurrentBuffer.Rows[fileRow].Length {
 				for j := 0; j < rowLength; j++ {
-					c := cfg.Rows[fileRow][cfg.ColOff+j]
+					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
 					if unicode.IsDigit(rune(c)) {
 						buffer.WriteString(constants.TEXT_RED)
 						buffer.WriteByte(c)
@@ -626,8 +636,8 @@ func editorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	buf.WriteString("\x1b[7m")
 
 	currentRow := cfg.Cy + 1
-	if currentRow > cfg.NumRows {
-		currentRow = cfg.NumRows
+	if currentRow > cfg.CurrentBuffer.NumRows {
+		currentRow = cfg.CurrentBuffer.NumRows
 	}
 
 	dirty := ""
@@ -635,8 +645,8 @@ func editorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 		dirty = "(modified)"
 	}
 
-	status := fmt.Sprintf("%.20s - %d lines %s", cfg.FileName, cfg.NumRows, dirty)
-	rStatus := fmt.Sprintf("%d/%d", currentRow, cfg.NumRows)
+	status := fmt.Sprintf("%.20s - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty)
+	rStatus := fmt.Sprintf("%d/%d", currentRow, cfg.CurrentBuffer.NumRows)
 
 	rLen := len(rStatus)
 	if len(status) > cfg.ScreenCols {

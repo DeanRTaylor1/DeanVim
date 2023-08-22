@@ -15,7 +15,7 @@ func EditorUpdateSyntax(r []byte, rowIndex int, cfg *config.EditorConfig) {
 			hl[i] = constants.HL_NUMBER
 		}
 	}
-	cfg.Highlighting[rowIndex] = hl
+	cfg.CurrentBuffer.Rows[rowIndex].Highlighting = hl
 }
 
 func EditorSyntaxToColor(highlight byte) byte {
