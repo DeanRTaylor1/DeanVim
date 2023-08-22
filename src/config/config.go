@@ -10,6 +10,17 @@ import (
 	"github.com/deanrtaylor1/go-editor/constants"
 )
 
+type buffer struct {
+	Rows    []Row
+	NumRows int
+}
+
+type Row struct {
+	Row          []byte
+	length       int
+	Highlighting []byte
+}
+
 type EditorConfig struct {
 	Cx            int
 	Cy            int

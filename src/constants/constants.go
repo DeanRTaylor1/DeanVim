@@ -18,6 +18,20 @@ const (
 	QUIT_KEY    rune = 'q'
 	SAVE_KEY    rune = 's'
 	ENTER_KEY   rune = '\r'
+	TILDE       rune = '~'
+	SPACE_RUNE  rune = ' '
+)
+
+const (
+	ESCAPE_RESET_ATTRIBUTES  = "\x1b[m"
+	ESCAPE_NEW_LINE          = "\r\n"
+	ESCAPE_CLEAR_TO_LINE_END = "\x1b[K"
+	ESCAPE_HIDE_CURSOR       = "\x1b[?25l"
+	// MOVE CURSOR TO TOP LEFT
+	ESCAPE_MOVE_TO_HOME_POS = "\x1b[H"
+
+	ESCAPE_MOVE_TO_COORDS = "\x1b[%d;%dH"
+	ESCAPE_SHOW_CURSOR    = "\x1b[?25h"
 )
 
 const (
@@ -48,6 +62,7 @@ const (
 	RESET               = "\x1b[0m"
 	BOLD                = "\x1b[1m"
 	UNDERLINE           = "\x1b[4m"
+	FOREGROUND_RESET    = "\x1b[39m"
 )
 
 const TAB_STOP = 4

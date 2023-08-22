@@ -49,7 +49,7 @@ func replaceTabsWithSpaces(line []byte) []byte {
 		if b == '\t' {
 			spacesNeeded := constants.TAB_STOP - (len(result) % constants.TAB_STOP)
 			for j := 0; j < spacesNeeded; j++ {
-				result = append(result, ' ')
+				result = append(result, byte(constants.SPACE_RUNE))
 			}
 		} else {
 			result = append(result, b)
@@ -581,16 +581,16 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				}
 				padding := (screenCols - welcomelen) / 2
 				if padding > 0 {
-					buffer.WriteByte('~')
+					buffer.WriteByte(byte(constants.TILDE))
 					padding--
 				}
 				for padding > 0 {
-					buffer.WriteByte(' ')
+					buffer.WriteByte(byte(constants.SPACE_RUNE))
 					padding--
 				}
 				buffer.WriteString(welcome)
 			} else {
-				buffer.WriteByte('~')
+				buffer.WriteByte(byte(constants.TILDE))
 			}
 		} else {
 
@@ -605,9 +605,9 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				for j := 0; j < rowLength; j++ {
 					c := cfg.Rows[fileRow][cfg.ColOff+j]
 					if unicode.IsDigit(rune(c)) {
-						buffer.WriteString("\x1b[31m")
+						buffer.WriteString(constants.TEXT_RED)
 						buffer.WriteByte(c)
-						buffer.WriteString("\x1b[39m")
+						buffer.WriteString(constants.FOREGROUND_RESET)
 					} else {
 						buffer.WriteByte(c)
 					}
@@ -616,9 +616,9 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				buffer.Write([]byte{})
 			}
 		}
-		buffer.WriteString("\x1b[K")
+		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 
-		buffer.WriteString("\r\n")
+		buffer.WriteString(constants.ESCAPE_NEW_LINE)
 	}
 }
 
@@ -649,12 +649,12 @@ func editorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 
 	buf.WriteString(rStatus)
-	buf.WriteString("\x1b[m")
-	buf.WriteString("\r\n")
+	buf.WriteString(constants.ESCAPE_RESET_ATTRIBUTES)
+	buf.WriteString(constants.ESCAPE_NEW_LINE)
 }
 
 func editorDrawMessageBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
-	buf.WriteString("\x1b[K") // Clear the line
+	buf.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END) // Clear the line
 	msgLen := len(cfg.StatusMsg)
 	if msgLen > cfg.ScreenCols {
 		msgLen = cfg.ScreenCols
@@ -664,21 +664,25 @@ func editorDrawMessageBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 }
 
+func setCursorPos(x int, y int) string {
+	return fmt.Sprintf(constants.ESCAPE_MOVE_TO_COORDS, x, y)
+}
+
 func editorRefreshScreen(cfg *config.EditorConfig) {
 	editorScroll(cfg)
 	var buffer bytes.Buffer
 
-	buffer.WriteString("\x1b[?25l")
-	buffer.WriteString("\x1b[H")
+	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
+	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
 
 	editorDrawRows(&buffer, cfg)
 	editorDrawStatusBar(&buffer, cfg)
 	editorDrawMessageBar(&buffer, cfg)
 
-	cursorPosition := fmt.Sprintf("\x1b[%d;%dH", (cfg.Cy-cfg.RowOff)+1, (cfg.Cx-cfg.ColOff)+1)
+	cursorPosition := setCursorPos((cfg.Cy-cfg.RowOff)+1, (cfg.Cx-cfg.ColOff)+1)
 	buffer.WriteString(cursorPosition)
 
-	buffer.WriteString("\x1b[?25h")
+	buffer.WriteString(constants.ESCAPE_SHOW_CURSOR)
 
 	os.Stdout.Write(buffer.Bytes())
 }
