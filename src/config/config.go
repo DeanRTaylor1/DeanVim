@@ -35,6 +35,22 @@ func LogToFile(message string) {
 	}
 }
 
+type BufferSyntax struct {
+	FileType               string
+	Flags                  int
+	SingleLineCommentStart string
+	Keywords               []string
+	Syntaxes               []SyntaxHighlighting
+}
+
+type SyntaxHighlighting struct {
+	FileType               string
+	FileMatch              []string
+	SingleLineCommentStart string
+	Flags                  int
+	Keywords               []string
+}
+
 type SearchState struct {
 	LastMatch   int
 	Direction   int
@@ -43,9 +59,10 @@ type SearchState struct {
 }
 
 type Buffer struct {
-	Rows        []Row
-	NumRows     int
-	SearchState *SearchState
+	Rows         []Row
+	NumRows      int
+	SearchState  *SearchState
+	BufferSyntax *BufferSyntax
 }
 
 type Row struct {
@@ -73,6 +90,44 @@ type EditorConfig struct {
 	// Highlighting  [][]byte
 }
 
+func NewBufferSyntax() *BufferSyntax {
+	return &BufferSyntax{
+		FileType:               "",
+		Flags:                  0,
+		SingleLineCommentStart: "",
+		Syntaxes: []SyntaxHighlighting{
+			{
+				FileType:               "go",
+				FileMatch:              []string{".go"},
+				SingleLineCommentStart: "//",
+				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+				Keywords:               []string{"func", "var", "const", "type", "interface", "package", "import", "return", "if", "else"},
+			},
+			{
+				FileType:               "typescript",
+				FileMatch:              []string{".ts", ".tsx"},
+				SingleLineCommentStart: "//",
+				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+				Keywords:               []string{"function", "var", "let", "const", "interface", "type", "class", "return", "if", "else"},
+			},
+			{
+				FileType:               "rust",
+				FileMatch:              []string{".rs"},
+				SingleLineCommentStart: "//",
+				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+				Keywords:               []string{"fn", "let", "const", "trait", "struct", "enum", "return", "if", "else"},
+			},
+			{
+				FileType:               "javascript",
+				FileMatch:              []string{".js", ".jsx"},
+				SingleLineCommentStart: "//",
+				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+				Keywords:               []string{"function", "var", "let", "const", "class", "return", "if", "else"},
+			},
+		},
+	}
+}
+
 func NewSearchState() *SearchState {
 	return &SearchState{
 		LastMatch:   -1,
@@ -92,9 +147,10 @@ func NewRow() *Row {
 
 func NewBuffer() *Buffer {
 	return &Buffer{
-		Rows:        []Row{},
-		NumRows:     0,
-		SearchState: NewSearchState(),
+		Rows:         []Row{},
+		NumRows:      0,
+		SearchState:  NewSearchState(),
+		BufferSyntax: NewBufferSyntax(),
 	}
 }
 

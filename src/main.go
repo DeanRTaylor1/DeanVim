@@ -59,7 +59,7 @@ func editorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 	}
 	cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars
 	cfg.CurrentBuffer.Rows[cfg.Cy].Length = row.Length
-	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy])
+	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg)
 }
 
 func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
@@ -67,7 +67,7 @@ func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 	convertedChars := replaceTabsWithSpaces(row.Chars)
 	row.Chars = convertedChars
 	row.Length = len(convertedChars)
-	highlighting.EditorUpdateSyntax(row)
+	highlighting.EditorUpdateSyntax(row, cfg)
 
 	if at < 0 || at > len(cfg.CurrentBuffer.Rows) {
 		// If at is outside the valid range, append the row to the end
@@ -87,7 +87,7 @@ func editorDelRow(cfg *config.EditorConfig) {
 	// Append the current row's characters to the previous one
 	cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars = append(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars, cfg.CurrentBuffer.Rows[cfg.Cy].Chars...)
 	cfg.CurrentBuffer.Rows[cfg.Cy-1].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars) // Update the length of the previous row
-	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy-1])
+	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
 
 	// Delete the current row
 	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:cfg.Cy], cfg.CurrentBuffer.Rows[cfg.Cy+1:]...)
@@ -107,7 +107,7 @@ func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorC
 	row.Length = len(row.Chars) // Update the length of the row
 
 	// Call EditorUpdateSyntax here to ensure the highlighting is updated as well
-	highlighting.EditorUpdateSyntax(row)
+	highlighting.EditorUpdateSyntax(row, cfg)
 
 	cfg.Dirty++
 }
@@ -224,6 +224,8 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 	defer file.Close()
 	cfg.FileName = file.Name()
 
+	highlighting.EditorSelectSyntaxHighlight(cfg)
+
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -234,7 +236,7 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		row := config.NewRow() // Create a new Row using the NewRow function
 		row.Chars = []byte(line[:linelen])
 		row.Length = linelen
-		highlighting.EditorUpdateSyntax(row)
+		highlighting.EditorUpdateSyntax(row, cfg)
 
 		editorInsertRow(row, -1, cfg)
 		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
@@ -678,7 +680,7 @@ func editorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 
 	status := fmt.Sprintf("%.20s - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty)
-	rStatus := fmt.Sprintf("%d/%d", currentRow, cfg.CurrentBuffer.NumRows)
+	rStatus := fmt.Sprintf("%s | %d/%d", cfg.CurrentBuffer.BufferSyntax.FileType, cfg.Cy+1, cfg.CurrentBuffer.NumRows)
 
 	rLen := len(rStatus)
 	if len(status) > cfg.ScreenCols {
