@@ -35,6 +35,8 @@ func LogToFile(message string) {
 	}
 }
 
+type SearchState struct{}
+
 type Buffer struct {
 	Rows    []Row
 	NumRows int

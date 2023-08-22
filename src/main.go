@@ -286,6 +286,9 @@ func editorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 			cfg.Cy = current
 			cfg.Cx = matchIndex
 			cfg.RowOff = cfg.CurrentBuffer.NumRows
+			for i := 0; i < len(buf); i++ {
+				cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting[matchIndex+i] = constants.HL_MATCH // Assuming HL_MATCH is defined
+			}
 			break
 		}
 	}

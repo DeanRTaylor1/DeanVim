@@ -71,4 +71,5 @@ const TAB_STOP = 4
 const (
 	HL_NORMAL = iota
 	HL_NUMBER
+	HL_MATCH
 )
