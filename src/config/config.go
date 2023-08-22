@@ -35,11 +35,17 @@ func LogToFile(message string) {
 	}
 }
 
-type SearchState struct{}
+type SearchState struct {
+	LastMatch   int
+	Direction   int
+	SavedHlLine int
+	SavedHl     []byte
+}
 
 type Buffer struct {
-	Rows    []Row
-	NumRows int
+	Rows        []Row
+	NumRows     int
+	SearchState *SearchState
 }
 
 type Row struct {
@@ -67,6 +73,15 @@ type EditorConfig struct {
 	// Highlighting  [][]byte
 }
 
+func NewSearchState() *SearchState {
+	return &SearchState{
+		LastMatch:   -1,
+		Direction:   1,
+		SavedHlLine: 0,
+		SavedHl:     []byte{},
+	}
+}
+
 func NewRow() *Row {
 	return &Row{
 		Chars:        []byte{},
@@ -77,8 +92,9 @@ func NewRow() *Row {
 
 func NewBuffer() *Buffer {
 	return &Buffer{
-		Rows:    []Row{},
-		NumRows: 0,
+		Rows:        []Row{},
+		NumRows:     0,
+		SearchState: NewSearchState(),
 	}
 }
 

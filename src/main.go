@@ -19,11 +19,6 @@ import (
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-var (
-	lastMatch = -1
-	direction = 1
-)
-
 func CTRL_KEY(ch rune) rune {
 	return ch & 0x1f
 }
@@ -254,25 +249,30 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 }
 
 func editorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
-	if c == '\r' || c == '\x1b' {
-		lastMatch = -1
-		direction = 1
-		return
-	} else if c == constants.ARROW_RIGHT || c == constants.ARROW_DOWN {
-		direction = 1
-	} else if c == constants.ARROW_LEFT || c == constants.ARROW_UP {
-		direction = -1
-	} else {
-		lastMatch = -1
-		direction = 1
+	if len(cfg.CurrentBuffer.SearchState.SavedHl) > 0 {
+		sl := cfg.CurrentBuffer.SearchState.SavedHlLine
+		cfg.CurrentBuffer.Rows[sl].Highlighting = cfg.CurrentBuffer.SearchState.SavedHl
 	}
 
-	if lastMatch == -1 {
-		direction = 1
+	if c == '\r' || c == '\x1b' {
+		cfg.CurrentBuffer.SearchState.LastMatch = -1
+		cfg.CurrentBuffer.SearchState.Direction = 1
+		return
+	} else if c == constants.ARROW_RIGHT || c == constants.ARROW_DOWN {
+		cfg.CurrentBuffer.SearchState.Direction = 1
+	} else if c == constants.ARROW_LEFT || c == constants.ARROW_UP {
+		cfg.CurrentBuffer.SearchState.Direction = -1
+	} else {
+		cfg.CurrentBuffer.SearchState.LastMatch = -1
+		cfg.CurrentBuffer.SearchState.Direction = 1
 	}
-	current := lastMatch
+
+	if cfg.CurrentBuffer.SearchState.LastMatch == -1 {
+		cfg.CurrentBuffer.SearchState.Direction = 1
+	}
+	current := cfg.CurrentBuffer.SearchState.LastMatch
 	for i := 0; i < cfg.CurrentBuffer.NumRows; i++ {
-		current += direction
+		current += cfg.CurrentBuffer.SearchState.Direction
 		if current == -1 {
 			current = cfg.CurrentBuffer.NumRows - 1
 		} else if current == cfg.CurrentBuffer.NumRows {
@@ -282,10 +282,15 @@ func editorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 		row := cfg.CurrentBuffer.Rows[current].Chars
 		matchIndex := strings.Index(string(row), string(buf))
 		if matchIndex != -1 {
-			lastMatch = current
+			cfg.CurrentBuffer.SearchState.LastMatch = current
 			cfg.Cy = current
 			cfg.Cx = matchIndex
 			cfg.RowOff = cfg.CurrentBuffer.NumRows
+
+			cfg.CurrentBuffer.SearchState.SavedHlLine = current
+			cfg.CurrentBuffer.SearchState.SavedHl = make([]byte, len(cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting))
+			copy(cfg.CurrentBuffer.SearchState.SavedHl, cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting)
+
 			for i := 0; i < len(buf); i++ {
 				cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting[matchIndex+i] = constants.HL_MATCH // Assuming HL_MATCH is defined
 			}
