@@ -35,10 +35,51 @@ func LogToFile(message string) {
 	}
 }
 
+var Syntaxes = []SyntaxHighlighting{
+	{
+		FileType:               "go",
+		FileMatch:              []string{".go"},
+		SingleLineCommentStart: "//",
+		MultiLineCommentStart:  "/*",
+		MultiLineCommentEnd:    "*/",
+		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+		Keywords:               []string{"func", "var", "const", "type", "interface", "package", "import", "return", "if", "else"},
+	},
+	{
+		FileType:               "typescript",
+		FileMatch:              []string{".ts", ".tsx"},
+		SingleLineCommentStart: "//",
+		MultiLineCommentStart:  "/*",
+		MultiLineCommentEnd:    "*/",
+		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+		Keywords:               []string{"function", "var", "let", "const", "interface", "type", "class", "return", "if", "else"},
+	},
+	{
+		FileType:               "rust",
+		FileMatch:              []string{".rs"},
+		SingleLineCommentStart: "//",
+		MultiLineCommentStart:  "/*",
+		MultiLineCommentEnd:    "*/",
+		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+		Keywords:               []string{"fn", "let", "const", "trait", "struct", "enum", "return", "if", "else"},
+	},
+	{
+		FileType:               "javascript",
+		FileMatch:              []string{".js", ".jsx"},
+		SingleLineCommentStart: "//",
+		MultiLineCommentStart:  "/*",
+		MultiLineCommentEnd:    "*/",
+		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
+		Keywords:               []string{"function", "var", "let", "const", "class", "return", "if", "else"},
+	},
+}
+
 type BufferSyntax struct {
 	FileType               string
 	Flags                  int
 	SingleLineCommentStart string
+	MultiLineCommentStart  string
+	MultiLineCommentEnd    string
 	Keywords               []string
 	Syntaxes               []SyntaxHighlighting
 }
@@ -47,6 +88,8 @@ type SyntaxHighlighting struct {
 	FileType               string
 	FileMatch              []string
 	SingleLineCommentStart string
+	MultiLineCommentStart  string
+	MultiLineCommentEnd    string
 	Flags                  int
 	Keywords               []string
 }
@@ -66,9 +109,11 @@ type Buffer struct {
 }
 
 type Row struct {
-	Chars        []byte
-	Length       int
-	Highlighting []byte
+	Idx           int
+	Chars         []byte
+	Length        int
+	Highlighting  []byte
+	HlOpenComment bool
 }
 
 type EditorConfig struct {
@@ -95,36 +140,7 @@ func NewBufferSyntax() *BufferSyntax {
 		FileType:               "",
 		Flags:                  0,
 		SingleLineCommentStart: "",
-		Syntaxes: []SyntaxHighlighting{
-			{
-				FileType:               "go",
-				FileMatch:              []string{".go"},
-				SingleLineCommentStart: "//",
-				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-				Keywords:               []string{"func", "var", "const", "type", "interface", "package", "import", "return", "if", "else"},
-			},
-			{
-				FileType:               "typescript",
-				FileMatch:              []string{".ts", ".tsx"},
-				SingleLineCommentStart: "//",
-				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-				Keywords:               []string{"function", "var", "let", "const", "interface", "type", "class", "return", "if", "else"},
-			},
-			{
-				FileType:               "rust",
-				FileMatch:              []string{".rs"},
-				SingleLineCommentStart: "//",
-				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-				Keywords:               []string{"fn", "let", "const", "trait", "struct", "enum", "return", "if", "else"},
-			},
-			{
-				FileType:               "javascript",
-				FileMatch:              []string{".js", ".jsx"},
-				SingleLineCommentStart: "//",
-				Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-				Keywords:               []string{"function", "var", "let", "const", "class", "return", "if", "else"},
-			},
-		},
+		Syntaxes:               Syntaxes,
 	}
 }
 
@@ -139,9 +155,11 @@ func NewSearchState() *SearchState {
 
 func NewRow() *Row {
 	return &Row{
-		Chars:        []byte{},
-		Length:       0,
-		Highlighting: []byte{},
+		Idx:           0,
+		Chars:         []byte{},
+		Length:        0,
+		Highlighting:  []byte{},
+		HlOpenComment: false,
 	}
 }
 

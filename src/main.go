@@ -10,6 +10,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"unicode"
 
 	"golang.org/x/term"
 
@@ -63,13 +64,14 @@ func editorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 }
 
 func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
-	// Replace tabs with sroww's characters
+	// Replace tabs with spaces
 	convertedChars := replaceTabsWithSpaces(row.Chars)
 	row.Chars = convertedChars
 	row.Length = len(convertedChars)
+	row.Idx = at // Set the index to the insertion point
 	highlighting.EditorUpdateSyntax(row, cfg)
 
-	if at < 0 || at > len(cfg.CurrentBuffer.Rows) {
+	if at < 0 || at >= len(cfg.CurrentBuffer.Rows) {
 		// If at is outside the valid range, append the row to the end
 		cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows, *row)
 		return
@@ -77,6 +79,12 @@ func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 
 	// If at is within the valid range, insert the row at the specified position
 	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:at], append([]config.Row{*row}, cfg.CurrentBuffer.Rows[at:]...)...)
+
+	// Update the Idx of the subsequent rows
+	for i := at + 1; i < len(cfg.CurrentBuffer.Rows); i++ {
+		config.LogToFile(fmt.Sprintf("I: %d", i))
+		cfg.CurrentBuffer.Rows[i].Idx = i
+	}
 }
 
 func editorDelRow(cfg *config.EditorConfig) {
@@ -87,6 +95,11 @@ func editorDelRow(cfg *config.EditorConfig) {
 	// Append the current row's characters to the previous one
 	cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars = append(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars, cfg.CurrentBuffer.Rows[cfg.Cy].Chars...)
 	cfg.CurrentBuffer.Rows[cfg.Cy-1].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars) // Update the length of the previous row
+
+	for i := cfg.Cy; i < len(cfg.CurrentBuffer.Rows); i++ {
+		cfg.CurrentBuffer.Rows[i].Idx = i
+	}
+
 	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
 
 	// Delete the current row
@@ -240,6 +253,8 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		row := config.NewRow() // Create a new Row using the NewRow function
 		row.Chars = []byte(line[:linelen])
 		row.Length = linelen
+		row.Idx = len(cfg.CurrentBuffer.Rows)
+		config.LogToFile(fmt.Sprintf("Idx: %d", row.Idx))
 		highlighting.EditorUpdateSyntax(row, cfg)
 
 		editorInsertRow(row, -1, cfg)
@@ -633,7 +648,19 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				for j := 0; j < rowLength; j++ {
 					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
 					hl := highlights[cfg.ColOff+j]
-					if hl == constants.HL_NORMAL {
+
+					if unicode.IsControl(rune(c)) {
+						sym := '?'
+						if c <= 26 {
+							sym = rune(int(c) + int('@'))
+						}
+						buffer.WriteString("\x1b[7m")
+						buffer.WriteRune(sym)
+						buffer.WriteString("\x1b[m")
+						if cColor != -1 {
+							buffer.WriteString(fmt.Sprintf("\x1b[%dm", cColor))
+						}
+					} else if hl == constants.HL_NORMAL {
 						if cColor != -1 {
 							buffer.WriteString(constants.FOREGROUND_RESET)
 							cColor = -1

@@ -24,6 +24,8 @@ func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 				cfg.CurrentBuffer.BufferSyntax.Flags = syntax.Flags
 				cfg.CurrentBuffer.BufferSyntax.SingleLineCommentStart = syntax.SingleLineCommentStart
 				cfg.CurrentBuffer.BufferSyntax.Keywords = syntax.Keywords
+				cfg.CurrentBuffer.BufferSyntax.MultiLineCommentStart = syntax.MultiLineCommentStart
+				cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd = syntax.MultiLineCommentEnd
 				for _, r := range cfg.CurrentBuffer.Rows {
 					EditorUpdateSyntax(&r, cfg)
 				}
@@ -44,10 +46,21 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 	keywords := cfg.CurrentBuffer.BufferSyntax.Keywords
 
 	scs := cfg.CurrentBuffer.BufferSyntax.SingleLineCommentStart
+	mcs := cfg.CurrentBuffer.BufferSyntax.MultiLineCommentStart
+	mce := cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd
+
 	scsLen := len(scs)
+	mcsLen := len(mcs)
+	mceLen := len(mce)
 
 	prevSep := true
 	inString := byte(0)
+	inComment := false
+
+	if row.Idx > 0 && row.Idx-1 >= 0 && cfg.CurrentBuffer.Rows[row.Idx-1].HlOpenComment {
+		inComment = true
+	}
+
 	i := 0
 	for i < row.Length {
 		c := row.Chars[i]
@@ -56,12 +69,37 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 			prevHl = row.Highlighting[i-1]
 		}
 
-		if scsLen > 0 && inString == 0 {
+		if scsLen > 0 && inString == 0 && inComment == false {
 			if i+scsLen < row.Length && string(row.Chars[i:i+scsLen]) == scs {
 				for ; i < row.Length; i++ {
 					row.Highlighting[i] = constants.HL_COMMENT
 				}
 				break
+			}
+		}
+
+		if mcsLen != 0 && mceLen != 0 && inString == byte(0) {
+			if inComment != false {
+				row.Highlighting[i] = constants.HL_MLCOMMENT
+				if i+mceLen < row.Length && string(row.Chars[i:i+mceLen]) == mce {
+					for j := i; j < i+mceLen; j++ {
+						row.Highlighting[j] = constants.HL_MLCOMMENT
+					}
+					i += mceLen
+					inComment = false
+					prevSep = true
+					continue
+				} else {
+					i++
+					continue
+				}
+			} else if i+mcsLen < row.Length && string(row.Chars[i:i+mcsLen]) == mcs {
+				for j := i; j < i+mcsLen; j++ {
+					row.Highlighting[j] = constants.HL_MLCOMMENT
+				}
+				i += mcsLen
+				inComment = true
+				continue
 			}
 		}
 
@@ -130,6 +168,12 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 		i++
 
 	}
+
+	changed := row.HlOpenComment != inComment
+	row.HlOpenComment = inComment
+	if changed && row.Idx+1 < cfg.CurrentBuffer.NumRows && row.Idx-1 >= 0 {
+		EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[row.Idx-1], cfg)
+	}
 }
 
 func isSeparator(c rune) bool {
@@ -148,7 +192,7 @@ func EditorSyntaxToColor(highlight byte) byte {
 		return 35
 	case constants.HL_KEYWORD2:
 		return 32
-	case constants.HL_COMMENT:
+	case constants.HL_COMMENT, constants.HL_MLCOMMENT:
 		return 36
 	case constants.HL_STRING:
 		return 92

@@ -1,6 +1,8 @@
-package main
-
+package test 
+
+
 import "fmt"
+/* testing */ 
 
 func test() {
     fmt.Println("TEST") 123
