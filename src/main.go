@@ -97,13 +97,17 @@ func editorDelRow(cfg *config.EditorConfig) {
 }
 
 func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorConfig) {
-	if at < 0 || at > len(row.Chars) {
-		at = len(row.Chars)
-	}
+	// ... existing code ...
 
 	row.Chars = append(row.Chars, 0)
 	copy(row.Chars[at+1:], row.Chars[at:])
 	row.Chars[at] = byte(char)
+
+	// Add similar logic for row.Highlighting
+	row.Highlighting = append(row.Highlighting, constants.HL_NORMAL)
+	copy(row.Highlighting[at+1:], row.Highlighting[at:])
+	row.Highlighting[at] = constants.HL_NORMAL // or the appropriate value
+
 	row.Length = len(row.Chars) // Update the length of the row
 
 	// Call EditorUpdateSyntax here to ensure the highlighting is updated as well
@@ -473,7 +477,7 @@ func editorMoveCursor(key rune, cfg *config.EditorConfig) {
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.Cx < (cfg.CurrentBuffer.Rows[cfg.Cy].Length)-1 {
+		if cfg.Cx < (cfg.CurrentBuffer.Rows[cfg.Cy].Length) {
 			cfg.Cx++
 		} else if cfg.Cx == cfg.CurrentBuffer.Rows[cfg.Cy].Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
 			cfg.Cy++
@@ -625,32 +629,22 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 					panic("HIGHLIGHTING EMPTY")
 				}
 				highlights := cfg.CurrentBuffer.Rows[fileRow].Highlighting
+				cColor := -1
 				for j := 0; j < rowLength; j++ {
-					// if i == 0 {
-					// 	message := fmt.Sprintf(
-					// 		"Debug info for first row:\n"+
-					// 			"cfg.ColOff: %d\n"+
-					// 			"rowLength: %d\n"+
-					// 			"Length of Chars: %d\n"+
-					// 			"Length of Highlighting: %d\n",
-					// 		cfg.ColOff,
-					// 		rowLength,
-					// 		len(cfg.CurrentBuffer.Rows[fileRow].Chars),
-					// 		len(cfg.CurrentBuffer.Rows[fileRow].Highlighting),
-					// 	)
-					// 	config.LogToFile(message)
-					// }
-					if cfg.ColOff+j > rowLength {
-						panic("J OUT OF BOUNDS")
-					}
-					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j] // Include cfg.ColOff in character access
-					hl := highlights[cfg.ColOff+j]                           // Include cfg.ColOff in highlight access
+					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
+					hl := highlights[cfg.ColOff+j]
 					if hl == constants.HL_NORMAL {
-						buffer.WriteString(constants.FOREGROUND_RESET)
+						if cColor != -1 {
+							buffer.WriteString(constants.FOREGROUND_RESET)
+							cColor = -1
+						}
 						buffer.WriteByte(c)
 					} else {
-						color := highlighting.EditorSyntaxToColor(hl) // Use hl instead of highlights[j]
-						buffer.WriteString(fmt.Sprintf("\x1b[%dm", color))
+						color := int(highlighting.EditorSyntaxToColor(hl))
+						if color != cColor {
+							buffer.WriteString(fmt.Sprintf("\x1b[%dm", color))
+							cColor = color
+						}
 						buffer.WriteByte(c)
 					}
 				}

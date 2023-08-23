@@ -57,7 +57,7 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 		}
 
 		if scsLen > 0 && inString == 0 {
-			if string(row.Chars[i:i+scsLen]) == scs {
+			if i+scsLen < row.Length && string(row.Chars[i:i+scsLen]) == scs {
 				for ; i < row.Length; i++ {
 					row.Highlighting[i] = constants.HL_COMMENT
 				}
@@ -68,7 +68,7 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 		if cfg.CurrentBuffer.BufferSyntax.Flags&constants.HL_HIGHLIGHT_STRINGS != 0 {
 			if inString != 0 {
 				row.Highlighting[i] = constants.HL_STRING
-				if c == '\\' && i+1 < row.Length {
+				if c == '\\' && i+1 < row.Length && i+1 < len(row.Highlighting) {
 					row.Highlighting[i+1] = constants.HL_STRING
 					i += 2
 					continue
@@ -104,16 +104,20 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 				if kw2 {
 					klen--
 				}
-				if i+klen <= len(row.Chars) && string(row.Chars[i:i+klen]) == keyword[:klen] && isSeparator(rune(row.Chars[i+klen])) {
-					for k := 0; k < klen; k++ {
-						row.Highlighting[i+k] = constants.HL_KEYWORD1
-						if kw2 {
-							row.Highlighting[i+k] = constants.HL_KEYWORD2
+				// Fix applied in the following line
+				if i+klen < len(row.Chars) {
+					if string(row.Chars[i:i+klen]) == keyword[:klen] && isSeparator(rune(row.Chars[i+klen])) {
+						for k := 0; k < klen; k++ {
+							row.Highlighting[i+k] = constants.HL_KEYWORD1
+							if kw2 {
+								row.Highlighting[i+k] = constants.HL_KEYWORD2
+							}
 						}
+						i += klen
+						foundKeyword = true
+						break
 					}
-					i += klen
-					foundKeyword = true
-					break
+				} else {
 				}
 			}
 			if foundKeyword {
@@ -124,6 +128,7 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 
 		prevSep = isSeparator(rune(c))
 		i++
+
 	}
 }
 
