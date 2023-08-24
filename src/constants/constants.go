@@ -3,6 +3,17 @@ package constants
 /** CONSTS **/
 const VERSION = "0.0.1"
 
+type SyntaxState int
+
+const (
+	STATE_NORMAL SyntaxState = iota
+	STATE_SLCOMMENT
+	STATE_MLCOMMENT
+	STATE_STRING
+	STATE_KEYWORD
+	STATE_NUMBER
+)
+
 const (
 	ARROW_LEFT  rune = 1000
 	ARROW_RIGHT rune = 1001
@@ -77,6 +88,23 @@ const (
 	HL_MLCOMMENT
 	HL_KEYWORD1
 	HL_KEYWORD2
+	HL_CONTROL_FLOW  // for "if", "else", "for", "while", "switch"
+	HL_VARIABLE      // for "var", "let"
+	HL_CONSTANT      // for "const", "enum"
+	HL_TYPE          // for "int", "float", "string", "bool"
+	HL_FUNCTION      // for "func", "return"
+	HL_PREPROCESSOR  // for "#include", "#define"
+	HL_STORAGE_CLASS // for "static", "extern", "public", "private"
+	HL_OPERATOR      // for "+", "-", "*", "/"
+	HL_BOOLEAN       // for "true", "false"
+	HL_KEYWORD       // for general language keywords
+	HL_BUILTIN       // for built-in functions or types
+	HL_ANNOTATION    // for annotations or attributes
+	HL_EXCEPTION     // for "throw", "try", "catch"
+	HL_MODULE        // for "import", "package", "module"
+	HL_DEBUG         // for debug-related keywords
+	HL_TEST          // for test-related keywords
+	HL_DOCUMENTATION // for documentation comments
 )
 
 const (

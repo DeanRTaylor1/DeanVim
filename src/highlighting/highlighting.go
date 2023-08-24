@@ -7,7 +7,22 @@ import (
 
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/utils"
 )
+
+func parseToken(i int, chars []byte) (string, int) {
+	var token strings.Builder
+	length := 0
+	for i+length < len(chars) && !isDelimiter(chars[i+length]) {
+		token.WriteByte(chars[i+length])
+		length++
+	}
+	return token.String(), length
+}
+
+func isDelimiter(c byte) bool {
+	return c == ' ' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' || !unicode.IsLetter(rune(c))
+}
 
 func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 	cfg.CurrentBuffer.BufferSyntax.FileType = "" // Reset to no filetype
@@ -42,137 +57,93 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 	if cfg.CurrentBuffer.BufferSyntax == nil {
 		return
 	}
-
-	keywords := cfg.CurrentBuffer.BufferSyntax.Keywords
-
+	state := constants.STATE_NORMAL
 	scs := cfg.CurrentBuffer.BufferSyntax.SingleLineCommentStart
 	mcs := cfg.CurrentBuffer.BufferSyntax.MultiLineCommentStart
 	mce := cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd
-
-	scsLen := len(scs)
-	mcsLen := len(mcs)
-	mceLen := len(mce)
-
-	prevSep := true
+	scsLen, mcsLen, mceLen := len(scs), len(mcs), len(mce)
 	inString := byte(0)
-	inComment := false
-
-	if row.Idx > 0 && row.Idx-1 >= 0 && cfg.CurrentBuffer.Rows[row.Idx-1].HlOpenComment {
-		inComment = true
-	}
 
 	i := 0
 	for i < row.Length {
 		c := row.Chars[i]
-		prevHl := byte(constants.HL_NORMAL)
-		if i > 0 {
-			prevHl = row.Highlighting[i-1]
-		}
 
-		if scsLen > 0 && inString == 0 && inComment == false {
-			if i+scsLen < row.Length && string(row.Chars[i:i+scsLen]) == scs {
-				for ; i < row.Length; i++ {
-					row.Highlighting[i] = constants.HL_COMMENT
+		switch state {
+		case constants.STATE_NORMAL:
+			if scsLen > 0 && i+scsLen <= row.Length && string(row.Chars[i:i+scsLen]) == scs {
+				state = constants.STATE_SLCOMMENT
+				for j := i; j < i+scsLen; j++ {
+					row.Highlighting[j] = constants.HL_COMMENT
 				}
-				break
-			}
-		}
-
-		if mcsLen != 0 && mceLen != 0 && inString == byte(0) {
-			if inComment != false {
-				row.Highlighting[i] = constants.HL_MLCOMMENT
-				if i+mceLen < row.Length && string(row.Chars[i:i+mceLen]) == mce {
-					for j := i; j < i+mceLen; j++ {
-						row.Highlighting[j] = constants.HL_MLCOMMENT
-					}
-					i += mceLen
-					inComment = false
-					prevSep = true
-					continue
-				} else {
-					i++
-					continue
-				}
-			} else if i+mcsLen < row.Length && string(row.Chars[i:i+mcsLen]) == mcs {
+				i += scsLen - 1
+			} else if mcsLen > 0 && i+mcsLen <= row.Length && string(row.Chars[i:i+mcsLen]) == mcs {
+				state = constants.STATE_MLCOMMENT
 				for j := i; j < i+mcsLen; j++ {
 					row.Highlighting[j] = constants.HL_MLCOMMENT
 				}
-				i += mcsLen
-				inComment = true
-				continue
-			}
-		}
-
-		if cfg.CurrentBuffer.BufferSyntax.Flags&constants.HL_HIGHLIGHT_STRINGS != 0 {
-			if inString != 0 {
-				row.Highlighting[i] = constants.HL_STRING
-				if c == '\\' && i+1 < row.Length && i+1 < len(row.Highlighting) {
-					row.Highlighting[i+1] = constants.HL_STRING
-					i += 2
-					continue
-				}
-				if c == inString {
-					inString = 0
-				}
-				i++
-				prevSep = true
-				continue
+				i += mcsLen - 1
 			} else if c == '"' || c == '\'' {
 				inString = c
+				state = constants.STATE_STRING
 				row.Highlighting[i] = constants.HL_STRING
 				i++
-				continue
-			}
-		}
-
-		if cfg.CurrentBuffer.BufferSyntax.Flags&constants.HL_HIGHLIGHT_NUMBERS != 0 {
-			if unicode.IsDigit(rune(c)) && (prevSep || prevHl == constants.HL_NUMBER) || (c == '.' && prevHl == constants.HL_NUMBER) {
+			} else if utils.IsDigit(c) {
+				state = constants.STATE_NUMBER
 				row.Highlighting[i] = constants.HL_NUMBER
 				i++
-				prevSep = false
-				continue
-			}
-		}
-
-		if prevSep {
-			foundKeyword := false
-			for _, keyword := range keywords {
-				klen := len(keyword)
-				kw2 := keyword[klen-1] == '|'
-				if kw2 {
-					klen--
-				}
-				// Fix applied in the following line
-				if i+klen < len(row.Chars) {
-					if string(row.Chars[i:i+klen]) == keyword[:klen] && isSeparator(rune(row.Chars[i+klen])) {
-						for k := 0; k < klen; k++ {
-							row.Highlighting[i+k] = constants.HL_KEYWORD1
-							if kw2 {
-								row.Highlighting[i+k] = constants.HL_KEYWORD2
-							}
-						}
-						i += klen
-						foundKeyword = true
-						break
+			} else if c != ' ' {
+				token, length := parseToken(i, row.Chars)
+				if category, exists := constants.GoSyntaxHighlighting[token]; exists {
+					for j := 0; j < length; j++ {
+						row.Highlighting[i+j] = category
 					}
+					i += length
 				} else {
+					i++
 				}
+			} else {
+				i++
 			}
-			if foundKeyword {
-				prevSep = false
-				continue
+
+		case constants.STATE_MLCOMMENT:
+			row.HlOpenComment = true
+			row.Highlighting[i] = constants.HL_MLCOMMENT
+			if i+mceLen < row.Length && string(row.Chars[i:i+mceLen]) == mce {
+				for j := i; j < i+mceLen; j++ {
+					row.Highlighting[j] = constants.HL_MLCOMMENT
+				}
+				row.HlOpenComment = false
+				i += mceLen
+				state = constants.STATE_NORMAL
+			} else {
+				i++
 			}
+
+		case constants.STATE_STRING:
+			for i < row.Length && row.Chars[i] != inString {
+				if row.Chars[i] == '\\' && i+1 < row.Length {
+					row.Highlighting[i] = constants.HL_STRING
+					i++
+				}
+				row.Highlighting[i] = constants.HL_STRING
+				i++
+			}
+			if i < row.Length && row.Chars[i] == inString { // Handle closing quote
+				row.Highlighting[i] = constants.HL_STRING
+				i++
+			}
+			state = constants.STATE_NORMAL
+			inString = byte(0)
+
+		case constants.STATE_NUMBER:
+			if unicode.IsDigit(rune(c)) || (c == '.' && row.Highlighting[i-1] == constants.HL_NUMBER) {
+				row.Highlighting[i] = constants.HL_NUMBER
+				i++
+			} else {
+				state = constants.STATE_NORMAL // Transition back to normal state if non-digit found
+			}
+
 		}
-
-		prevSep = isSeparator(rune(c))
-		i++
-
-	}
-
-	changed := row.HlOpenComment != inComment
-	row.HlOpenComment = inComment
-	if changed && row.Idx+1 < cfg.CurrentBuffer.NumRows && row.Idx-1 >= 0 {
-		EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[row.Idx-1], cfg)
 	}
 }
 
@@ -188,19 +159,47 @@ func fill(slice []byte, value byte) {
 
 func EditorSyntaxToColor(highlight byte) byte {
 	switch highlight {
-	case constants.HL_KEYWORD1:
-		return 35
-	case constants.HL_KEYWORD2:
-		return 32
-	case constants.HL_COMMENT, constants.HL_MLCOMMENT:
-		return 36
+	case constants.HL_CONTROL_FLOW:
+		return 35 // Magenta
+	case constants.HL_VARIABLE:
+		return 34 // Blue
+	case constants.HL_CONSTANT:
+		return 32 // Green
+	case constants.HL_TYPE:
+		return 33 // Yellow
+	case constants.HL_FUNCTION:
+		return 36 // Cyan
+	case constants.HL_PREPROCESSOR:
+		return 90 // Bright Black (Gray)
+	case constants.HL_STORAGE_CLASS:
+		return 94 // Bright Blue
+	case constants.HL_OPERATOR:
+		return 37 // White
+	case constants.HL_MLCOMMENT, constants.HL_COMMENT:
+		return 90 // Cyan
 	case constants.HL_STRING:
-		return 92
+		return 92 // Bright Red
 	case constants.HL_NUMBER:
-		return 31
-	case constants.HL_MATCH:
-		return 34
+		return 31 // Red
+	case constants.HL_BOOLEAN:
+		return 33 // Yellow
+	case constants.HL_KEYWORD:
+		return 35 // Magenta
+	case constants.HL_BUILTIN:
+		return 34 // Blue
+	case constants.HL_ANNOTATION:
+		return 30 // Black
+	case constants.HL_EXCEPTION:
+		return 91 // Bright Red
+	case constants.HL_MODULE:
+		return 34 // Blue
+	case constants.HL_DEBUG:
+		return 90 // Bright Black (Gray)
+	case constants.HL_TEST:
+		return 32 // Green
+	case constants.HL_DOCUMENTATION:
+		return 93 // Bright Yellow
 	default:
-		return 37
+		return 37 // White
 	}
 }

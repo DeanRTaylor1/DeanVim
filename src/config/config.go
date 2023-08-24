@@ -35,45 +35,6 @@ func LogToFile(message string) {
 	}
 }
 
-var Syntaxes = []SyntaxHighlighting{
-	{
-		FileType:               "go",
-		FileMatch:              []string{".go"},
-		SingleLineCommentStart: "//",
-		MultiLineCommentStart:  "/*",
-		MultiLineCommentEnd:    "*/",
-		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"func", "var", "const", "type", "interface", "package", "import", "return", "if", "else"},
-	},
-	{
-		FileType:               "typescript",
-		FileMatch:              []string{".ts", ".tsx"},
-		SingleLineCommentStart: "//",
-		MultiLineCommentStart:  "/*",
-		MultiLineCommentEnd:    "*/",
-		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"function", "var", "let", "const", "interface", "type", "class", "return", "if", "else"},
-	},
-	{
-		FileType:               "rust",
-		FileMatch:              []string{".rs"},
-		SingleLineCommentStart: "//",
-		MultiLineCommentStart:  "/*",
-		MultiLineCommentEnd:    "*/",
-		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"fn", "let", "const", "trait", "struct", "enum", "return", "if", "else"},
-	},
-	{
-		FileType:               "javascript",
-		FileMatch:              []string{".js", ".jsx"},
-		SingleLineCommentStart: "//",
-		MultiLineCommentStart:  "/*",
-		MultiLineCommentEnd:    "*/",
-		Flags:                  constants.HL_HIGHLIGHT_NUMBERS | constants.HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"function", "var", "let", "const", "class", "return", "if", "else"},
-	},
-}
-
 type BufferSyntax struct {
 	FileType               string
 	Flags                  int
@@ -81,17 +42,7 @@ type BufferSyntax struct {
 	MultiLineCommentStart  string
 	MultiLineCommentEnd    string
 	Keywords               []string
-	Syntaxes               []SyntaxHighlighting
-}
-
-type SyntaxHighlighting struct {
-	FileType               string
-	FileMatch              []string
-	SingleLineCommentStart string
-	MultiLineCommentStart  string
-	MultiLineCommentEnd    string
-	Flags                  int
-	Keywords               []string
+	Syntaxes               []constants.SyntaxHighlighting
 }
 
 type SearchState struct {
@@ -140,7 +91,7 @@ func NewBufferSyntax() *BufferSyntax {
 		FileType:               "",
 		Flags:                  0,
 		SingleLineCommentStart: "",
-		Syntaxes:               Syntaxes,
+		Syntaxes:               constants.Syntaxes,
 	}
 }
 
