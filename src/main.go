@@ -60,7 +60,7 @@ func editorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 	}
 	cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars
 	cfg.CurrentBuffer.Rows[cfg.Cy].Length = row.Length
-	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg)
+	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg)
 }
 
 func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
@@ -69,7 +69,7 @@ func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 	row.Chars = convertedChars
 	row.Length = len(convertedChars)
 	row.Idx = at // Set the index to the insertion point
-	highlighting.EditorUpdateSyntax(row, cfg)
+	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
 	if at < 0 || at >= len(cfg.CurrentBuffer.Rows) {
 		// If at is outside the valid range, append the row to the end
@@ -82,7 +82,6 @@ func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 
 	// Update the Idx of the subsequent rows
 	for i := at + 1; i < len(cfg.CurrentBuffer.Rows); i++ {
-		config.LogToFile(fmt.Sprintf("I: %d", i))
 		cfg.CurrentBuffer.Rows[i].Idx = i
 	}
 }
@@ -100,7 +99,7 @@ func editorDelRow(cfg *config.EditorConfig) {
 		cfg.CurrentBuffer.Rows[i].Idx = i
 	}
 
-	highlighting.EditorUpdateSyntax(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
+	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
 
 	// Delete the current row
 	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:cfg.Cy], cfg.CurrentBuffer.Rows[cfg.Cy+1:]...)
@@ -110,21 +109,17 @@ func editorDelRow(cfg *config.EditorConfig) {
 }
 
 func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorConfig) {
-	// ... existing code ...
-
 	row.Chars = append(row.Chars, 0)
 	copy(row.Chars[at+1:], row.Chars[at:])
 	row.Chars[at] = byte(char)
 
-	// Add similar logic for row.Highlighting
 	row.Highlighting = append(row.Highlighting, constants.HL_NORMAL)
 	copy(row.Highlighting[at+1:], row.Highlighting[at:])
-	row.Highlighting[at] = constants.HL_NORMAL // or the appropriate value
+	row.Highlighting[at] = constants.HL_NORMAL
 
-	row.Length = len(row.Chars) // Update the length of the row
+	row.Length = len(row.Chars)
 
-	// Call EditorUpdateSyntax here to ensure the highlighting is updated as well
-	highlighting.EditorUpdateSyntax(row, cfg)
+	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
 	cfg.Dirty++
 }
@@ -132,6 +127,14 @@ func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorC
 func editorRowDelChar(row *config.Row, at int, cfg *config.EditorConfig) {
 	if at < 0 || at >= len(row.Chars) {
 		return
+	}
+	if closingBracket, ok := constants.BracketPairs[rune(row.Chars[at])]; ok {
+		// Check if the next character is the corresponding closing bracket
+		if at+1 < len(row.Chars) && row.Chars[at+1] == byte(closingBracket) {
+			// Delete the closing bracket along with the opening bracket
+			copy(row.Chars[at:], row.Chars[at+2:])
+			row.Chars = row.Chars[:len(row.Chars)-1]
+		}
 	}
 	copy(row.Chars[at:], row.Chars[at+1:])
 	row.Chars = row.Chars[:len(row.Chars)-1] // Access the Row field
@@ -152,12 +155,23 @@ func editorInsertChar(char rune, cfg *config.EditorConfig) {
 }
 
 func editorInsertNewLine(cfg *config.EditorConfig) {
+	row := cfg.CurrentBuffer.Rows[cfg.Cy]
+	isBetweenBrackets := false
+
+	// Check if the cursor is between an opening and a closing bracket
+	if cfg.Cx > 0 && cfg.Cx < len(row.Chars) {
+		openingBracket := row.Chars[cfg.Cx-1]
+		cursorPos := row.Chars[cfg.Cx]
+		if closingBracket, ok := constants.BracketPairs[rune(openingBracket)]; ok && byte(closingBracket) == cursorPos {
+			isBetweenBrackets = true
+		}
+	}
+
 	if cfg.Cx == 0 {
 		newRow := config.NewRow()
 		at := cfg.Cy
 		editorInsertRow(newRow, at, cfg)
 	} else {
-		row := cfg.CurrentBuffer.Rows[cfg.Cy]
 		cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars[:cfg.Cx]
 		cfg.CurrentBuffer.Rows[cfg.Cy].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
 		newRow := config.Row{Chars: row.Chars[cfg.Cx:]}
@@ -167,6 +181,13 @@ func editorInsertNewLine(cfg *config.EditorConfig) {
 
 	cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
 	cfg.Cy++
+
+	// If the cursor was between brackets, insert an additional new line
+	if isBetweenBrackets {
+		newRow := config.NewRow()
+		editorInsertRow(newRow, cfg.Cy, cfg)
+		cfg.CurrentBuffer.NumRows++
+	}
 }
 
 func editorDelChar(cfg *config.EditorConfig) {
@@ -182,7 +203,7 @@ func editorDelChar(cfg *config.EditorConfig) {
 		editorRowDelChar(row, cfg.Cx-1, cfg)
 		cfg.Cx--
 	} else {
-		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length // Access the Row field
+		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length
 		editorDelRow(cfg)
 		cfg.Cy--
 	}
@@ -255,7 +276,7 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		row.Length = linelen
 		row.Idx = len(cfg.CurrentBuffer.Rows)
 		config.LogToFile(fmt.Sprintf("Idx: %d", row.Idx))
-		highlighting.EditorUpdateSyntax(row, cfg)
+		highlighting.SyntaxHighlightStateMachine(row, cfg)
 
 		editorInsertRow(row, -1, cfg)
 		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
@@ -265,6 +286,7 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		return err
 	}
 	cfg.Dirty = 0
+	cfg.FirstRead = false
 
 	return nil
 }
@@ -313,7 +335,7 @@ func editorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 			copy(cfg.CurrentBuffer.SearchState.SavedHl, cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting)
 
 			for i := 0; i < len(buf); i++ {
-				cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting[matchIndex+i] = constants.HL_MATCH // Assuming HL_MATCH is defined
+				cfg.CurrentBuffer.Rows[cfg.Cy].Highlighting[matchIndex+i] = constants.HL_MATCH
 			}
 			break
 		}
@@ -321,6 +343,7 @@ func editorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 }
 
 func editorFind(cfg *config.EditorConfig) {
+	cfg.CurrentBuffer.SearchState.Searching = true
 	cx := cfg.Cx
 	cy := cfg.Cy
 	rowOff := cfg.RowOff
@@ -334,6 +357,7 @@ func editorFind(cfg *config.EditorConfig) {
 		cfg.RowOff = rowOff
 		cfg.ColOff = colOff
 	}
+	cfg.CurrentBuffer.SearchState.Searching = false
 }
 
 func enableRawMode(cfg *config.EditorConfig) error {
@@ -349,6 +373,9 @@ func readKey(reader *bufio.Reader) (rune, error) {
 	char, _, err := reader.ReadRune()
 	if err != nil {
 		return 0, err
+	}
+	if char == '\t' {
+		return constants.TAB_KEY, nil
 	}
 	// readRune returns one byte so we check if that byte is an escape character
 	// That means an arrow key could have been pressed so we replace that arrow with our keys for navigation
@@ -529,8 +556,12 @@ func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 	if err != nil {
 		panic(err)
 	}
-
 	switch char {
+	case constants.TAB_KEY:
+		for i := 0; i < constants.TAB_STOP; i++ {
+			editorInsertChar(' ', cfg)
+		}
+		break
 	case constants.ENTER_KEY:
 		editorInsertNewLine(cfg)
 		break
@@ -585,8 +616,16 @@ func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 	case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
 		editorMoveCursor(char, cfg)
 	default:
-		editorInsertChar(char, cfg)
-		break
+		if closingBracket, ok := constants.BracketPairs[char]; ok {
+			editorInsertChar(char, cfg)
+			editorInsertChar(closingBracket, cfg)
+			cfg.Cx--
+			break
+		} else {
+			editorInsertChar(char, cfg)
+			break
+
+		}
 	}
 	cfg.QuitTimes = constants.QUIT_TIMES
 }
@@ -609,6 +648,9 @@ func editorScroll(cfg *config.EditorConfig) {
 func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	screenRows := cfg.ScreenRows
 	screenCols := cfg.ScreenCols
+	if cfg.CurrentBuffer.SearchState.Searching == true {
+		buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
+	}
 	for i := 0; i < screenRows; i++ {
 		fileRow := i + cfg.RowOff
 		if fileRow >= cfg.CurrentBuffer.NumRows {
@@ -660,6 +702,12 @@ func editorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 						if cColor != -1 {
 							buffer.WriteString(fmt.Sprintf("\x1b[%dm", cColor))
 						}
+					} else if hl == constants.HL_MATCH {
+						buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
+						buffer.WriteString(constants.FOREGROUND_RESET)
+						buffer.WriteString(constants.BACKGROUND_YELLOW)
+						buffer.WriteByte(c)
+						buffer.WriteString(constants.BACKGROUND_RESET)
 					} else if hl == constants.HL_NORMAL {
 						if cColor != -1 {
 							buffer.WriteString(constants.FOREGROUND_RESET)

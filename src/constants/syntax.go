@@ -71,3 +71,9 @@ var Syntaxes = []SyntaxHighlighting{
 		Keywords:               []string{"function", "var", "let", "const", "class", "return", "if", "else"},
 	},
 }
+
+var BracketPairs = map[rune]rune{
+	'{': '}',
+	'[': ']',
+	'(': ')',
+}

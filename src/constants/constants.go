@@ -24,6 +24,7 @@ const (
 	HOME_KEY    rune = 1006
 	END_KEY     rune = 1007
 	DEL_KEY     rune = 1008
+	TAB_KEY     rune = 1009
 	BACKSPACE   rune = 127
 	QUIT_TIMES  int  = 3
 	QUIT_KEY    rune = 'q'
@@ -75,6 +76,7 @@ const (
 	BOLD                = "\x1b[1m"
 	UNDERLINE           = "\x1b[4m"
 	FOREGROUND_RESET    = "\x1b[39m"
+	BACKGROUND_RESET    = "\x1b[49m"
 )
 
 const TAB_STOP = 4

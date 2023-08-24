@@ -50,6 +50,7 @@ type SearchState struct {
 	Direction   int
 	SavedHlLine int
 	SavedHl     []byte
+	Searching   bool
 }
 
 type Buffer struct {
@@ -73,7 +74,6 @@ type EditorConfig struct {
 	ScreenRows    int
 	ScreenCols    int
 	TerminalState *term.State
-	// NumRows       int
 	CurrentBuffer *Buffer
 	RowOff        int
 	ColOff        int
@@ -83,7 +83,7 @@ type EditorConfig struct {
 	Dirty         int
 	QuitTimes     int
 	Reader        *bufio.Reader
-	// Highlighting  [][]byte
+	FirstRead     bool
 }
 
 func NewBufferSyntax() *BufferSyntax {
@@ -101,6 +101,7 @@ func NewSearchState() *SearchState {
 		Direction:   1,
 		SavedHlLine: 0,
 		SavedHl:     []byte{},
+		Searching:   false,
 	}
 }
 
@@ -131,7 +132,6 @@ func NewEditorConfig() *EditorConfig {
 		ScreenCols:    0,
 		TerminalState: nil,
 		CurrentBuffer: NewBuffer(),
-		// NumRows:       0,
 		RowOff:        0,
 		ColOff:        0,
 		FileName:      "[Not Selected]",
@@ -140,6 +140,6 @@ func NewEditorConfig() *EditorConfig {
 		Dirty:         0,
 		QuitTimes:     constants.QUIT_TIMES,
 		Reader:        bufio.NewReader(os.Stdin),
-		// Highlighting:  [][]byte{},
+		FirstRead:     true,
 	}
 }

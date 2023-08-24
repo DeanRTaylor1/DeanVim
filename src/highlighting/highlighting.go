@@ -42,7 +42,7 @@ func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 				cfg.CurrentBuffer.BufferSyntax.MultiLineCommentStart = syntax.MultiLineCommentStart
 				cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd = syntax.MultiLineCommentEnd
 				for _, r := range cfg.CurrentBuffer.Rows {
-					EditorUpdateSyntax(&r, cfg)
+					SyntaxHighlightStateMachine(&r, cfg)
 				}
 				return
 			}
@@ -50,7 +50,7 @@ func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 	}
 }
 
-func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
+func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 	row.Highlighting = make([]byte, row.Length)
 	fill(row.Highlighting, constants.HL_NORMAL)
 
@@ -63,6 +63,13 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 	mce := cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd
 	scsLen, mcsLen, mceLen := len(scs), len(mcs), len(mce)
 	inString := byte(0)
+	row.HlOpenComment = false
+	if row.Idx > 0 {
+		if cfg.CurrentBuffer.Rows[row.Idx-1].HlOpenComment {
+			row.HlOpenComment = true
+			state = constants.STATE_MLCOMMENT
+		}
+	}
 
 	i := 0
 	for i < row.Length {
@@ -77,6 +84,7 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 				}
 				i += scsLen - 1
 			} else if mcsLen > 0 && i+mcsLen <= row.Length && string(row.Chars[i:i+mcsLen]) == mcs {
+				row.HlOpenComment = true
 				state = constants.STATE_MLCOMMENT
 				for j := i; j < i+mcsLen; j++ {
 					row.Highlighting[j] = constants.HL_MLCOMMENT
@@ -116,7 +124,7 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 					row.Highlighting[j] = constants.HL_MLCOMMENT
 				}
 				row.HlOpenComment = false
-				i += mceLen
+				i += mceLen - 1
 				state = constants.STATE_NORMAL
 			} else {
 				i++
@@ -153,6 +161,12 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 
 		}
 	}
+
+	// if row.HlOpenComment && i >= row.Length {
+	// 	for j := row.Idx + 1; j < cfg.CurrentBuffer.NumRows; j++ {
+	// 		SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[j], cfg)
+	// 	}
+	// }
 }
 
 func isSeparator(c rune) bool {
@@ -207,6 +221,8 @@ func EditorSyntaxToColor(highlight byte) byte {
 		return 32 // Green
 	case constants.HL_DOCUMENTATION:
 		return 93 // Bright Yellow
+	case constants.HL_MATCH:
+		return 93
 	default:
 		return 37 // White
 	}
