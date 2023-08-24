@@ -70,7 +70,7 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 
 		switch state {
 		case constants.STATE_NORMAL:
-			if scsLen > 0 && i+scsLen <= row.Length && string(row.Chars[i:i+scsLen]) == scs {
+			if scsLen > 0 && i+scsLen < row.Length && string(row.Chars[i:i+scsLen]) == scs {
 				state = constants.STATE_SLCOMMENT
 				for j := i; j < i+scsLen; j++ {
 					row.Highlighting[j] = constants.HL_COMMENT
@@ -103,6 +103,9 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 				}
 			} else {
 				i++
+			}
+			if i >= row.Length {
+				break // Exit the loop if we've reached the end of the line
 			}
 
 		case constants.STATE_MLCOMMENT:
@@ -142,6 +145,11 @@ func EditorUpdateSyntax(row *config.Row, cfg *config.EditorConfig) {
 			} else {
 				state = constants.STATE_NORMAL // Transition back to normal state if non-digit found
 			}
+		case constants.STATE_SLCOMMENT:
+			for ; i < row.Length; i++ {
+				row.Highlighting[i] = constants.HL_COMMENT
+			}
+			return
 
 		}
 	}
