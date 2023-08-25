@@ -144,3 +144,14 @@ func NewEditorConfig() *EditorConfig {
 		FirstRead:     true,
 	}
 }
+
+func GetWindowSize(cfg *EditorConfig) error {
+	width, height, err := term.GetSize(int(os.Stdin.Fd()))
+	if err != nil {
+		return err
+	}
+
+	cfg.ScreenCols = width
+	cfg.ScreenRows = height
+	return nil
+}
