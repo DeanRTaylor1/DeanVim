@@ -79,7 +79,7 @@ const (
 	BACKGROUND_RESET    = "\x1b[49m"
 )
 
-const TAB_STOP = 4
+const TAB_STOP = 2
 
 const (
 	HL_NORMAL = iota
@@ -107,6 +107,7 @@ const (
 	HL_DEBUG         // for debug-related keywords
 	HL_TEST          // for test-related keywords
 	HL_DOCUMENTATION // for documentation comments
+	HL_TAB_KEY
 )
 
 const (

@@ -66,6 +66,7 @@ type Row struct {
 	Length        int
 	Highlighting  []byte
 	HlOpenComment bool
+	Tabs          []byte
 }
 
 type EditorConfig struct {

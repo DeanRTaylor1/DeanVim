@@ -1,6 +1,7 @@
 package highlighting
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -51,8 +52,9 @@ func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 }
 
 func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
-	row.Highlighting = make([]byte, row.Length)
-	fill(row.Highlighting, constants.HL_NORMAL)
+	config.LogToFile(fmt.Sprintf("idx %d, HL: %d", row.Idx, len(row.Highlighting)))
+	// row.Highlighting = make([]byte, row.Length)
+	// Fill(row.Highlighting, constants.HL_NORMAL)
 
 	if cfg.CurrentBuffer.BufferSyntax == nil {
 		return
@@ -173,7 +175,14 @@ func isSeparator(c rune) bool {
 	return unicode.IsSpace(c) || c == '\x00' || strings.ContainsRune(",.()+-/*=~%<>[];", c)
 }
 
-func fill(slice []byte, value byte) {
+func ResetRowHighlights(offset int, cfg *config.EditorConfig) {
+	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy+offset]
+
+	currentRow.Highlighting = make([]byte, currentRow.Length)
+	Fill(currentRow.Highlighting, constants.HL_NORMAL)
+}
+
+func Fill(slice []byte, value byte) {
 	for i := range slice {
 		slice[i] = value
 	}

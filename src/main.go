@@ -58,8 +58,15 @@ func editorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 	if cfg.Cy < 1 {
 		return
 	}
-	cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars
-	cfg.CurrentBuffer.Rows[cfg.Cy].Length = row.Length
+	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+
+	currentRow.Chars = row.Chars
+	currentRow.Length = row.Length
+	currentRow.Highlighting = make([]byte, row.Length)
+	highlighting.Fill(currentRow.Highlighting, constants.HL_NORMAL)
+	currentRow.Tabs = make([]byte, currentRow.Length)
+	mapTabs(cfg)
+
 	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg)
 }
 
@@ -69,6 +76,8 @@ func editorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 	row.Chars = convertedChars
 	row.Length = len(convertedChars)
 	row.Idx = at // Set the index to the insertion point
+	row.Highlighting = make([]byte, row.Length)
+	row.Tabs = make([]byte, row.Length)
 	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
 	if at < 0 || at >= len(cfg.CurrentBuffer.Rows) {
@@ -91,21 +100,37 @@ func editorDelRow(cfg *config.EditorConfig) {
 		return
 	}
 
-	// Append the current row's characters to the previous one
-	cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars = append(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars, cfg.CurrentBuffer.Rows[cfg.Cy].Chars...)
-	cfg.CurrentBuffer.Rows[cfg.Cy-1].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy-1].Chars) // Update the length of the previous row
+	mergeCurrentRowWithPrevious(cfg)
+	updateRowIndicesFromCurrent(cfg)
+	highlighting.ResetRowHighlights(-1, cfg)
+	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
+	resetRowTabs(cfg.Cy-1, cfg)
+	deleteCurrentRow(cfg)
+	cfg.Dirty++
+}
 
+func resetRowTabs(idx int, cfg *config.EditorConfig) {
+	row := &cfg.CurrentBuffer.Rows[idx]
+	row.Tabs = make([]byte, row.Length)
+}
+
+func mergeCurrentRowWithPrevious(cfg *config.EditorConfig) {
+	prevRow := &cfg.CurrentBuffer.Rows[cfg.Cy-1]
+	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+
+	prevRow.Chars = append(prevRow.Chars, currentRow.Chars...)
+	prevRow.Length = len(prevRow.Chars)
+}
+
+func updateRowIndicesFromCurrent(cfg *config.EditorConfig) {
 	for i := cfg.Cy; i < len(cfg.CurrentBuffer.Rows); i++ {
 		cfg.CurrentBuffer.Rows[i].Idx = i
 	}
+}
 
-	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
-
-	// Delete the current row
+func deleteCurrentRow(cfg *config.EditorConfig) {
 	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:cfg.Cy], cfg.CurrentBuffer.Rows[cfg.Cy+1:]...)
-
-	cfg.CurrentBuffer.NumRows-- // Update NumRows within CurrentBuffer
-	cfg.Dirty++
+	cfg.CurrentBuffer.NumRows--
 }
 
 func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorConfig) {
@@ -113,11 +138,10 @@ func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorC
 	copy(row.Chars[at+1:], row.Chars[at:])
 	row.Chars[at] = byte(char)
 
-	row.Highlighting = append(row.Highlighting, constants.HL_NORMAL)
-	copy(row.Highlighting[at+1:], row.Highlighting[at:])
-	row.Highlighting[at] = constants.HL_NORMAL
-
 	row.Length = len(row.Chars)
+	row.Highlighting = make([]byte, row.Length)
+	highlighting.Fill(row.Highlighting, constants.HL_NORMAL)
+	row.Tabs = make([]byte, row.Length)
 
 	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
@@ -275,9 +299,10 @@ func editorOpen(cfg *config.EditorConfig, fileName string) error {
 		row.Chars = []byte(line[:linelen])
 		row.Length = linelen
 		row.Idx = len(cfg.CurrentBuffer.Rows)
-		config.LogToFile(fmt.Sprintf("Idx: %d", row.Idx))
+		row.Highlighting = make([]byte, row.Length)
+		highlighting.Fill(row.Highlighting, constants.HL_NORMAL)
+		row.Tabs = make([]byte, row.Length)
 		highlighting.SyntaxHighlightStateMachine(row, cfg)
-
 		editorInsertRow(row, -1, cfg)
 		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
 	}
@@ -551,6 +576,34 @@ func editorMoveCursor(key rune, cfg *config.EditorConfig) {
 	}
 }
 
+func mapTabs(cfg *config.EditorConfig) {
+	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+
+	if len(currentRow.Tabs) != len(currentRow.Chars) {
+		currentRow.Tabs = make([]byte, len(currentRow.Chars))
+	}
+
+	for i := 0; i < len(currentRow.Chars); {
+		if currentRow.Chars[i] == ' ' && i+constants.TAB_STOP <= len(currentRow.Chars) { // Check bounds here
+			isTabs := true
+			for j := 1; j < constants.TAB_STOP; j++ {
+				if currentRow.Chars[i+j] != ' ' {
+					isTabs = false
+					break
+				}
+			}
+			if isTabs {
+				for j := 0; j < constants.TAB_STOP; j++ {
+					currentRow.Tabs[i+j] = constants.HL_TAB_KEY
+				}
+				i += constants.TAB_STOP
+				continue
+			}
+		}
+		i++
+	}
+}
+
 func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 	char, err := readKey(reader)
 	if err != nil {
@@ -561,6 +614,7 @@ func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		for i := 0; i < constants.TAB_STOP; i++ {
 			editorInsertChar(' ', cfg)
 		}
+		mapTabs(cfg)
 		break
 	case constants.ENTER_KEY:
 		editorInsertNewLine(cfg)
@@ -599,7 +653,27 @@ func processKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		if char == constants.DEL_KEY {
 			editorMoveCursor(constants.ARROW_RIGHT, cfg)
 		}
-		editorDelChar(cfg)
+
+		currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+		if cfg.Cx > 0 && currentRow.Tabs[cfg.Cx-1] == constants.HL_TAB_KEY {
+			startOfTab := cfg.Cx - 1
+			endOfTab := startOfTab
+			i := 1
+			for startOfTab > 0 && currentRow.Tabs[startOfTab-1] == constants.HL_TAB_KEY {
+				startOfTab--
+				i++
+				if i == constants.TAB_STOP {
+					break // Stop after finding one complete tab
+				}
+			}
+
+			// Delete the entire tab
+			for j := endOfTab; j >= startOfTab; j-- {
+				editorDelChar(cfg)
+			}
+		} else {
+			editorDelChar(cfg)
+		}
 		break
 	case constants.PAGE_DOWN, constants.PAGE_UP:
 		times := cfg.ScreenRows
