@@ -43,7 +43,7 @@ func EditorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 		if matchIndex != -1 {
 			cfg.CurrentBuffer.SearchState.LastMatch = current
 			cfg.Cy = current
-			cfg.Cx = matchIndex
+			cfg.Cx = matchIndex + cfg.LineNumberWidth
 			cfg.RowOff = cfg.CurrentBuffer.NumRows
 
 			cfg.CurrentBuffer.SearchState.SavedHlLine = current
@@ -60,7 +60,7 @@ func EditorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 
 func EditorFind(cfg *config.EditorConfig) {
 	cfg.CurrentBuffer.SearchState.Searching = true
-	cx := cfg.Cx
+	cx := cfg.Cx + cfg.LineNumberWidth
 	cy := cfg.Cy
 	rowOff := cfg.RowOff
 	colOff := cfg.ColOff

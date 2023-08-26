@@ -75,7 +75,7 @@ func EditorScroll(cfg *config.EditorConfig) {
 		cfg.RowOff = cfg.Cy - cfg.ScreenRows + 1
 	}
 	if cfg.Cx < cfg.ColOff {
-		cfg.ColOff = cfg.Cx
+		cfg.ColOff = cfg.Cx - cfg.LineNumberWidth
 	}
 	if cfg.Cx >= cfg.ColOff+cfg.ScreenCols {
 		cfg.ColOff = cfg.Cx - cfg.ScreenCols + 1

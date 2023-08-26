@@ -45,13 +45,13 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		EditorSetStatusMessage(cfg, "%s", msg)
 		break
 	case constants.HOME_KEY:
-		cfg.Cx = 0
+		cfg.Cx = cfg.LineNumberWidth
 		break
 	case constants.END_KEY:
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy].Length
+		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy].Length + cfg.LineNumberWidth
 		break
 	case utils.CTRL_KEY('f'):
 		EditorFind(cfg)
@@ -62,8 +62,8 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		}
 
 		currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
-		if cfg.Cx > 0 && currentRow.Tabs[cfg.Cx-1] == constants.HL_TAB_KEY {
-			startOfTab := cfg.Cx - 1
+		if cfg.SliceIndex > 0 && currentRow.Tabs[cfg.SliceIndex-1] == constants.HL_TAB_KEY {
+			startOfTab := cfg.SliceIndex - 1
 			endOfTab := startOfTab
 			i := 1
 			for startOfTab > 0 && currentRow.Tabs[startOfTab-1] == constants.HL_TAB_KEY {
@@ -100,6 +100,7 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		if closingBracket, ok := constants.BracketPairs[char]; ok {
 			EditorInsertChar(char, cfg)
 			EditorInsertChar(closingBracket, cfg)
+			cfg.SliceIndex--
 			cfg.Cx--
 			break
 		} else {
@@ -119,35 +120,28 @@ func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
 	// spacesNeeded := TAB_STOP - (cfg.Cx % TAB_STOP)
 	switch key {
 	case rune(constants.ARROW_LEFT):
-		if cfg.Cx != 0 {
+		if cfg.SliceIndex != 0 {
+			cfg.SliceIndex--
 			cfg.Cx--
 		} else if cfg.Cy > 0 {
+			cfg.SliceIndex--
 			cfg.Cy--
 			if cfg.Cy < len(cfg.CurrentBuffer.Rows) {
-				cfg.Cx = (cfg.CurrentBuffer.Rows[cfg.Cy].Length)
+				cfg.Cx = (cfg.CurrentBuffer.Rows[cfg.Cy].Length) + cfg.LineNumberWidth
 			}
-		}
-		break
-	case rune(constants.SAVE_KEY):
-		if cfg.Cy == cfg.CurrentBuffer.NumRows {
-			break
-		}
-		if cfg.Cx < (cfg.CurrentBuffer.Rows[cfg.Cy].Length)-1 {
-			cfg.Cx++
-		} else if cfg.Cx == (cfg.CurrentBuffer.Rows[cfg.Cy].Length) && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
-			cfg.Cy++
-			cfg.Cx = 0
 		}
 		break
 	case rune(constants.ARROW_RIGHT):
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.Cx < (cfg.CurrentBuffer.Rows[cfg.Cy].Length) {
+		if cfg.SliceIndex < (cfg.CurrentBuffer.Rows[cfg.Cy].Length) {
+			cfg.SliceIndex++
 			cfg.Cx++
 		} else if cfg.Cx == cfg.CurrentBuffer.Rows[cfg.Cy].Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
 			cfg.Cy++
-			cfg.Cx = 0
+			cfg.Cx = cfg.LineNumberWidth
+			cfg.SliceIndex = 0
 		}
 		break
 
@@ -170,8 +164,9 @@ func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
 	}
 
 	rowLen := len(row)
-	if cfg.Cx > rowLen {
-		cfg.Cx = rowLen
+	if cfg.SliceIndex > rowLen {
+		cfg.Cx = rowLen + cfg.LineNumberWidth
+		cfg.SliceIndex = rowLen
 	}
 }
 

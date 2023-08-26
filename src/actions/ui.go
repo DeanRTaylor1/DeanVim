@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"time"
 	"unicode"
@@ -20,6 +21,10 @@ func EditorRefreshScreen(cfg *config.EditorConfig) {
 
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
+
+	if cfg.Cx < 5 {
+		cfg.Cx = 5
+	}
 
 	EditorDrawRows(&buffer, cfg)
 	EditorDrawStatusBar(&buffer, cfg)
@@ -41,6 +46,21 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 	for i := 0; i < screenRows; i++ {
 		fileRow := i + cfg.RowOff
+
+		relativeLineNumber := int(math.Abs(float64(cfg.Cy - fileRow)))
+
+		lineNumber := fmt.Sprintf("%4d ", relativeLineNumber)
+
+		if fileRow == cfg.Cy {
+			buffer.WriteString(constants.TEXT_BRIGHT_WHITE)
+			lineNumber = fmt.Sprintf("~%3d ", fileRow+1)
+		} else {
+			buffer.WriteString(constants.TEXT_BRIGHT_BLACK)
+		}
+
+		buffer.WriteString(lineNumber)
+		buffer.WriteString(constants.FOREGROUND_RESET)
+
 		if fileRow >= cfg.CurrentBuffer.NumRows {
 			if cfg.CurrentBuffer.NumRows == 0 && i == screenRows/3 {
 				welcome := "Go editor -- version 0.1"

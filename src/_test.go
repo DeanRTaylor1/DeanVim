@@ -1,13 +1,18 @@
 package test 
-
-
+
+
 import "fmt"
 /* testing */ 
-// test
+{
+test func main(){
+
+}
+}// test
 func test() {
     fmt.Println("TEST") 123
+      
 }
-make([]byte):
+    make([]byte):
 func test(){
 
 }

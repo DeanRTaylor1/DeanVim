@@ -26,8 +26,9 @@ func EditorInsertChar(char rune, cfg *config.EditorConfig) {
 		EditorInsertRow(config.NewRow(), -1, cfg)
 		cfg.CurrentBuffer.NumRows++
 	}
-	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.Cx, char, cfg)
+	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.SliceIndex, char, cfg)
 
+	cfg.SliceIndex++
 	cfg.Cx++
 }
 
@@ -36,24 +37,25 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 	isBetweenBrackets := false
 
 	// Check if the cursor is between an opening and a closing bracket
-	if cfg.Cx > 0 && cfg.Cx < len(row.Chars) {
-		openingBracket := row.Chars[cfg.Cx-1]
-		cursorPos := row.Chars[cfg.Cx]
+	if cfg.SliceIndex > 0 && cfg.SliceIndex < len(row.Chars) {
+		openingBracket := row.Chars[cfg.SliceIndex-1]
+		cursorPos := row.Chars[cfg.SliceIndex]
 		if closingBracket, ok := constants.BracketPairs[rune(openingBracket)]; ok && byte(closingBracket) == cursorPos {
 			isBetweenBrackets = true
 		}
 	}
 
-	if cfg.Cx == 0 {
+	if cfg.SliceIndex == 0 {
 		newRow := config.NewRow()
 		at := cfg.Cy
 		EditorInsertRow(newRow, at, cfg)
 	} else {
-		cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars[:cfg.Cx]
+		cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars[:cfg.SliceIndex]
 		cfg.CurrentBuffer.Rows[cfg.Cy].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
-		newRow := config.Row{Chars: row.Chars[cfg.Cx:]}
+		newRow := config.Row{Chars: row.Chars[cfg.SliceIndex:]}
 		EditorInsertRow(&newRow, cfg.Cy+1, cfg)
-		cfg.Cx = 0
+		cfg.Cx = cfg.LineNumberWidth
+		cfg.SliceIndex = 0
 	}
 
 	cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
