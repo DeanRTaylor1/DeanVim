@@ -62,6 +62,7 @@ type Buffer struct {
 }
 
 type Row struct {
+	CharAdjustment   int
 	IndentationLevel int
 	Idx              int
 	Chars            []byte
@@ -123,6 +124,7 @@ func NewSearchState() *SearchState {
 func NewRow() *Row {
 	return &Row{
 		Idx:              0,
+		CharAdjustment:   0,
 		IndentationLevel: 1,
 		Chars:            []byte{},
 		Length:           0,

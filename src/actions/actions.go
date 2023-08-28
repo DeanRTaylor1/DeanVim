@@ -46,6 +46,7 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		break
 	case constants.HOME_KEY:
 		cfg.Cx = cfg.LineNumberWidth
+		cfg.SliceIndex = 0
 		break
 	case constants.END_KEY:
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
@@ -128,18 +129,20 @@ func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
 			cfg.SliceIndex--
 			cfg.Cy--
 			if cfg.Cy < len(cfg.CurrentBuffer.Rows) {
-				cfg.Cx = (cfg.CurrentBuffer.Rows[cfg.Cy].Length) + cfg.LineNumberWidth
+				cfg.Cx = (cfg.GetCurrentRow().Length) + cfg.LineNumberWidth
+				cfg.SliceIndex = cfg.GetCurrentRow().Length
 			}
 		}
 		break
 	case rune(constants.ARROW_RIGHT):
+		config.LogToFile(fmt.Sprintf("%d, %d, %d", cfg.GetCurrentRow().Length, len(cfg.GetCurrentRow().Chars), cfg.SliceIndex))
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.SliceIndex <= (cfg.CurrentBuffer.Rows[cfg.Cy].Length) {
+		if cfg.SliceIndex < (cfg.GetCurrentRow().Length) {
 			cfg.SliceIndex++
 			cfg.Cx++
-		} else if cfg.Cx == cfg.CurrentBuffer.Rows[cfg.Cy].Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
+		} else if cfg.Cx-cfg.LineNumberWidth >= cfg.GetCurrentRow().Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
 			cfg.Cy++
 			cfg.Cx = cfg.LineNumberWidth
 			cfg.SliceIndex = 0

@@ -12,7 +12,7 @@ func EditorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
 	if cfg.Cy < 1 {
 		return
 	}
-	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+	currentRow := cfg.GetCurrentRow()
 
 	currentRow.Chars = row.Chars
 	currentRow.Length = row.Length

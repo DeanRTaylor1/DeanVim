@@ -1,30 +1,13 @@
-package test 
-func {
-    fmt.Println("testing")
-  }
-func {
-    {
+package test
+
+func one() {
+  if {
+    func happ() {
+      func {
+    if {
       
-    }func nestedFunc {
-        
-      }
+    }
+  }  
     }
   }
-import "fmt"
-/* testing */ 
-{
-test func main(){
-
-}
-}// test
-func test() {
-    fmt.Println("TEST") 123
-      
-}
-    make([]byte):
-func test(){
-
-}
-}func main() {
- fmt.Printf("printing")
 }

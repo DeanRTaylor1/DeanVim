@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strings"
 	"time"
 	"unicode"
 
@@ -14,6 +15,39 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 	"github.com/deanrtaylor1/go-editor/utils"
 )
+
+func DrawLineNumbers(buffer *bytes.Buffer, fileRow int, cfg *config.EditorConfig) {
+	relativeLineNumber := int(math.Abs(float64(cfg.Cy - fileRow)))
+	lineNumber := fmt.Sprintf("%4d ", relativeLineNumber)
+
+	if fileRow == cfg.Cy {
+		buffer.WriteString(constants.TEXT_BRIGHT_WHITE)
+		lineNumber = fmt.Sprintf("~%3d ", fileRow+1)
+	} else {
+		buffer.WriteString(constants.TEXT_BRIGHT_BLACK)
+	}
+
+	buffer.WriteString(lineNumber)
+	buffer.WriteString(constants.FOREGROUND_RESET)
+}
+
+func DrawWelcomeMessage(buffer *bytes.Buffer, screenCols int) {
+	welcome := "Go editor -- version 0.1"
+	welcomelen := len(welcome)
+	if welcomelen > screenCols {
+		welcomelen = screenCols
+	}
+	padding := (screenCols - welcomelen) / 2
+	if padding > 0 {
+		buffer.WriteByte(byte(constants.TILDE))
+		padding--
+	}
+	for padding > 0 {
+		buffer.WriteByte(byte(constants.SPACE_RUNE))
+		padding--
+	}
+	buffer.WriteString(welcome)
+}
 
 func EditorRefreshScreen(cfg *config.EditorConfig) {
 	EditorScroll(cfg)
@@ -46,36 +80,11 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 	for i := 0; i < screenRows; i++ {
 		fileRow := i + cfg.RowOff
-		relativeLineNumber := int(math.Abs(float64(cfg.Cy - fileRow)))
-		lineNumber := fmt.Sprintf("%4d ", relativeLineNumber)
-
-		if fileRow == cfg.Cy {
-			buffer.WriteString(constants.TEXT_BRIGHT_WHITE)
-			lineNumber = fmt.Sprintf("~%3d ", fileRow+1)
-		} else {
-			buffer.WriteString(constants.TEXT_BRIGHT_BLACK)
-		}
-
-		buffer.WriteString(lineNumber)
-		buffer.WriteString(constants.FOREGROUND_RESET)
+		DrawLineNumbers(buffer, fileRow, cfg)
 
 		if fileRow >= cfg.CurrentBuffer.NumRows {
 			if cfg.CurrentBuffer.NumRows == 0 && i == screenRows/3 {
-				welcome := "Go editor -- version 0.1"
-				welcomelen := len(welcome)
-				if welcomelen > screenCols {
-					welcomelen = screenCols
-				}
-				padding := (screenCols - welcomelen) / 2
-				if padding > 0 {
-					buffer.WriteByte(byte(constants.TILDE))
-					padding--
-				}
-				for padding > 0 {
-					buffer.WriteByte(byte(constants.SPACE_RUNE))
-					padding--
-				}
-				buffer.WriteString(welcome)
+				DrawWelcomeMessage(buffer, screenCols)
 			} else {
 				buffer.WriteByte(byte(constants.TILDE))
 			}
@@ -89,14 +98,36 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				rowLength = availableScreenCols
 			}
 			if cfg.ColOff < cfg.CurrentBuffer.Rows[fileRow].Length {
-				if len(cfg.CurrentBuffer.Rows[fileRow].Highlighting) < 1 {
-					panic("HIGHLIGHTING EMPTY")
-				}
 				highlights := cfg.CurrentBuffer.Rows[fileRow].Highlighting
 				cColor := -1
 				for j := 0; j < rowLength; j++ {
 					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
 					hl := highlights[cfg.ColOff+j]
+
+					if c == ' ' {
+						spaceCount := 0
+						for k := j; k < j+constants.TAB_STOP; k++ {
+							if k >= rowLength || cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+k] != ' ' {
+								break
+							}
+							spaceCount++
+						}
+
+						if j > constants.TAB_STOP && spaceCount == constants.TAB_STOP {
+							nextCharIndex := j + constants.TAB_STOP
+							if nextCharIndex < rowLength && cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+nextCharIndex] != '}' {
+								buffer.WriteString(strings.Repeat(" ", constants.TAB_STOP-1))
+								buffer.WriteString(constants.TEXT_BRIGHT_BLACK)
+								buffer.WriteString("│")
+								buffer.WriteString(constants.FOREGROUND_RESET)
+							} else {
+								// If the next character is a '}', just append the spaces
+								buffer.WriteString(strings.Repeat(" ", constants.TAB_STOP))
+							}
+							j += constants.TAB_STOP - 1 // Skip ahead
+							continue
+						}
+					}
 
 					if unicode.IsControl(rune(c)) {
 						sym := '?'
