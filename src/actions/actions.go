@@ -52,6 +52,7 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 			break
 		}
 		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy].Length + cfg.LineNumberWidth
+		cfg.SliceIndex = cfg.CurrentBuffer.Rows[cfg.Cy].Length
 		break
 	case utils.CTRL_KEY('f'):
 		EditorFind(cfg)
@@ -135,7 +136,7 @@ func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.SliceIndex < (cfg.CurrentBuffer.Rows[cfg.Cy].Length) {
+		if cfg.SliceIndex <= (cfg.CurrentBuffer.Rows[cfg.Cy].Length) {
 			cfg.SliceIndex++
 			cfg.Cx++
 		} else if cfg.Cx == cfg.CurrentBuffer.Rows[cfg.Cy].Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {

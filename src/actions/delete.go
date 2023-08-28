@@ -13,16 +13,17 @@ func EditorDelChar(cfg *config.EditorConfig) {
 	if cfg.SliceIndex == 0 && cfg.Cy == 0 {
 		return
 	}
-
 	row := &cfg.CurrentBuffer.Rows[cfg.Cy]
 	if cfg.SliceIndex > 0 {
-		EditorRowDelChar(row, cfg.SliceIndex-1, cfg)
+		if cfg.Cx-cfg.ColOff <= cfg.LineNumberWidth {
+			cfg.ColOff--
+		}
 		cfg.Cx--
+		EditorRowDelChar(row, cfg.SliceIndex-1, cfg)
 		cfg.SliceIndex--
 	} else {
 		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length + cfg.LineNumberWidth
 		cfg.SliceIndex = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length
-
 		EditorDelRow(cfg)
 		cfg.Cy--
 	}

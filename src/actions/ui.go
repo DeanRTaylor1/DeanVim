@@ -46,9 +46,7 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 	for i := 0; i < screenRows; i++ {
 		fileRow := i + cfg.RowOff
-
 		relativeLineNumber := int(math.Abs(float64(cfg.Cy - fileRow)))
-
 		lineNumber := fmt.Sprintf("%4d ", relativeLineNumber)
 
 		if fileRow == cfg.Cy {
@@ -83,11 +81,12 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 			}
 		} else {
 			rowLength := cfg.CurrentBuffer.Rows[fileRow].Length - cfg.ColOff
+			availableScreenCols := screenCols - cfg.LineNumberWidth
 			if rowLength < 0 {
 				rowLength = 0
 			}
-			if rowLength > screenCols {
-				rowLength = screenCols
+			if rowLength > availableScreenCols {
+				rowLength = availableScreenCols
 			}
 			if cfg.ColOff < cfg.CurrentBuffer.Rows[fileRow].Length {
 				if len(cfg.CurrentBuffer.Rows[fileRow].Highlighting) < 1 {
