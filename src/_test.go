@@ -2,12 +2,12 @@ package test
 
 func one() {
   if {
-    func happ() {
+    func happy() {
       func {
     if {
       
-    }
-  }  
+    }asasa
+    }  
     }
   }
 }

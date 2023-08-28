@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"syscall"
@@ -53,7 +52,6 @@ func main() {
 	actions.EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
 
 	for {
-		config.LogToFile(fmt.Sprintf("%d, %d, %d", cfg.Cx, cfg.SliceIndex, cfg.ColOff))
 		actions.EditorRefreshScreen(cfg)
 		actions.ProcessKeyPress(cfg.Reader, cfg)
 	}

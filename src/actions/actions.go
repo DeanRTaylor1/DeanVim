@@ -17,6 +17,8 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		panic(err)
 	}
 	switch char {
+	case utils.CTRL_KEY('z'):
+		UndoAction(cfg)
 	case constants.TAB_KEY:
 		for i := 0; i < constants.TAB_STOP; i++ {
 			EditorInsertChar(' ', cfg)
@@ -59,10 +61,17 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		EditorFind(cfg)
 		break
 	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
+		prevRowLength := 0
+		action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow(), cfg.Cy, constants.ACTION_UPDATE_ROW, prevRowLength, cfg.Cx, nil)
+		if cfg.Cy > 0 && cfg.SliceIndex == 0 {
+			action.ActionType = constants.ACTION_APPEND_ROW_TO_PREVIOUS
+			action.PrevRow = cfg.CurrentBuffer.Rows[cfg.Cy-1]
+			action.Cx = cfg.LineNumberWidth
+		}
+		cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
 		if char == constants.DEL_KEY {
 			EditorMoveCursor(constants.ARROW_RIGHT, cfg)
 		}
-
 		currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
 		if cfg.SliceIndex > 0 && currentRow.Tabs[cfg.SliceIndex-1] == constants.HL_TAB_KEY {
 			startOfTab := cfg.SliceIndex - 1
@@ -99,6 +108,8 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 	case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
 		EditorMoveCursor(char, cfg)
 	default:
+		action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow(), cfg.Cy, constants.ACTION_UPDATE_ROW, 0, cfg.Cx, nil)
+		cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
 		if closingBracket, ok := constants.BracketPairs[char]; ok {
 			EditorInsertChar(char, cfg)
 			EditorInsertChar(closingBracket, cfg)

@@ -36,6 +36,14 @@ func LogToFile(message string) {
 	}
 }
 
+type EditorAction struct {
+	ActionType int
+	Row        Row
+	Index      int
+	PrevRow    interface{}
+	Cx         int
+}
+
 type BufferSyntax struct {
 	FileType               string
 	Flags                  int
@@ -59,6 +67,8 @@ type Buffer struct {
 	NumRows      int
 	SearchState  *SearchState
 	BufferSyntax *BufferSyntax
+	UndoStack    []EditorAction
+	RedoStack    []EditorAction
 }
 
 type Row struct {
@@ -90,6 +100,39 @@ type EditorConfig struct {
 	QuitTimes       int
 	Reader          *bufio.Reader
 	FirstRead       bool
+	UndoHistory     int
+}
+
+func (b *Buffer) PopUndo() (EditorAction, bool) {
+	if len(b.UndoStack) == 0 {
+		return EditorAction{}, false
+	}
+	lastAction := b.UndoStack[len(b.UndoStack)-1]
+	b.UndoStack = b.UndoStack[:len(b.UndoStack)-1]
+	return lastAction, true
+}
+
+func (b *Buffer) PopRedo() (EditorAction, bool) {
+	if len(b.RedoStack) == 0 {
+		return EditorAction{}, false
+	}
+	lastAction := b.RedoStack[len(b.RedoStack)-1]
+	b.RedoStack = b.RedoStack[:len(b.RedoStack)-1]
+	return lastAction, true
+}
+
+func (b *Buffer) AppendRedo(action EditorAction, maxUndoHistory int) {
+	if len(b.RedoStack) >= maxUndoHistory {
+		b.RedoStack = b.RedoStack[1:]
+	}
+	b.RedoStack = append(b.RedoStack, action)
+}
+
+func (b *Buffer) AppendUndo(action EditorAction, maxUndoHistory int) {
+	if len(b.UndoStack) >= maxUndoHistory {
+		b.UndoStack = b.UndoStack[1:]
+	}
+	b.UndoStack = append(b.UndoStack, action)
 }
 
 func (c *EditorConfig) GetAdjustedCx() int {
@@ -133,12 +176,24 @@ func NewRow() *Row {
 	}
 }
 
+func (b *Buffer) NewEditorAction(row Row, rowIndex int, actionType int, prevRowLength int, cx int, prevRow interface{}) *EditorAction {
+	return &EditorAction{
+		Row:        row,
+		Index:      rowIndex,
+		ActionType: actionType,
+		PrevRow:    prevRow,
+		Cx:         cx,
+	}
+}
+
 func NewBuffer() *Buffer {
 	return &Buffer{
 		Rows:         []Row{},
 		NumRows:      0,
 		SearchState:  NewSearchState(),
 		BufferSyntax: NewBufferSyntax(),
+		UndoStack:    []EditorAction{},
+		RedoStack:    []EditorAction{},
 	}
 }
 
@@ -161,6 +216,7 @@ func NewEditorConfig() *EditorConfig {
 		QuitTimes:       constants.QUIT_TIMES,
 		Reader:          bufio.NewReader(os.Stdin),
 		FirstRead:       true,
+		UndoHistory:     30,
 	}
 }
 

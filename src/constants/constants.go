@@ -6,6 +6,13 @@ const VERSION = "0.0.1"
 type SyntaxState int
 
 const (
+	ACTION_DELETE_ROW = iota
+	ACTION_UPDATE_ROW
+	ACTION_INSERT_ROW
+	ACTION_APPEND_ROW_TO_PREVIOUS
+)
+
+const (
 	STATE_NORMAL SyntaxState = iota
 	STATE_SLCOMMENT
 	STATE_MLCOMMENT
