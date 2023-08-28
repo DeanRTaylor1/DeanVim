@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"strings"
+
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/highlighting"
@@ -50,9 +52,15 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 		at := cfg.Cy
 		EditorInsertRow(newRow, at, cfg)
 	} else {
-		cfg.CurrentBuffer.Rows[cfg.Cy].Chars = row.Chars[:cfg.SliceIndex]
-		cfg.CurrentBuffer.Rows[cfg.Cy].Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
-		newRow := config.Row{Chars: row.Chars[cfg.SliceIndex:]}
+		// If we are between brackets another row will be inserted in between this row and the previous
+		currentRow := cfg.GetCurrentRow()
+		currentRow.Chars = row.Chars[:cfg.SliceIndex]
+		currentRow.Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
+
+		newRow := config.Row{Chars: row.Chars[cfg.SliceIndex:], IndentationLevel: currentRow.IndentationLevel}
+		oneTab := strings.Repeat(" ", constants.TAB_STOP*newRow.IndentationLevel)
+		newRow.Chars = append([]byte(oneTab), newRow.Chars...)
+
 		EditorInsertRow(&newRow, cfg.Cy+1, cfg)
 		cfg.Cx = cfg.LineNumberWidth
 		cfg.SliceIndex = 0
@@ -63,8 +71,22 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 
 	// If the cursor was between brackets, insert an additional new line
 	if isBetweenBrackets {
+		currentRow := cfg.GetCurrentRow()
+
 		newRow := config.NewRow()
+		newRow.IndentationLevel = currentRow.IndentationLevel + 1
+		// Create a byte slice with as many tabs as newRow.IndentationLevel
+		indentBytes := make([]byte, newRow.IndentationLevel)
+		for i := 0; i < newRow.IndentationLevel; i++ {
+			indentBytes[i] = byte('\t')
+		}
+
+		newRow.Chars = append(indentBytes, newRow.Chars...)
+		newRow.Length = len(newRow.Chars)
+
 		EditorInsertRow(newRow, cfg.Cy, cfg)
+		cfg.Cx = newRow.Length + cfg.LineNumberWidth
+		cfg.SliceIndex = newRow.Length
 		cfg.CurrentBuffer.NumRows++
 	}
 }

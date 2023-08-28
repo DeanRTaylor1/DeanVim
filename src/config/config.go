@@ -62,12 +62,13 @@ type Buffer struct {
 }
 
 type Row struct {
-	Idx           int
-	Chars         []byte
-	Length        int
-	Highlighting  []byte
-	HlOpenComment bool
-	Tabs          []byte
+	IndentationLevel int
+	Idx              int
+	Chars            []byte
+	Length           int
+	Highlighting     []byte
+	HlOpenComment    bool
+	Tabs             []byte
 }
 
 type EditorConfig struct {
@@ -96,6 +97,10 @@ func (c *EditorConfig) GetAdjustedCx() int {
 	return adjustedCx
 }
 
+func (c *EditorConfig) GetCurrentRow() *Row {
+	return &c.CurrentBuffer.Rows[c.Cy]
+}
+
 func NewBufferSyntax() *BufferSyntax {
 	return &BufferSyntax{
 		FileType:               "",
@@ -117,11 +122,12 @@ func NewSearchState() *SearchState {
 
 func NewRow() *Row {
 	return &Row{
-		Idx:           0,
-		Chars:         []byte{},
-		Length:        0,
-		Highlighting:  []byte{},
-		HlOpenComment: false,
+		Idx:              0,
+		IndentationLevel: 1,
+		Chars:            []byte{},
+		Length:           0,
+		Highlighting:     []byte{},
+		HlOpenComment:    false,
 	}
 }
 

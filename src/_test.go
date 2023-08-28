@@ -1,6 +1,15 @@
 package test 
-
-
+func {
+    fmt.Println("testing")
+  }
+func {
+    {
+      
+    }func nestedFunc {
+        
+      }
+    }
+  }
 import "fmt"
 /* testing */ 
 {

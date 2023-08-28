@@ -1,7 +1,6 @@
 package highlighting
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -52,10 +51,6 @@ func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 }
 
 func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
-	config.LogToFile(fmt.Sprintf("idx %d, HL: %d", row.Idx, len(row.Highlighting)))
-	// row.Highlighting = make([]byte, row.Length)
-	// Fill(row.Highlighting, constants.HL_NORMAL)
-
 	if cfg.CurrentBuffer.BufferSyntax == nil {
 		return
 	}
