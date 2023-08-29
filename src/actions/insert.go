@@ -1,8 +1,6 @@
 package actions
 
 import (
-	"strings"
-
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/highlighting"
@@ -57,12 +55,15 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 		currentRow.Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
 
 		newRow := config.Row{Chars: row.Chars[cfg.SliceIndex:], IndentationLevel: currentRow.IndentationLevel}
-		oneTab := strings.Repeat(" ", constants.TAB_STOP*newRow.IndentationLevel)
-		newRow.Chars = append([]byte(oneTab), newRow.Chars...)
+		indentBytes := make([]byte, newRow.IndentationLevel)
+		for i := 0; i < newRow.IndentationLevel; i++ {
+			indentBytes[i] = byte('\t')
+		}
+		newRow.Chars = append(indentBytes, newRow.Chars...)
 
 		EditorInsertRow(&newRow, cfg.Cy+1, cfg)
-		cfg.Cx = cfg.LineNumberWidth
-		cfg.SliceIndex = 0
+		cfg.Cx = len(newRow.Chars) + cfg.LineNumberWidth
+		cfg.SliceIndex = len(newRow.Chars)
 	}
 
 	cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
@@ -98,6 +99,7 @@ func EditorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 	row.Idx = at // Set the index to the insertion point
 	row.Highlighting = make([]byte, row.Length)
 	row.Tabs = make([]byte, row.Length)
+
 	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
 	if at < 0 || at >= len(cfg.CurrentBuffer.Rows) {

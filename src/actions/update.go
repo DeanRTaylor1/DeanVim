@@ -47,7 +47,7 @@ func MapTabs(cfg *config.EditorConfig) {
 	}
 
 	for i := 0; i < len(currentRow.Chars); {
-		if currentRow.Chars[i] == ' ' && i+constants.TAB_STOP <= len(currentRow.Chars) { // Check bounds here
+		if currentRow.Chars[i] == ' ' && i+constants.TAB_STOP <= len(currentRow.Chars) {
 			isTabs := true
 			for j := 1; j < constants.TAB_STOP; j++ {
 				if currentRow.Chars[i+j] != ' ' {

@@ -13,6 +13,9 @@ import (
 )
 
 func TabKeyHandler(cfg *config.EditorConfig) {
+	if cfg.SliceIndex == 0 {
+		cfg.GetCurrentRow().IndentationLevel++
+	}
 	for i := 0; i < constants.TAB_STOP; i++ {
 		EditorInsertChar(' ', cfg)
 	}
@@ -101,6 +104,7 @@ func deleteTabOrChar(cfg *config.EditorConfig) {
 		for j := endOfTab; j >= startOfTab; j-- {
 			EditorDelChar(cfg)
 		}
+		cfg.GetCurrentRow().IndentationLevel--
 	} else {
 		EditorDelChar(cfg)
 	}
