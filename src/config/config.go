@@ -37,21 +37,12 @@ func LogToFile(message string) {
 }
 
 type EditorAction struct {
-	ActionType int
-	Row        Row
-	Index      int
-	PrevRow    interface{}
-	Cx         int
-}
-
-type BufferSyntax struct {
-	FileType               string
-	Flags                  int
-	SingleLineCommentStart string
-	MultiLineCommentStart  string
-	MultiLineCommentEnd    string
-	Keywords               []string
-	Syntaxes               []constants.SyntaxHighlighting
+	ActionType   int
+	Row          Row
+	Index        int
+	PrevRow      interface{}
+	Cx           int
+	RedoFunction func()
 }
 
 type SearchState struct {
@@ -60,15 +51,6 @@ type SearchState struct {
 	SavedHlLine int
 	SavedHl     []byte
 	Searching   bool
-}
-
-type Buffer struct {
-	Rows         []Row
-	NumRows      int
-	SearchState  *SearchState
-	BufferSyntax *BufferSyntax
-	UndoStack    []EditorAction
-	RedoStack    []EditorAction
 }
 
 type Row struct {
@@ -103,36 +85,8 @@ type EditorConfig struct {
 	UndoHistory     int
 }
 
-func (b *Buffer) PopUndo() (EditorAction, bool) {
-	if len(b.UndoStack) == 0 {
-		return EditorAction{}, false
-	}
-	lastAction := b.UndoStack[len(b.UndoStack)-1]
-	b.UndoStack = b.UndoStack[:len(b.UndoStack)-1]
-	return lastAction, true
-}
-
-func (b *Buffer) PopRedo() (EditorAction, bool) {
-	if len(b.RedoStack) == 0 {
-		return EditorAction{}, false
-	}
-	lastAction := b.RedoStack[len(b.RedoStack)-1]
-	b.RedoStack = b.RedoStack[:len(b.RedoStack)-1]
-	return lastAction, true
-}
-
-func (b *Buffer) AppendRedo(action EditorAction, maxUndoHistory int) {
-	if len(b.RedoStack) >= maxUndoHistory {
-		b.RedoStack = b.RedoStack[1:]
-	}
-	b.RedoStack = append(b.RedoStack, action)
-}
-
-func (b *Buffer) AppendUndo(action EditorAction, maxUndoHistory int) {
-	if len(b.UndoStack) >= maxUndoHistory {
-		b.UndoStack = b.UndoStack[1:]
-	}
-	b.UndoStack = append(b.UndoStack, action)
+func (c *EditorConfig) ClearRedoStack() {
+	c.CurrentBuffer.RedoStack = []EditorAction{}
 }
 
 func (c *EditorConfig) GetAdjustedCx() int {
@@ -168,7 +122,7 @@ func NewRow() *Row {
 	return &Row{
 		Idx:              0,
 		CharAdjustment:   0,
-		IndentationLevel: 1,
+		IndentationLevel: 0,
 		Chars:            []byte{},
 		Length:           0,
 		Highlighting:     []byte{},
@@ -176,25 +130,26 @@ func NewRow() *Row {
 	}
 }
 
-func (b *Buffer) NewEditorAction(row Row, rowIndex int, actionType int, prevRowLength int, cx int, prevRow interface{}) *EditorAction {
-	return &EditorAction{
-		Row:        row,
-		Index:      rowIndex,
-		ActionType: actionType,
-		PrevRow:    prevRow,
-		Cx:         cx,
+func (r *Row) DeepCopy() *Row {
+	// Create a new Row object and copy over the simple fields
+	newRow := &Row{
+		Idx:              r.Idx,
+		CharAdjustment:   r.CharAdjustment,
+		IndentationLevel: r.IndentationLevel,
+		Length:           r.Length,
+		HlOpenComment:    r.HlOpenComment,
 	}
-}
 
-func NewBuffer() *Buffer {
-	return &Buffer{
-		Rows:         []Row{},
-		NumRows:      0,
-		SearchState:  NewSearchState(),
-		BufferSyntax: NewBufferSyntax(),
-		UndoStack:    []EditorAction{},
-		RedoStack:    []EditorAction{},
-	}
+	newRow.Chars = make([]byte, len(r.Chars))
+	copy(newRow.Chars, r.Chars)
+
+	newRow.Highlighting = make([]byte, len(r.Highlighting))
+	copy(newRow.Highlighting, r.Highlighting)
+
+	newRow.Tabs = make([]byte, len(r.Tabs))
+	copy(newRow.Tabs, r.Tabs)
+
+	return newRow
 }
 
 func NewEditorConfig() *EditorConfig {
@@ -218,6 +173,24 @@ func NewEditorConfig() *EditorConfig {
 		FirstRead:       true,
 		UndoHistory:     30,
 	}
+}
+
+func (e *EditorConfig) MoveCursorLeft() {
+	e.Cx--
+	e.SliceIndex--
+}
+
+func (e *EditorConfig) MoveCursorRight() {
+	e.SliceIndex++
+	e.Cx++
+}
+
+func (e *EditorConfig) MoveCursorUp() {
+	e.Cy--
+}
+
+func (e *EditorConfig) MoveCursorDown() {
+	e.Cy++
 }
 
 func GetWindowSize(cfg *EditorConfig) error {

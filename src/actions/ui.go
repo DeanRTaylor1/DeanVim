@@ -6,13 +6,11 @@ import (
 	"log"
 	"math"
 	"os"
-	"strings"
 	"time"
 	"unicode"
 
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
-	"github.com/deanrtaylor1/go-editor/highlighting"
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
@@ -56,6 +54,7 @@ func EditorRefreshScreen(cfg *config.EditorConfig) {
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
 
+	// Cursor position should never be within our rendered line numbers
 	if cfg.Cx < 5 {
 		cfg.Cx = 5
 	}
@@ -75,19 +74,14 @@ func EditorRefreshScreen(cfg *config.EditorConfig) {
 func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	screenRows := cfg.ScreenRows
 	screenCols := cfg.ScreenCols
-	if cfg.CurrentBuffer.SearchState.Searching == true {
-		buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
-	}
+	HideCursorIfSearching(buffer, cfg)
+
 	for i := 0; i < screenRows; i++ {
 		fileRow := i + cfg.RowOff
 		DrawLineNumbers(buffer, fileRow, cfg)
 
 		if fileRow >= cfg.CurrentBuffer.NumRows {
-			if cfg.CurrentBuffer.NumRows == 0 && i == screenRows/3 {
-				DrawWelcomeMessage(buffer, screenCols)
-			} else {
-				buffer.WriteByte(byte(constants.TILDE))
-			}
+			WriteWelcomeIfNoFile(buffer, screenCols, screenRows, i, cfg)
 		} else {
 			rowLength := cfg.CurrentBuffer.Rows[fileRow].Length - cfg.ColOff
 			availableScreenCols := screenCols - cfg.LineNumberWidth
@@ -103,62 +97,22 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				for j := 0; j < rowLength; j++ {
 					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
 					hl := highlights[cfg.ColOff+j]
-
 					if c == ' ' {
-						spaceCount := 0
-						for k := j; k < j+constants.TAB_STOP; k++ {
-							if k >= rowLength || cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+k] != ' ' {
-								break
-							}
-							spaceCount++
-						}
-
+						spaceCount := CountSpaces(cfg, rowLength, j, fileRow)
 						if j > constants.TAB_STOP && spaceCount == constants.TAB_STOP {
-							nextCharIndex := j + constants.TAB_STOP
-							if nextCharIndex < rowLength && cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+nextCharIndex] != '}' {
-								buffer.WriteString(strings.Repeat(" ", constants.TAB_STOP-1))
-								buffer.WriteString(constants.TEXT_BRIGHT_BLACK)
-								buffer.WriteString("│")
-								buffer.WriteString(constants.FOREGROUND_RESET)
-							} else {
-								// If the next character is a '}', just append the spaces
-								buffer.WriteString(strings.Repeat(" ", constants.TAB_STOP))
-							}
-							j += constants.TAB_STOP - 1 // Skip ahead
+							AppendTabOrRowIndentBar(cfg, &j, buffer, fileRow, rowLength)
+							j += constants.TAB_STOP - 1
 							continue
 						}
 					}
-
 					if unicode.IsControl(rune(c)) {
-						sym := '?'
-						if c <= 26 {
-							sym = rune(int(c) + int('@'))
-						}
-						buffer.WriteString("\x1b[7m")
-						buffer.WriteRune(sym)
-						buffer.WriteString("\x1b[m")
-						if cColor != -1 {
-							buffer.WriteString(fmt.Sprintf("\x1b[%dm", cColor))
-						}
+						ControlCHandler(buffer, rune(c), cColor)
 					} else if hl == constants.HL_MATCH {
-						buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
-						buffer.WriteString(constants.FOREGROUND_RESET)
-						buffer.WriteString(constants.BACKGROUND_YELLOW)
-						buffer.WriteByte(c)
-						buffer.WriteString(constants.BACKGROUND_RESET)
+						FormatFindResultHandler(buffer, c)
 					} else if hl == constants.HL_NORMAL {
-						if cColor != -1 {
-							buffer.WriteString(constants.FOREGROUND_RESET)
-							cColor = -1
-						}
-						buffer.WriteByte(c)
+						NormalFormatHandler(buffer, c, cColor)
 					} else {
-						color := int(highlighting.EditorSyntaxToColor(hl))
-						if color != cColor {
-							buffer.WriteString(fmt.Sprintf("\x1b[%dm", color))
-							cColor = color
-						}
-						buffer.WriteByte(c)
+						ColorFormatHandler(buffer, c, &cColor, hl)
 					}
 				}
 				buffer.WriteString(constants.FOREGROUND_RESET)
@@ -174,8 +128,10 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 }
 
 func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
-	buf.WriteString("\x1b[7m")
+	// Set background color for the status bar
+	buf.WriteString("\x1b[48;5;236m") // Dark gray background
 
+	// File Status Section
 	currentRow := cfg.Cy + 1
 	if currentRow > cfg.CurrentBuffer.NumRows {
 		currentRow = cfg.CurrentBuffer.NumRows
@@ -183,23 +139,33 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 
 	dirty := ""
 	if cfg.Dirty > 0 {
-		dirty = "(modified)"
+		dirty = "\x1b[31m(modified)\x1b[39m" // Red color for modified
 	}
 
-	status := fmt.Sprintf("%.20s - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty)
-	rStatus := fmt.Sprintf("%s | %d/%d", cfg.CurrentBuffer.BufferSyntax.FileType, cfg.Cy+1, cfg.CurrentBuffer.NumRows)
+	status := fmt.Sprintf("\x1b[32m%.20s\x1b[39m - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty) // Green color for filename
 
-	rLen := len(rStatus)
-	if len(status) > cfg.ScreenCols {
-		status = status[:cfg.ScreenCols-rLen]
-	}
+	// Right-aligned Status
+	rStatus := fmt.Sprintf("%s \x1b[34m|\x1b[39m %d/%d", cfg.CurrentBuffer.BufferSyntax.FileType, cfg.Cy+1, cfg.CurrentBuffer.NumRows) // Blue color for separator
 
+	// Calculate the visible length of status and rStatus (ignoring ANSI codes)
+	visibleStatusLen := len(status) - 9   // 9 characters are for ANSI codes in 'status'
+	visibleRStatusLen := len(rStatus) - 9 // 9 characters are for ANSI codes in 'rStatus'
+
+	// Calculate the number of spaces needed to fill the gap
+	spaceCount := cfg.ScreenCols - (visibleStatusLen + visibleRStatusLen)
+
+	// Write the status bars
 	buf.WriteString(status)
-	for i := len(status); i < cfg.ScreenCols-rLen; i++ {
+
+	// Fill the gap with spaces
+	for i := 0; i < spaceCount; i++ {
 		buf.WriteString(" ")
 	}
 
+	// Write the right-aligned status
 	buf.WriteString(rStatus)
+
+	// Reset terminal attributes and move to the next line
 	buf.WriteString(constants.ESCAPE_RESET_ATTRIBUTES)
 	buf.WriteString(constants.ESCAPE_NEW_LINE)
 }

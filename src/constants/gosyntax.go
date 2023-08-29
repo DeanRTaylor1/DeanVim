@@ -13,7 +13,8 @@ var GoSyntaxHighlighting map[string]byte = map[string]byte{
 	"const": CategoryConstants["constant"],
 
 	// Module
-	"import": CategoryConstants["module"],
+	"import":  CategoryConstants["module"],
+	"package": CategoryConstants["module"],
 
 	// Types
 	"int":        CategoryConstants["type"],

@@ -59,18 +59,14 @@ func EditorDelRow(cfg *config.EditorConfig) {
 	highlighting.ResetRowHighlights(-1, cfg)
 	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
 	ResetRowTabs(cfg.Cy-1, cfg)
-	deleteCurrentRow(cfg)
+	cfg.CurrentBuffer.RemoveRowAtIndex(cfg.Cy)
+	// deleteCurrentRow(cfg)
 	cfg.Dirty++
 }
 
 func ResetRowTabs(idx int, cfg *config.EditorConfig) {
 	row := &cfg.CurrentBuffer.Rows[idx]
 	row.Tabs = make([]byte, row.Length)
-}
-
-func deleteCurrentRow(cfg *config.EditorConfig) {
-	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:cfg.Cy], cfg.CurrentBuffer.Rows[cfg.Cy+1:]...)
-	cfg.CurrentBuffer.NumRows--
 }
 
 func mergeCurrentRowWithPrevious(cfg *config.EditorConfig) {

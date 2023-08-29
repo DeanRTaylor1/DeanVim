@@ -3,7 +3,6 @@ package actions
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/deanrtaylor1/go-editor/config"
@@ -16,111 +15,58 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 	if err != nil {
 		panic(err)
 	}
+
+	clearRedos := true
+
 	switch char {
 	case utils.CTRL_KEY('z'):
 		UndoAction(cfg)
+		clearRedos = false
+	case utils.CTRL_KEY('y'):
+		RedoAction(cfg)
+		clearRedos = false
 	case constants.TAB_KEY:
-		for i := 0; i < constants.TAB_STOP; i++ {
-			EditorInsertChar(' ', cfg)
-		}
-		MapTabs(cfg)
-		break
+		TabKeyHandler(cfg)
 	case constants.ENTER_KEY:
-		EditorInsertNewLine(cfg)
-		break
+		EnterKeyHandler(cfg)
 	case utils.CTRL_KEY(constants.QUIT_KEY):
-		if cfg.Dirty > 0 && cfg.QuitTimes > 0 {
-			EditorSetStatusMessage(cfg, "WARNING!!! File has unsaved changes. Press Ctrl-Q %d more times to quit.", cfg.QuitTimes)
-			cfg.QuitTimes--
+		success := QuitKeyHandler(cfg)
+		if !success {
 			return
 		}
-		fmt.Print(constants.ESCAPE_CLEAR_SCREEN)
-		fmt.Print(constants.ESCAPE_MOVE_TO_HOME_POS)
-		os.Exit(0)
-		break
 	case utils.CTRL_KEY(constants.SAVE_KEY):
-		msg, err := EditorSave(cfg)
-		if err != nil {
-			EditorSetStatusMessage(cfg, "%s", err.Error())
-			break
-		}
-		EditorSetStatusMessage(cfg, "%s", msg)
-		break
+		SaveKeyHandler(cfg)
 	case constants.HOME_KEY:
-		cfg.Cx = cfg.LineNumberWidth
-		cfg.SliceIndex = 0
-		break
+		HomeKeyHandler(cfg)
 	case constants.END_KEY:
-		if cfg.Cy == cfg.CurrentBuffer.NumRows {
+		err := EndKeyHandler(cfg)
+		if err != nil {
+			config.LogToFile(err.Error())
 			break
 		}
-		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy].Length + cfg.LineNumberWidth
-		cfg.SliceIndex = cfg.CurrentBuffer.Rows[cfg.Cy].Length
-		break
 	case utils.CTRL_KEY('f'):
 		EditorFind(cfg)
 		break
 	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
-		prevRowLength := 0
-		action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow(), cfg.Cy, constants.ACTION_UPDATE_ROW, prevRowLength, cfg.Cx, nil)
-		if cfg.Cy > 0 && cfg.SliceIndex == 0 {
-			action.ActionType = constants.ACTION_APPEND_ROW_TO_PREVIOUS
-			action.PrevRow = cfg.CurrentBuffer.Rows[cfg.Cy-1]
-			action.Cx = cfg.LineNumberWidth
-		}
-		cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
-		if char == constants.DEL_KEY {
-			EditorMoveCursor(constants.ARROW_RIGHT, cfg)
-		}
-		currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
-		if cfg.SliceIndex > 0 && currentRow.Tabs[cfg.SliceIndex-1] == constants.HL_TAB_KEY {
-			startOfTab := cfg.SliceIndex - 1
-			endOfTab := startOfTab
-			i := 1
-			for startOfTab > 0 && currentRow.Tabs[startOfTab-1] == constants.HL_TAB_KEY {
-				startOfTab--
-				i++
-				if i == constants.TAB_STOP {
-					break // Stop after finding one complete tab
-				}
-			}
-
-			// Delete the entire tab
-			for j := endOfTab; j >= startOfTab; j-- {
-				EditorDelChar(cfg)
-			}
-		} else {
-			EditorDelChar(cfg)
-		}
-		break
+		DeleteHandler(cfg, char)
 	case constants.PAGE_DOWN, constants.PAGE_UP:
-		times := cfg.ScreenRows
-		for times > 0 {
-			if char == constants.PAGE_UP {
-				EditorMoveCursor(constants.ARROW_UP, cfg)
-			} else {
-				EditorMoveCursor(constants.ARROW_DOWN, cfg)
-			}
-			times--
-		}
+		PageJumpHandler(cfg, char)
+		clearRedos = false
 	case utils.CTRL_KEY('l'), '\x1b':
 		break
 	case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
 		EditorMoveCursor(char, cfg)
+		clearRedos = false
 	default:
-		action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow(), cfg.Cy, constants.ACTION_UPDATE_ROW, 0, cfg.Cx, nil)
-		cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
-		if closingBracket, ok := constants.BracketPairs[char]; ok {
-			EditorInsertChar(char, cfg)
-			EditorInsertChar(closingBracket, cfg)
-			cfg.SliceIndex--
-			cfg.Cx--
-			break
+		if IsClosingBracket(char) && cfg.GetCurrentRow().Length > cfg.SliceIndex && IsClosingBracket(rune(cfg.GetCurrentRow().Chars[cfg.SliceIndex])) {
+			cfg.Cx++
+			cfg.SliceIndex++
 		} else {
-			EditorInsertChar(char, cfg)
-			break
-
+			InsertCharHandler(cfg, char)
 		}
+	}
+	if clearRedos {
+		cfg.ClearRedoStack()
 	}
 	cfg.QuitTimes = constants.QUIT_TIMES
 }
@@ -134,42 +80,31 @@ func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
 	switch key {
 	case rune(constants.ARROW_LEFT):
 		if cfg.SliceIndex != 0 {
-			cfg.SliceIndex--
-			cfg.Cx--
-		} else if cfg.Cy > 0 {
-			cfg.SliceIndex--
-			cfg.Cy--
-			if cfg.Cy < len(cfg.CurrentBuffer.Rows) {
-				cfg.Cx = (cfg.GetCurrentRow().Length) + cfg.LineNumberWidth
-				cfg.SliceIndex = cfg.GetCurrentRow().Length
-			}
+			cfg.MoveCursorLeft()
+		} else if cfg.Cy > 0 && cfg.Cy < cfg.CurrentBuffer.NumRows {
+			cfg.MoveCursorUp()
+			cfg.Cx = (cfg.GetCurrentRow().Length) + cfg.LineNumberWidth
+			cfg.SliceIndex = cfg.GetCurrentRow().Length
 		}
-		break
 	case rune(constants.ARROW_RIGHT):
-		config.LogToFile(fmt.Sprintf("%d, %d, %d", cfg.GetCurrentRow().Length, len(cfg.GetCurrentRow().Chars), cfg.SliceIndex))
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
 		if cfg.SliceIndex < (cfg.GetCurrentRow().Length) {
-			cfg.SliceIndex++
-			cfg.Cx++
+			cfg.MoveCursorRight()
 		} else if cfg.Cx-cfg.LineNumberWidth >= cfg.GetCurrentRow().Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
-			cfg.Cy++
+			cfg.MoveCursorDown()
 			cfg.Cx = cfg.LineNumberWidth
 			cfg.SliceIndex = 0
 		}
-		break
-
 	case rune(constants.ARROW_DOWN):
 		if cfg.Cy < cfg.CurrentBuffer.NumRows {
-			cfg.Cy++
+			cfg.MoveCursorDown()
 		}
-		break
 	case rune(constants.ARROW_UP):
 		if cfg.Cy != 0 {
-			cfg.Cy--
+			cfg.MoveCursorUp()
 		}
-		break
 	}
 
 	if cfg.Cy < cfg.CurrentBuffer.NumRows {

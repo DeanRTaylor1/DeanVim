@@ -30,8 +30,7 @@ func EditorInsertChar(char rune, cfg *config.EditorConfig) {
 	}
 	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.SliceIndex, char, cfg)
 
-	cfg.SliceIndex++
-	cfg.Cx++
+	cfg.MoveCursorRight()
 }
 
 func EditorInsertNewLine(cfg *config.EditorConfig) {
@@ -107,8 +106,8 @@ func EditorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 		return
 	}
 
-	// If at is within the valid range, insert the row at the specified position
-	cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows[:at], append([]config.Row{*row}, cfg.CurrentBuffer.Rows[at:]...)...)
+	// Use InsertRowAtIndex to insert the row at the specified position
+	cfg.CurrentBuffer.InsertRowAtIndex(at, *row)
 
 	// Update the Idx of the subsequent rows
 	for i := at + 1; i < len(cfg.CurrentBuffer.Rows); i++ {

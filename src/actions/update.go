@@ -9,7 +9,7 @@ import (
 )
 
 func EditorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
-	if cfg.Cy < 1 {
+	if cfg.Cy < 0 {
 		return
 	}
 	currentRow := cfg.GetCurrentRow()
