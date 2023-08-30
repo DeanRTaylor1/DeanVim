@@ -48,8 +48,9 @@ func DrawWelcomeMessage(buffer *bytes.Buffer, screenCols int) {
 }
 
 func EditorRefreshScreen(cfg *config.EditorConfig) {
-	EditorScroll(cfg)
 	var buffer bytes.Buffer
+	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
+	EditorScroll(cfg)
 
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
@@ -116,6 +117,7 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 					}
 				}
 				buffer.WriteString(constants.FOREGROUND_RESET)
+				cColor = -1
 			} else {
 				buffer.Write([]byte{})
 			}

@@ -9,7 +9,6 @@ import (
 
 	"github.com/deanrtaylor1/go-editor/actions"
 	"github.com/deanrtaylor1/go-editor/config"
-	"github.com/deanrtaylor1/go-editor/highlighting"
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
 )
 
@@ -53,8 +52,5 @@ func main() {
 	for {
 		actions.EditorRefreshScreen(cfg)
 		actions.ProcessKeyPress(cfg.Reader, cfg)
-		if cfg.CurrentBuffer.NeedsFullHighlight {
-			highlighting.HighlightFileFromRow(0, cfg)
-		}
 	}
 }
