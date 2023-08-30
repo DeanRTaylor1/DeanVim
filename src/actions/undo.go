@@ -35,5 +35,10 @@ func UndoAction(cfg *config.EditorConfig) {
 		cfg.Cx = lastAction.Cx
 		cfg.Cy = lastAction.Index
 		cfg.SliceIndex = cfg.Cx - cfg.LineNumberWidth
+	case constants.ACTION_INSERT_CHAR_AT_EOF:
+		cfg.CurrentBuffer.RemoveRowAtIndex(lastAction.Index)
+		cfg.Cx = lastAction.Cx
+		cfg.Cy = lastAction.Index
+		cfg.SliceIndex = 0
 	}
 }

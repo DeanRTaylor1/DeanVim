@@ -149,8 +149,15 @@ func HandleCharInsertion(cfg *config.EditorConfig, char rune) {
 }
 
 func InsertCharHandler(cfg *config.EditorConfig, char rune) {
-	currentRow := *cfg.GetCurrentRow().DeepCopy()
-	action := cfg.CurrentBuffer.NewEditorAction(currentRow, cfg.Cy, constants.ACTION_UPDATE_ROW, 0, cfg.Cx, nil, func() { HandleCharInsertion(cfg, char) })
+	var currentRow config.Row
+	var action *config.EditorAction
+	if cfg.Cy != cfg.CurrentBuffer.NumRows {
+		currentRow = *cfg.GetCurrentRow().DeepCopy()
+		action = cfg.CurrentBuffer.NewEditorAction(currentRow, cfg.Cy, constants.ACTION_UPDATE_ROW, 0, cfg.Cx, nil, func() { HandleCharInsertion(cfg, char) })
+	} else {
+		currentRow = *config.NewRow()
+		action = cfg.CurrentBuffer.NewEditorAction(currentRow, cfg.CurrentBuffer.NumRows, constants.ACTION_INSERT_CHAR_AT_EOF, 0, cfg.Cx, nil, func() { HandleCharInsertion(cfg, char) })
+	}
 	cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
 
 	HandleCharInsertion(cfg, char)

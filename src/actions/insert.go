@@ -100,14 +100,14 @@ func EditorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 	row.Highlighting = make([]byte, row.Length)
 	row.Tabs = make([]byte, row.Length)
 
-	highlighting.SyntaxHighlightStateMachine(row, cfg)
-
 	if at < 0 || at >= len(cfg.CurrentBuffer.Rows) {
 		// If at is outside the valid range, append the row to the end
 		row.Idx = len(cfg.CurrentBuffer.Rows)
+		highlighting.SyntaxHighlightStateMachine(row, cfg)
 		cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows, *row)
 		return
 	}
+	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
 	// Use InsertRowAtIndex to insert the row at the specified position
 	cfg.CurrentBuffer.InsertRowAtIndex(at, *row)
