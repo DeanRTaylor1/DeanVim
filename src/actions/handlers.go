@@ -31,9 +31,7 @@ func EnterKeyHandler(cfg *config.EditorConfig) {
 func QuitKeyHandler(cfg *config.EditorConfig) bool {
 	if cfg.Dirty > 0 && cfg.QuitTimes > 0 {
 		EditorSetStatusMessage(cfg, "WARNING!!! File has unsaved changes. Press Ctrl-Q %d more times to quit.", cfg.QuitTimes)
-		config.LogToFile(fmt.Sprintf("%d", cfg.QuitTimes))
 		cfg.QuitTimes--
-		config.LogToFile(fmt.Sprintf("%d", cfg.QuitTimes))
 		return false
 	}
 	fmt.Print(constants.ESCAPE_CLEAR_SCREEN)
@@ -152,7 +150,6 @@ func HandleCharInsertion(cfg *config.EditorConfig, char rune) {
 
 func InsertCharHandler(cfg *config.EditorConfig, char rune) {
 	currentRow := *cfg.GetCurrentRow().DeepCopy()
-	config.LogToFile(fmt.Sprintf("%s", currentRow.Chars))
 	action := cfg.CurrentBuffer.NewEditorAction(currentRow, cfg.Cy, constants.ACTION_UPDATE_ROW, 0, cfg.Cx, nil, func() { HandleCharInsertion(cfg, char) })
 	cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
 
@@ -195,6 +192,8 @@ func ColorFormatHandler(buffer *bytes.Buffer, c byte, cColor *int, hl byte) {
 		*cColor = color
 	}
 	buffer.WriteByte(c)
+	buffer.WriteString(constants.FOREGROUND_RESET)
+	*cColor = -1
 }
 
 func HideCursorIfSearching(buffer *bytes.Buffer, cfg *config.EditorConfig) {

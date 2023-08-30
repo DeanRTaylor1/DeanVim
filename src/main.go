@@ -9,10 +9,9 @@ import (
 
 	"github.com/deanrtaylor1/go-editor/actions"
 	"github.com/deanrtaylor1/go-editor/config"
+	"github.com/deanrtaylor1/go-editor/highlighting"
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
 )
-
-/** file i/o **/
 
 func enableRawMode(cfg *config.EditorConfig) error {
 	oldState, err := term.MakeRaw(int(syscall.Stdin))
@@ -54,5 +53,8 @@ func main() {
 	for {
 		actions.EditorRefreshScreen(cfg)
 		actions.ProcessKeyPress(cfg.Reader, cfg)
+		if cfg.CurrentBuffer.NeedsFullHighlight {
+			highlighting.HighlightFileFromRow(0, cfg)
+		}
 	}
 }

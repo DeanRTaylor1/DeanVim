@@ -30,7 +30,7 @@ type SyntaxHighlighting struct {
 	MultiLineCommentStart  string
 	MultiLineCommentEnd    string
 	Flags                  int
-	Keywords               []string
+	Syntax                 map[string]byte
 }
 
 var Syntaxes = []SyntaxHighlighting{
@@ -41,7 +41,7 @@ var Syntaxes = []SyntaxHighlighting{
 		MultiLineCommentStart:  "/*",
 		MultiLineCommentEnd:    "*/",
 		Flags:                  HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"func", "var", "const", "type", "interface", "package", "import", "return", "if", "else"},
+		Syntax:                 GoSyntaxHighlighting,
 	},
 	{
 		FileType:               "typescript",
@@ -50,17 +50,17 @@ var Syntaxes = []SyntaxHighlighting{
 		MultiLineCommentStart:  "/*",
 		MultiLineCommentEnd:    "*/",
 		Flags:                  HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"function", "var", "let", "const", "interface", "type", "class", "return", "if", "else"},
+		Syntax:                 TypeScriptSyntaxHighlighting,
 	},
-	{
-		FileType:               "rust",
-		FileMatch:              []string{".rs"},
-		SingleLineCommentStart: "//",
-		MultiLineCommentStart:  "/*",
-		MultiLineCommentEnd:    "*/",
-		Flags:                  HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"fn", "let", "const", "trait", "struct", "enum", "return", "if", "else"},
-	},
+	// {
+	// 	FileType:               "rust",
+	// 	FileMatch:              []string{".rs"},
+	// 	SingleLineCommentStart: "//",
+	// 	MultiLineCommentStart:  "/*",
+	// 	MultiLineCommentEnd:    "*/",
+	// 	Flags:                  HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS,
+	// 	Keywords:               []string{"fn", "let", "const", "trait", "struct", "enum", "return", "if", "else"},
+	// },
 	{
 		FileType:               "javascript",
 		FileMatch:              []string{".js", ".jsx"},
@@ -68,7 +68,7 @@ var Syntaxes = []SyntaxHighlighting{
 		MultiLineCommentStart:  "/*",
 		MultiLineCommentEnd:    "*/",
 		Flags:                  HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS,
-		Keywords:               []string{"function", "var", "let", "const", "class", "return", "if", "else"},
+		Syntax:                 JavaScriptSyntaxHighlighting,
 	},
 }
 

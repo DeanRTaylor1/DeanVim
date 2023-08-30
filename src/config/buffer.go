@@ -3,12 +3,13 @@ package config
 import "github.com/deanrtaylor1/go-editor/constants"
 
 type Buffer struct {
-	Rows         []Row
-	NumRows      int
-	SearchState  *SearchState
-	BufferSyntax *BufferSyntax
-	UndoStack    []EditorAction
-	RedoStack    []EditorAction
+	Rows               []Row
+	NumRows            int
+	SearchState        *SearchState
+	BufferSyntax       *BufferSyntax
+	UndoStack          []EditorAction
+	RedoStack          []EditorAction
+	NeedsFullHighlight bool
 }
 
 type BufferSyntax struct {
@@ -17,7 +18,7 @@ type BufferSyntax struct {
 	SingleLineCommentStart string
 	MultiLineCommentStart  string
 	MultiLineCommentEnd    string
-	Keywords               []string
+	Keywords               map[string]byte
 	Syntaxes               []constants.SyntaxHighlighting
 }
 
@@ -97,11 +98,12 @@ func (b *Buffer) NewEditorAction(row Row, rowIndex int, actionType int, prevRowL
 
 func NewBuffer() *Buffer {
 	return &Buffer{
-		Rows:         []Row{},
-		NumRows:      0,
-		SearchState:  NewSearchState(),
-		BufferSyntax: NewBufferSyntax(),
-		UndoStack:    []EditorAction{},
-		RedoStack:    []EditorAction{},
+		Rows:               []Row{},
+		NumRows:            0,
+		SearchState:        NewSearchState(),
+		BufferSyntax:       NewBufferSyntax(),
+		UndoStack:          []EditorAction{},
+		RedoStack:          []EditorAction{},
+		NeedsFullHighlight: false,
 	}
 }

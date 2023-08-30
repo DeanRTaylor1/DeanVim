@@ -38,16 +38,21 @@ func EditorSelectSyntaxHighlight(cfg *config.EditorConfig) {
 				cfg.CurrentBuffer.BufferSyntax.FileType = syntax.FileType
 				cfg.CurrentBuffer.BufferSyntax.Flags = syntax.Flags
 				cfg.CurrentBuffer.BufferSyntax.SingleLineCommentStart = syntax.SingleLineCommentStart
-				cfg.CurrentBuffer.BufferSyntax.Keywords = syntax.Keywords
+				cfg.CurrentBuffer.BufferSyntax.Keywords = syntax.Syntax
 				cfg.CurrentBuffer.BufferSyntax.MultiLineCommentStart = syntax.MultiLineCommentStart
 				cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd = syntax.MultiLineCommentEnd
-				for _, r := range cfg.CurrentBuffer.Rows {
-					SyntaxHighlightStateMachine(&r, cfg)
-				}
 				return
 			}
 		}
 	}
+}
+
+func HighlightFileFromRow(rowStart int, cfg *config.EditorConfig) {
+	for i := rowStart; i < len(cfg.CurrentBuffer.Rows); i++ {
+		SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[i], cfg)
+	}
+
+	cfg.CurrentBuffer.NeedsFullHighlight = false
 }
 
 func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
@@ -60,11 +65,12 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 	mce := cfg.CurrentBuffer.BufferSyntax.MultiLineCommentEnd
 	scsLen, mcsLen, mceLen := len(scs), len(mcs), len(mce)
 	inString := byte(0)
-	row.HlOpenComment = false
 	if row.Idx > 0 {
 		if cfg.CurrentBuffer.Rows[row.Idx-1].HlOpenComment {
 			row.HlOpenComment = true
 			state = constants.STATE_MLCOMMENT
+		} else {
+			row.HlOpenComment = false
 		}
 	}
 
@@ -74,6 +80,8 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 
 		switch state {
 		case constants.STATE_NORMAL:
+			row.Highlighting[i] = constants.HL_NORMAL
+
 			if scsLen > 0 && i+scsLen < row.Length && string(row.Chars[i:i+scsLen]) == scs {
 				state = constants.STATE_SLCOMMENT
 				for j := i; j < i+scsLen; j++ {
@@ -87,6 +95,11 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 					row.Highlighting[j] = constants.HL_MLCOMMENT
 				}
 				i += mcsLen - 1
+				if !cfg.CurrentBuffer.NeedsFullHighlight {
+					cfg.CurrentBuffer.NeedsFullHighlight = true
+					HighlightFileFromRow(row.Idx, cfg)
+					return
+				}
 			} else if c == '"' || c == '\'' {
 				inString = c
 				state = constants.STATE_STRING
@@ -98,7 +111,9 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 				i++
 			} else if c != ' ' {
 				token, length := parseToken(i, row.Chars)
-				if category, exists := constants.GoSyntaxHighlighting[token]; exists {
+				isPrevCharValid := i == 0 || isDelimiter(row.Chars[i-1])
+				isNextCharValid := i+length >= row.Length || isDelimiter(row.Chars[i+length])
+				if category, exists := cfg.CurrentBuffer.BufferSyntax.Keywords[token]; exists && isPrevCharValid && isNextCharValid {
 					for j := 0; j < length; j++ {
 						row.Highlighting[i+j] = category
 					}
@@ -114,19 +129,22 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 			}
 
 		case constants.STATE_MLCOMMENT:
-			row.HlOpenComment = true
 			row.Highlighting[i] = constants.HL_MLCOMMENT
-			if i+mceLen < row.Length && string(row.Chars[i:i+mceLen]) == mce {
+			if i+mceLen <= row.Length && string(row.Chars[i:i+mceLen]) == mce {
 				for j := i; j < i+mceLen; j++ {
 					row.Highlighting[j] = constants.HL_MLCOMMENT
 				}
 				row.HlOpenComment = false
-				i += mceLen - 1
+				i += mceLen
 				state = constants.STATE_NORMAL
+				if !cfg.CurrentBuffer.NeedsFullHighlight {
+					cfg.CurrentBuffer.NeedsFullHighlight = true
+					HighlightFileFromRow(row.Idx, cfg)
+					return
+				}
 			} else {
 				i++
 			}
-
 		case constants.STATE_STRING:
 			for i < row.Length && row.Chars[i] != inString {
 				if row.Chars[i] == '\\' && i+1 < row.Length {
@@ -159,11 +177,10 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 		}
 	}
 
-	// if row.HlOpenComment && i >= row.Length {
-	// 	for j := row.Idx + 1; j < cfg.CurrentBuffer.NumRows; j++ {
-	// 		SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[j], cfg)
-	// 	}
-	// }
+	if !cfg.CurrentBuffer.NeedsFullHighlight && row.HlOpenComment && i >= row.Length {
+		cfg.CurrentBuffer.NeedsFullHighlight = true
+		HighlightFileFromRow(0, cfg)
+	}
 }
 
 func isSeparator(c rune) bool {

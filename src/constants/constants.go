@@ -95,8 +95,6 @@ const (
 	HL_STRING
 	HL_COMMENT
 	HL_MLCOMMENT
-	HL_KEYWORD1
-	HL_KEYWORD2
 	HL_CONTROL_FLOW  // for "if", "else", "for", "while", "switch"
 	HL_VARIABLE      // for "var", "let"
 	HL_CONSTANT      // for "const", "enum"

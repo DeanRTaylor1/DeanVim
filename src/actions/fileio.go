@@ -38,10 +38,10 @@ func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 		row.Highlighting = make([]byte, row.Length)
 		highlighting.Fill(row.Highlighting, constants.HL_NORMAL)
 		row.Tabs = make([]byte, row.Length)
-		highlighting.SyntaxHighlightStateMachine(row, cfg)
-		EditorInsertRow(row, -1, cfg)
+		EditorInsertRow(row, row.Idx, cfg)
 		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
 	}
+	highlighting.HighlightFileFromRow(0, cfg)
 
 	if err := scanner.Err(); err != nil {
 		return err

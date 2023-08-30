@@ -104,6 +104,7 @@ func EditorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
 
 	if at < 0 || at >= len(cfg.CurrentBuffer.Rows) {
 		// If at is outside the valid range, append the row to the end
+		row.Idx = len(cfg.CurrentBuffer.Rows)
 		cfg.CurrentBuffer.Rows = append(cfg.CurrentBuffer.Rows, *row)
 		return
 	}
