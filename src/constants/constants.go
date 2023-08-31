@@ -23,23 +23,24 @@ const (
 )
 
 const (
-	ARROW_LEFT  rune = 1000
-	ARROW_RIGHT rune = 1001
-	ARROW_UP    rune = 1002
-	ARROW_DOWN  rune = 1003
-	PAGE_UP     rune = 1004
-	PAGE_DOWN   rune = 1005
-	HOME_KEY    rune = 1006
-	END_KEY     rune = 1007
-	DEL_KEY     rune = 1008
-	TAB_KEY     rune = 1009
-	BACKSPACE   rune = 127
-	QUIT_TIMES  int  = 3
-	QUIT_KEY    rune = 'q'
-	SAVE_KEY    rune = 's'
-	ENTER_KEY   rune = '\r'
-	TILDE       rune = '~'
-	SPACE_RUNE  rune = ' '
+	ARROW_LEFT      rune = 1000
+	ARROW_RIGHT     rune = 1001
+	ARROW_UP        rune = 1002
+	ARROW_DOWN      rune = 1003
+	PAGE_UP         rune = 1004
+	PAGE_DOWN       rune = 1005
+	HOME_KEY        rune = 1006
+	END_KEY         rune = 1007
+	DEL_KEY         rune = 1008
+	TAB_KEY         rune = 1009
+	INITIAL_REFRESH rune = 2000
+	BACKSPACE       rune = 127
+	QUIT_TIMES      int  = 3
+	QUIT_KEY        rune = 'q'
+	SAVE_KEY        rune = 's'
+	ENTER_KEY       rune = '\r'
+	TILDE           rune = '~'
+	SPACE_RUNE      rune = ' '
 )
 
 const (

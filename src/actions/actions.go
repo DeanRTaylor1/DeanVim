@@ -10,7 +10,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
+func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) rune {
 	char, err := ReadKey(reader)
 	if err != nil {
 		panic(err)
@@ -32,7 +32,7 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 	case utils.CTRL_KEY(constants.QUIT_KEY):
 		success := QuitKeyHandler(cfg)
 		if !success {
-			return
+			return constants.QUIT_KEY
 		}
 	case utils.CTRL_KEY(constants.SAVE_KEY):
 		SaveKeyHandler(cfg)
@@ -69,6 +69,7 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) {
 		cfg.ClearRedoStack()
 	}
 	cfg.QuitTimes = constants.QUIT_TIMES
+	return char
 }
 
 func EditorMoveCursor(key rune, cfg *config.EditorConfig) {

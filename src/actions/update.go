@@ -68,13 +68,13 @@ func MapTabs(cfg *config.EditorConfig) {
 }
 
 func EditorScroll(cfg *config.EditorConfig) {
-	if cfg.Cy < cfg.RowOff {
+	if cfg.Cy <= cfg.RowOff {
 		cfg.RowOff = cfg.Cy
 	}
 	if cfg.Cy >= cfg.RowOff+cfg.ScreenRows {
 		cfg.RowOff = cfg.Cy - cfg.ScreenRows + 1
 	}
-	if cfg.Cx < cfg.ColOff {
+	if cfg.Cx >= 5 && cfg.Cx-cfg.LineNumberWidth < cfg.ColOff {
 		cfg.ColOff = cfg.Cx - cfg.LineNumberWidth
 	}
 	if cfg.Cx >= cfg.ColOff+cfg.ScreenCols {

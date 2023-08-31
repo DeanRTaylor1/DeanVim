@@ -9,6 +9,7 @@ import (
 
 	"github.com/deanrtaylor1/go-editor/actions"
 	"github.com/deanrtaylor1/go-editor/config"
+	"github.com/deanrtaylor1/go-editor/constants"
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
 )
 
@@ -49,8 +50,10 @@ func main() {
 
 	actions.EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
 
+	char := constants.INITIAL_REFRESH
+
 	for {
-		actions.EditorRefreshScreen(cfg)
-		actions.ProcessKeyPress(cfg.Reader, cfg)
+		actions.EditorRefreshScreen(cfg, char)
+		char = actions.ProcessKeyPress(cfg.Reader, cfg)
 	}
 }

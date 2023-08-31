@@ -62,8 +62,12 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 		newRow.Chars = append(indentBytes, newRow.Chars...)
 
 		EditorInsertRow(&newRow, cfg.Cy+1, cfg)
-		cfg.Cx = len(newRow.Chars) + cfg.LineNumberWidth
-		cfg.SliceIndex = len(newRow.Chars)
+		cfg.Cx = cfg.LineNumberWidth
+		cfg.SliceIndex = 0
+		if cfg.GetCurrentRow().IndentationLevel > 0 {
+			cfg.SliceIndex = constants.TAB_STOP * cfg.GetCurrentRow().IndentationLevel
+			cfg.Cx = constants.TAB_STOP*cfg.GetCurrentRow().IndentationLevel + 5
+		}
 	}
 
 	cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer

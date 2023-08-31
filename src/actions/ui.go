@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
 	"time"
 	"unicode"
 
@@ -47,42 +46,19 @@ func DrawWelcomeMessage(buffer *bytes.Buffer, screenCols int) {
 	buffer.WriteString(welcome)
 }
 
-func EditorRefreshScreen(cfg *config.EditorConfig) {
-	var buffer bytes.Buffer
-	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
-	EditorScroll(cfg)
-
-	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
-	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
-
-	// Cursor position should never be within our rendered line numbers
-	if cfg.Cx < 5 {
-		cfg.Cx = 5
-	}
-
-	EditorDrawRows(&buffer, cfg)
-	EditorDrawStatusBar(&buffer, cfg)
-	EditorDrawMessageBar(&buffer, cfg)
-
-	cursorPosition := SetCursorPos((cfg.Cy-cfg.RowOff)+1, (cfg.Cx-cfg.ColOff)+1)
-	buffer.WriteString(cursorPosition)
-
-	buffer.WriteString(constants.ESCAPE_SHOW_CURSOR)
-
-	os.Stdout.Write(buffer.Bytes())
-}
-
-func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
-	screenRows := cfg.ScreenRows
+func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, endRow int) {
 	screenCols := cfg.ScreenCols
 	HideCursorIfSearching(buffer, cfg)
 
-	for i := 0; i < screenRows; i++ {
+	for i := startRow; i <= endRow; i++ {
 		fileRow := i + cfg.RowOff
+		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff, 0) // +1 because terminal rows start from 1
+		buffer.WriteString(cursorPosition)
 		DrawLineNumbers(buffer, fileRow, cfg)
+		cursorPosition = SetCursorPos(fileRow+1-cfg.RowOff, 6) // +1 because terminal rows start from 1
 
 		if fileRow >= cfg.CurrentBuffer.NumRows {
-			WriteWelcomeIfNoFile(buffer, screenCols, screenRows, i, cfg)
+			WriteWelcomeIfNoFile(buffer, screenCols, endRow-startRow+1, i, cfg)
 		} else {
 			rowLength := cfg.CurrentBuffer.Rows[fileRow].Length - cfg.ColOff
 			availableScreenCols := screenCols - cfg.LineNumberWidth
@@ -97,6 +73,7 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 				cColor := -1
 				for j := 0; j < rowLength; j++ {
 					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
+
 					hl := highlights[cfg.ColOff+j]
 					if c == ' ' {
 						spaceCount := CountSpaces(cfg, rowLength, j, fileRow)
@@ -123,8 +100,8 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 			}
 
 		}
-		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 
+		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 		buffer.WriteString(constants.ESCAPE_NEW_LINE)
 	}
 }
@@ -135,8 +112,8 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 
 	// File Status Section
 	currentRow := cfg.Cy + 1
-	if currentRow > cfg.CurrentBuffer.NumRows {
-		currentRow = cfg.CurrentBuffer.NumRows
+	if currentRow > cfg.CurrentBuffer.NumRows+1 {
+		currentRow = cfg.CurrentBuffer.NumRows + 1
 	}
 
 	dirty := ""
@@ -176,7 +153,7 @@ func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig), cf
 	buf := []rune{}
 	for {
 		EditorSetStatusMessage(cfg, "%s", fmt.Sprintf("%s %s", prompt, string(buf)))
-		EditorRefreshScreen(cfg)
+		EditorRefreshScreen(cfg, constants.INITIAL_REFRESH)
 		c, err := ReadKey(cfg.Reader)
 		if err != nil {
 			log.Fatal(err)
