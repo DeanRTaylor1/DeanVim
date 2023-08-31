@@ -15,9 +15,11 @@ var TypeScriptSyntaxHighlighting map[string]byte = map[string]byte{
 	"throw":  CategoryConstants["exception"],
 
 	// Variables and Constants
-	"var":   CategoryConstants["variable"],
-	"let":   CategoryConstants["variable"],
+	"var": CategoryConstants["variable"],
+	"let": CategoryConstants["variable"],
+
 	"const": CategoryConstants["constant"],
+	"env":   CategoryConstants["constant"],
 
 	// Types
 	"number":    CategoryConstants["type"],
@@ -55,6 +57,11 @@ var TypeScriptSyntaxHighlighting map[string]byte = map[string]byte{
 	"instanceof": CategoryConstants["keyword"],
 	"typeof":     CategoryConstants["keyword"],
 	"as":         CategoryConstants["keyword"],
+	"async":      CategoryConstants["keyword"],
+
+	"process": CategoryConstants["builtin"],
+	"console": CategoryConstants["builtin"],
+	"from":    CategoryConstants["builtin"],
 
 	// Boolean Literals
 	"true":  CategoryConstants["boolean"],

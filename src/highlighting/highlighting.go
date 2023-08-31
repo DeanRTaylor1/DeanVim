@@ -229,7 +229,7 @@ func EditorSyntaxToColor(highlight byte) byte {
 	case constants.HL_KEYWORD:
 		return 35 // Magenta
 	case constants.HL_BUILTIN:
-		return 34 // Blue
+		return 31 // Blue
 	case constants.HL_ANNOTATION:
 		return 30 // Black
 	case constants.HL_EXCEPTION:
