@@ -55,6 +55,9 @@ func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
 	} else {
 		startRow := cfg.Cy - 2
 		endRow := cfg.Cy + 2
+		if cfg.Cy == 0 {
+			startRow = 0
+		}
 
 		switch lastKeyPress {
 		case constants.INITIAL_REFRESH, constants.ENTER_KEY, constants.BACKSPACE, constants.DEL_KEY, utils.CTRL_KEY(lastKeyPress), constants.PAGE_DOWN, constants.PAGE_UP:

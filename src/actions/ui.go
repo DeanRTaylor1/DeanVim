@@ -52,6 +52,8 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, en
 
 	for i := startRow; i <= endRow; i++ {
 		fileRow := i + cfg.RowOff
+		config.LogToFile(fmt.Sprintf("rowOff: %d", cfg.RowOff))
+
 		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff, 0) // +1 because terminal rows start from 1
 		buffer.WriteString(cursorPosition)
 		DrawLineNumbers(buffer, fileRow, cfg)
@@ -72,6 +74,7 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, en
 				highlights := cfg.CurrentBuffer.Rows[fileRow].Highlighting
 				cColor := -1
 				for j := 0; j < rowLength; j++ {
+
 					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
 
 					hl := highlights[cfg.ColOff+j]
@@ -108,6 +111,30 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, en
 
 func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	// Set background color for the status bar
+
+	var modeBgColor string
+	var modeBold string = "\x1b[1m" // Bold text
+
+	var modeTextColor string = "\x1b[38;5;236m" // Dark gray text
+	var modeName string
+
+	switch cfg.EditorMode {
+	case constants.EDITOR_MODE_NORMAL:
+		modeBgColor = "\x1b[48;5;1m" // Subdued Red background
+		modeName = " NORMAL "
+	case constants.EDITOR_MODE_VISUAL:
+		modeBgColor = "\x1b[48;5;4m" // Subdued Blue background
+		modeName = " VISUAL "
+	case constants.EDITOR_MODE_INSERT:
+		modeBgColor = "\x1b[48;5;2m" // Subdued Green background
+
+		modeName = " INSERT "
+	default:
+		modeBgColor = "\x1b[48;5;236m" // Default dark gray background
+		modeName = "UNKNOWN"
+	}
+	buf.WriteString(fmt.Sprintf("%s%s%s%-7s\x1b[0m", modeBgColor, modeTextColor, modeBold, modeName))
+
 	buf.WriteString("\x1b[48;5;236m") // Dark gray background
 
 	// File Status Section
@@ -121,7 +148,7 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 		dirty = "\x1b[31m(modified)\x1b[39m" // Red color for modified
 	}
 
-	status := fmt.Sprintf("\x1b[32m%.20s\x1b[39m - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty) // Green color for filename
+	status := fmt.Sprintf(" \x1b[32m%.20s\x1b[39m - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty) // Green color for filename
 
 	// Right-aligned Status
 	rStatus := fmt.Sprintf("%s \x1b[34m|\x1b[39m %d/%d", cfg.CurrentBuffer.BufferSyntax.FileType, cfg.Cy+1, cfg.CurrentBuffer.NumRows) // Blue color for separator
@@ -131,7 +158,7 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	visibleRStatusLen := len(rStatus) - 9 // 9 characters are for ANSI codes in 'rStatus'
 
 	// Calculate the number of spaces needed to fill the gap
-	spaceCount := cfg.ScreenCols - (visibleStatusLen + visibleRStatusLen)
+	spaceCount := cfg.ScreenCols - (visibleStatusLen + visibleRStatusLen + 7)
 
 	// Write the status bars
 	buf.WriteString(status)

@@ -65,6 +65,7 @@ type Row struct {
 }
 
 type EditorConfig struct {
+	EditorMode      int
 	Cx              int
 	Cy              int
 	SliceIndex      int
@@ -154,6 +155,7 @@ func (r *Row) DeepCopy() *Row {
 
 func NewEditorConfig() *EditorConfig {
 	return &EditorConfig{
+		EditorMode:      constants.EDITOR_MODE_NORMAL,
 		Cx:              0,
 		Cy:              0,
 		SliceIndex:      0,
@@ -173,6 +175,10 @@ func NewEditorConfig() *EditorConfig {
 		FirstRead:       true,
 		UndoHistory:     30,
 	}
+}
+
+func (e *EditorConfig) SetMode(mode int) {
+	e.EditorMode = mode
 }
 
 func (e *EditorConfig) MoveCursorLeft() {

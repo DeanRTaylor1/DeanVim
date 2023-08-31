@@ -6,6 +6,12 @@ const VERSION = "0.0.1"
 type SyntaxState int
 
 const (
+	EDITOR_MODE_NORMAL = iota
+	EDITOR_MODE_INSERT
+	EDITOR_MODE_VISUAL
+)
+
+const (
 	ACTION_DELETE_ROW = iota
 	ACTION_UPDATE_ROW
 	ACTION_INSERT_ROW

@@ -16,57 +16,60 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) rune {
 		panic(err)
 	}
 
-	clearRedos := true
+	if cfg.EditorMode == constants.EDITOR_MODE_NORMAL {
 
-	switch char {
-	case utils.CTRL_KEY('z'):
-		UndoAction(cfg)
-		clearRedos = false
-	case utils.CTRL_KEY('y'):
-		RedoAction(cfg)
-		clearRedos = false
-	case constants.TAB_KEY:
-		TabKeyHandler(cfg)
-	case constants.ENTER_KEY:
-		EnterKeyHandler(cfg)
-	case utils.CTRL_KEY(constants.QUIT_KEY):
-		success := QuitKeyHandler(cfg)
-		if !success {
-			return constants.QUIT_KEY
-		}
-	case utils.CTRL_KEY(constants.SAVE_KEY):
-		SaveKeyHandler(cfg)
-	case constants.HOME_KEY:
-		HomeKeyHandler(cfg)
-	case constants.END_KEY:
-		err := EndKeyHandler(cfg)
-		if err != nil {
-			config.LogToFile(err.Error())
+		clearRedos := true
+
+		switch char {
+		case utils.CTRL_KEY('z'):
+			UndoAction(cfg)
+			clearRedos = false
+		case utils.CTRL_KEY('y'):
+			RedoAction(cfg)
+			clearRedos = false
+		case constants.TAB_KEY:
+			TabKeyHandler(cfg)
+		case constants.ENTER_KEY:
+			EnterKeyHandler(cfg)
+		case utils.CTRL_KEY(constants.QUIT_KEY):
+			success := QuitKeyHandler(cfg)
+			if !success {
+				return constants.QUIT_KEY
+			}
+		case utils.CTRL_KEY(constants.SAVE_KEY):
+			SaveKeyHandler(cfg)
+		case constants.HOME_KEY:
+			HomeKeyHandler(cfg)
+		case constants.END_KEY:
+			err := EndKeyHandler(cfg)
+			if err != nil {
+				config.LogToFile(err.Error())
+				break
+			}
+		case utils.CTRL_KEY('f'):
+			EditorFind(cfg)
 			break
+		case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
+			DeleteHandler(cfg, char)
+		case constants.PAGE_DOWN, constants.PAGE_UP:
+			PageJumpHandler(cfg, char)
+			clearRedos = false
+		case utils.CTRL_KEY('l'), '\x1b':
+			break
+		case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
+			EditorMoveCursor(char, cfg)
+			clearRedos = false
+		default:
+			if IsClosingBracket(char) && cfg.GetCurrentRow().Length > cfg.SliceIndex && IsClosingBracket(rune(cfg.GetCurrentRow().Chars[cfg.SliceIndex])) {
+				cfg.Cx++
+				cfg.SliceIndex++
+			} else {
+				InsertCharHandler(cfg, char)
+			}
 		}
-	case utils.CTRL_KEY('f'):
-		EditorFind(cfg)
-		break
-	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
-		DeleteHandler(cfg, char)
-	case constants.PAGE_DOWN, constants.PAGE_UP:
-		PageJumpHandler(cfg, char)
-		clearRedos = false
-	case utils.CTRL_KEY('l'), '\x1b':
-		break
-	case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
-		EditorMoveCursor(char, cfg)
-		clearRedos = false
-	default:
-		if IsClosingBracket(char) && cfg.GetCurrentRow().Length > cfg.SliceIndex && IsClosingBracket(rune(cfg.GetCurrentRow().Chars[cfg.SliceIndex])) {
-			cfg.Cx++
-			cfg.SliceIndex++
-		} else {
-			InsertCharHandler(cfg, char)
+		if clearRedos {
+			cfg.ClearRedoStack()
 		}
-	}
-	if clearRedos {
-		cfg.ClearRedoStack()
 	}
 	cfg.QuitTimes = constants.QUIT_TIMES
 	return char
