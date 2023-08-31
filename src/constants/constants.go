@@ -9,6 +9,7 @@ const (
 	EDITOR_MODE_NORMAL = iota
 	EDITOR_MODE_INSERT
 	EDITOR_MODE_VISUAL
+	EDITOR_MODE_FILE_BROWSER
 )
 
 const (
@@ -47,6 +48,7 @@ const (
 	ENTER_KEY       rune = '\r'
 	TILDE           rune = '~'
 	SPACE_RUNE      rune = ' '
+	ESCAPE_KEY      rune = 27
 )
 
 const (

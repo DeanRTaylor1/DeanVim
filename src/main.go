@@ -42,9 +42,27 @@ func main() {
 	initEditor(cfg)
 
 	if len(os.Args) >= 2 {
-		err := actions.EditorOpen(cfg, os.Args[1])
+		arg := os.Args[1]
+		fileInfo, err := os.Stat(arg)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if fileInfo.IsDir() {
+			cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
+			actions.DirectoryOpen(cfg, arg)
+		} else if arg == "." {
+			cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
+			currentDir, err := os.Getwd()
+			if err != nil {
+				log.Fatal("Could not get current directory")
+			}
+			actions.DirectoryOpen(cfg, currentDir)
+		} else {
+			err := actions.EditorOpen(cfg, arg)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 

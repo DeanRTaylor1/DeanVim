@@ -64,26 +64,37 @@ type Row struct {
 	Tabs             []byte
 }
 
+type FileBrowserItem struct {
+	Name       string
+	Path       string
+	Type       string
+	Extension  string
+	CreatedAt  time.Time
+	ModifiedAt time.Time
+}
+
 type EditorConfig struct {
-	EditorMode      int
-	Cx              int
-	Cy              int
-	SliceIndex      int
-	LineNumberWidth int
-	ScreenRows      int
-	ScreenCols      int
-	TerminalState   *term.State
-	CurrentBuffer   *Buffer
-	RowOff          int
-	ColOff          int
-	FileName        string
-	StatusMsg       string
-	StatusMsgTime   time.Time
-	Dirty           int
-	QuitTimes       int
-	Reader          *bufio.Reader
-	FirstRead       bool
-	UndoHistory     int
+	EditorMode       int
+	Cx               int
+	Cy               int
+	SliceIndex       int
+	LineNumberWidth  int
+	ScreenRows       int
+	ScreenCols       int
+	TerminalState    *term.State
+	CurrentBuffer    *Buffer
+	RowOff           int
+	ColOff           int
+	FileName         string
+	StatusMsg        string
+	StatusMsgTime    time.Time
+	Dirty            int
+	QuitTimes        int
+	Reader           *bufio.Reader
+	FirstRead        bool
+	UndoHistory      int
+	CurrentDirectory string
+	FileBrowserItems []FileBrowserItem
 }
 
 func (c *EditorConfig) ClearRedoStack() {
@@ -155,25 +166,27 @@ func (r *Row) DeepCopy() *Row {
 
 func NewEditorConfig() *EditorConfig {
 	return &EditorConfig{
-		EditorMode:      constants.EDITOR_MODE_NORMAL,
-		Cx:              0,
-		Cy:              0,
-		SliceIndex:      0,
-		LineNumberWidth: 5,
-		ScreenRows:      0,
-		ScreenCols:      0,
-		TerminalState:   nil,
-		CurrentBuffer:   NewBuffer(),
-		RowOff:          0,
-		ColOff:          0,
-		FileName:        "[Not Selected]",
-		StatusMsg:       "",
-		StatusMsgTime:   time.Time{},
-		Dirty:           0,
-		QuitTimes:       constants.QUIT_TIMES,
-		Reader:          bufio.NewReader(os.Stdin),
-		FirstRead:       true,
-		UndoHistory:     30,
+		EditorMode:       constants.EDITOR_MODE_NORMAL,
+		Cx:               0,
+		Cy:               0,
+		SliceIndex:       0,
+		LineNumberWidth:  5,
+		ScreenRows:       0,
+		ScreenCols:       0,
+		TerminalState:    nil,
+		CurrentBuffer:    NewBuffer(),
+		RowOff:           0,
+		ColOff:           0,
+		FileName:         "[Not Selected]",
+		StatusMsg:        "",
+		StatusMsgTime:    time.Time{},
+		Dirty:            0,
+		QuitTimes:        constants.QUIT_TIMES,
+		Reader:           bufio.NewReader(os.Stdin),
+		FirstRead:        true,
+		UndoHistory:      30,
+		FileBrowserItems: []FileBrowserItem{},
+		CurrentDirectory: "",
 	}
 }
 
@@ -183,11 +196,15 @@ func (e *EditorConfig) SetMode(mode int) {
 
 func (e *EditorConfig) MoveCursorLeft() {
 	e.Cx--
-	e.SliceIndex--
+	if e.EditorMode != constants.EDITOR_MODE_FILE_BROWSER {
+		e.SliceIndex--
+	}
 }
 
 func (e *EditorConfig) MoveCursorRight() {
-	e.SliceIndex++
+	if e.EditorMode != constants.EDITOR_MODE_FILE_BROWSER {
+		e.SliceIndex++
+	}
 	e.Cx++
 }
 
@@ -196,7 +213,9 @@ func (e *EditorConfig) MoveCursorUp() {
 }
 
 func (e *EditorConfig) MoveCursorDown() {
+	LogToFile(fmt.Sprintf("1cfg.Cy: %d", e.Cy))
 	e.Cy++
+	LogToFile(fmt.Sprintf("1cfg.Cy: %d", e.Cy))
 }
 
 func GetWindowSize(cfg *EditorConfig) error {

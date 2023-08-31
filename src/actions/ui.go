@@ -46,13 +46,71 @@ func DrawWelcomeMessage(buffer *bytes.Buffer, screenCols int) {
 	buffer.WriteString(welcome)
 }
 
+func DrawFileBrowserHeader(buffer *bytes.Buffer) int {
+	// Instructions
+	instructionsLines := []string{
+		"==========================================================",
+		"sorted by: date",
+		"sort sequence: newest to oldest",
+		"Help:<Up> to go up, <Down> to go down, <Enter> to select",
+		"==========================================================",
+	}
+
+	// Initialize line counter
+	lineCount := 0
+
+	for _, line := range instructionsLines {
+		cursorPosition := SetCursorPos(lineCount+1, 0)
+		buffer.WriteString(cursorPosition)
+		buffer.WriteString(line)
+		buffer.WriteString("\n")
+		lineCount++
+	}
+
+	return lineCount
+}
+
+func DrawFileBrowser(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, endRow int) {
+	headerLines := DrawFileBrowserHeader(buffer)
+	if cfg.Cy < headerLines {
+		cfg.Cy = headerLines
+	}
+	var textColor string = "\x1b[32m" // Set text color to green
+	var resetColor string = "\x1b[0m" // Reset all terminal attributes to default
+
+	if endRow >= cfg.ScreenRows-headerLines {
+		endRow = cfg.ScreenRows - headerLines
+	}
+
+	for i := startRow; i <= endRow; i++ {
+		fileRow := i + cfg.RowOff
+		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff+headerLines, 0)
+		buffer.WriteString(cursorPosition)
+
+		config.LogToFile(fmt.Sprintf("browserFileRow: %d", fileRow))
+
+		if fileRow >= len(cfg.FileBrowserItems) {
+			buffer.WriteString(" ")
+		} else {
+			item := cfg.FileBrowserItems[fileRow]
+			if item.Type == "directory" {
+				buffer.WriteString(textColor + item.Name + "/" + resetColor)
+			} else {
+				buffer.WriteString(item.Name)
+			}
+		}
+
+		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
+		buffer.WriteString(constants.ESCAPE_NEW_LINE)
+	}
+}
+
 func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, endRow int) {
 	screenCols := cfg.ScreenCols
 	HideCursorIfSearching(buffer, cfg)
 
 	for i := startRow; i <= endRow; i++ {
 		fileRow := i + cfg.RowOff
-		config.LogToFile(fmt.Sprintf("rowOff: %d", cfg.RowOff))
 
 		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff, 0) // +1 because terminal rows start from 1
 		buffer.WriteString(cursorPosition)

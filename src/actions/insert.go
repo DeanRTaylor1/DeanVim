@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"fmt"
+
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/highlighting"
@@ -26,6 +28,7 @@ func EditorInsertChar(char rune, cfg *config.EditorConfig) {
 		EditorInsertRow(config.NewRow(), -1, cfg)
 		cfg.CurrentBuffer.NumRows++
 	}
+	config.LogToFile(fmt.Sprintf("CX: %d, SliceIndex: %d, Cy: %d", cfg.Cx, cfg.SliceIndex, cfg.Cy))
 	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.SliceIndex, char, cfg)
 
 	cfg.MoveCursorRight()

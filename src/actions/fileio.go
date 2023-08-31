@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -13,6 +15,57 @@ import (
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
+
+func DirectoryOpen(cfg *config.EditorConfig, path string) error {
+	// Read the directory
+	dirEntries, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	// Clear the existing FileBrowserItems
+	cfg.FileBrowserItems = []config.FileBrowserItem{}
+
+	// Populate the FileBrowserItems slice
+	for _, entry := range dirEntries {
+
+		fullPath := filepath.Join(path, entry.Name())
+		fileInfo, err := os.Stat(fullPath)
+		if err != nil {
+			return err
+		}
+
+		item := config.FileBrowserItem{
+			Name:       entry.Name(),
+			Path:       fullPath,
+			CreatedAt:  fileInfo.ModTime(),
+			ModifiedAt: fileInfo.ModTime(),
+		}
+
+		if entry.Type().IsDir() {
+			item.Type = "directory"
+			item.Extension = "directory" // or leave it empty
+		} else {
+			item.Type = "file"
+			ext := filepath.Ext(entry.Name()) // Remove the leading dot
+			if len(ext) > 1 {
+				item.Extension = ext[1:]
+			}
+		}
+
+		cfg.FileBrowserItems = append(cfg.FileBrowserItems, item)
+	}
+
+	// Sort the FileBrowserItems so that directories appear first
+	sort.Slice(cfg.FileBrowserItems, func(i, j int) bool {
+		return cfg.FileBrowserItems[i].Type == "directory" && cfg.FileBrowserItems[j].Type != "directory"
+	})
+
+	// Set the current directory path in the config
+	cfg.CurrentDirectory = path
+
+	return nil
+}
 
 func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 	file, err := os.Open(fileName)
