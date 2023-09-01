@@ -13,7 +13,7 @@ import (
 )
 
 func TabKeyHandler(cfg *config.EditorConfig) {
-	if cfg.SliceIndex == 0 {
+	if cfg.CurrentBuffer.SliceIndex == 0 {
 		cfg.GetCurrentRow().IndentationLevel++
 	}
 	for i := 0; i < constants.TAB_STOP; i++ {
@@ -52,7 +52,7 @@ func SaveKeyHandler(cfg *config.EditorConfig) {
 
 func HomeKeyHandler(cfg *config.EditorConfig) {
 	cfg.Cx = cfg.LineNumberWidth
-	cfg.SliceIndex = 0
+	cfg.CurrentBuffer.SliceIndex = 0
 }
 
 func EndKeyHandler(cfg *config.EditorConfig) error {
@@ -60,7 +60,7 @@ func EndKeyHandler(cfg *config.EditorConfig) error {
 		return errors.New("Can not go to end of this row")
 	}
 	cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy].Length + cfg.LineNumberWidth
-	cfg.SliceIndex = cfg.CurrentBuffer.Rows[cfg.Cy].Length
+	cfg.CurrentBuffer.SliceIndex = cfg.CurrentBuffer.Rows[cfg.Cy].Length
 	return nil
 }
 
@@ -68,7 +68,7 @@ func createActionForUndo(cfg *config.EditorConfig, cb func()) *config.EditorActi
 	prevRowLength := 0
 	action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow().DeepCopy(), cfg.Cy, constants.ACTION_UPDATE_ROW, prevRowLength, cfg.Cx, nil, cb)
 
-	if cfg.Cy > 0 && cfg.SliceIndex == 0 {
+	if cfg.Cy > 0 && cfg.CurrentBuffer.SliceIndex == 0 {
 		action.ActionType = constants.ACTION_APPEND_ROW_TO_PREVIOUS
 		action.PrevRow = cfg.CurrentBuffer.Rows[cfg.Cy-1]
 		action.Cx = cfg.LineNumberWidth
@@ -86,8 +86,8 @@ func handleDeleteKey(cfg *config.EditorConfig, char rune) {
 func deleteTabOrChar(cfg *config.EditorConfig) {
 	currentRow := cfg.GetCurrentRow()
 
-	if cfg.SliceIndex > 0 && len(currentRow.Tabs) > 0 && currentRow.Tabs[cfg.SliceIndex-1] == constants.HL_TAB_KEY {
-		startOfTab := cfg.SliceIndex - 1
+	if cfg.CurrentBuffer.SliceIndex > 0 && len(currentRow.Tabs) > 0 && currentRow.Tabs[cfg.CurrentBuffer.SliceIndex-1] == constants.HL_TAB_KEY {
+		startOfTab := cfg.CurrentBuffer.SliceIndex - 1
 		endOfTab := startOfTab
 		i := 1
 		for startOfTab > 0 && currentRow.Tabs[startOfTab-1] == constants.HL_TAB_KEY {
@@ -141,7 +141,7 @@ func HandleCharInsertion(cfg *config.EditorConfig, char rune) {
 	if closingBracket, ok := constants.BracketPairs[char]; ok {
 		EditorInsertChar(char, cfg)
 		EditorInsertChar(closingBracket, cfg)
-		cfg.SliceIndex--
+		cfg.CurrentBuffer.SliceIndex--
 		cfg.Cx--
 	} else {
 		EditorInsertChar(char, cfg)

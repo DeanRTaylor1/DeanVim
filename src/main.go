@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"syscall"
@@ -42,36 +43,20 @@ func main() {
 	initEditor(cfg)
 
 	if len(os.Args) >= 2 {
-		arg := os.Args[1]
-		fileInfo, err := os.Stat(arg)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if fileInfo.IsDir() {
-			cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
-			actions.DirectoryOpen(cfg, arg)
-		} else if arg == "." {
-			cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
-			currentDir, err := os.Getwd()
-			if err != nil {
-				log.Fatal("Could not get current directory")
-			}
-			actions.DirectoryOpen(cfg, currentDir)
-		} else {
-			err := actions.EditorOpen(cfg, arg)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+		actions.ReadHandler(cfg, os.Args[1])
 	}
 
-	actions.EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
+	if cfg.IsBrowsingFiles() {
+		actions.EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.CurrentDirectory))
+	} else {
+		actions.EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
+	}
 
 	char := constants.INITIAL_REFRESH
 
 	for {
 		actions.EditorRefreshScreen(cfg, char)
 		char = actions.ProcessKeyPress(cfg.Reader, cfg)
+
 	}
 }

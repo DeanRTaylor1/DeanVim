@@ -65,6 +65,9 @@ func SingleLineRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer, startRow,
 }
 
 func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
+	if lastKeyPress == constants.NO_OP {
+		return
+	}
 	var buffer bytes.Buffer
 	EditorScroll(cfg)
 	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)

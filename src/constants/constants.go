@@ -41,6 +41,7 @@ const (
 	DEL_KEY         rune = 1008
 	TAB_KEY         rune = 1009
 	INITIAL_REFRESH rune = 2000
+	NO_OP           rune = 3000
 	BACKSPACE       rune = 127
 	QUIT_TIMES      int  = 3
 	QUIT_KEY        rune = 'q'

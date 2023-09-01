@@ -83,6 +83,7 @@ type EditorConfig struct {
 	ScreenCols       int
 	TerminalState    *term.State
 	CurrentBuffer    *Buffer
+	Buffers          []Buffer
 	RowOff           int
 	ColOff           int
 	FileName         string
@@ -169,7 +170,6 @@ func NewEditorConfig() *EditorConfig {
 		EditorMode:       constants.EDITOR_MODE_NORMAL,
 		Cx:               0,
 		Cy:               0,
-		SliceIndex:       0,
 		LineNumberWidth:  5,
 		ScreenRows:       0,
 		ScreenCols:       0,
@@ -205,13 +205,13 @@ func (e *EditorConfig) SetMode(mode int) {
 func (e *EditorConfig) MoveCursorLeft() {
 	e.Cx--
 	if e.EditorMode != constants.EDITOR_MODE_FILE_BROWSER {
-		e.SliceIndex--
+		e.CurrentBuffer.SliceIndex--
 	}
 }
 
 func (e *EditorConfig) MoveCursorRight() {
 	if e.EditorMode != constants.EDITOR_MODE_FILE_BROWSER {
-		e.SliceIndex++
+		e.CurrentBuffer.SliceIndex++
 	}
 	e.Cx++
 }

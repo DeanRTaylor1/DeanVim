@@ -3,6 +3,8 @@ package config
 import "github.com/deanrtaylor1/go-editor/constants"
 
 type Buffer struct {
+	Idx                int
+	Name               string
 	Rows               []Row
 	NumRows            int
 	SearchState        *SearchState
@@ -10,6 +12,7 @@ type Buffer struct {
 	UndoStack          []EditorAction
 	RedoStack          []EditorAction
 	NeedsFullHighlight bool
+	SliceIndex         int
 }
 
 type BufferSyntax struct {
@@ -105,5 +108,6 @@ func NewBuffer() *Buffer {
 		UndoStack:          []EditorAction{},
 		RedoStack:          []EditorAction{},
 		NeedsFullHighlight: false,
+		SliceIndex:         0,
 	}
 }

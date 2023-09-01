@@ -14,7 +14,7 @@ func RedoAction(cfg *config.EditorConfig) {
 
 	cfg.Cx = lastAction.Cx
 	cfg.Cy = lastAction.Index
-	cfg.SliceIndex = lastAction.Cx - 5
+	cfg.CurrentBuffer.SliceIndex = lastAction.Cx - 5
 
 	lastAction.RedoFunction()
 }

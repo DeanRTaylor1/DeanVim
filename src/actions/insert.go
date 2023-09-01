@@ -26,7 +26,7 @@ func EditorInsertChar(char rune, cfg *config.EditorConfig) {
 		EditorInsertRow(config.NewRow(), -1, cfg)
 		cfg.CurrentBuffer.NumRows++
 	}
-	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.SliceIndex, char, cfg)
+	editorRowInsertChar(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg.CurrentBuffer.SliceIndex, char, cfg)
 
 	cfg.MoveCursorRight()
 }
@@ -36,25 +36,25 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 	isBetweenBrackets := false
 
 	// Check if the cursor is between an opening and a closing bracket
-	if cfg.SliceIndex > 0 && cfg.SliceIndex < len(row.Chars) {
-		openingBracket := row.Chars[cfg.SliceIndex-1]
-		cursorPos := row.Chars[cfg.SliceIndex]
+	if cfg.CurrentBuffer.SliceIndex > 0 && cfg.CurrentBuffer.SliceIndex < len(row.Chars) {
+		openingBracket := row.Chars[cfg.CurrentBuffer.SliceIndex-1]
+		cursorPos := row.Chars[cfg.CurrentBuffer.SliceIndex]
 		if closingBracket, ok := constants.BracketPairs[rune(openingBracket)]; ok && byte(closingBracket) == cursorPos {
 			isBetweenBrackets = true
 		}
 	}
 
-	if cfg.SliceIndex == 0 {
+	if cfg.CurrentBuffer.SliceIndex == 0 {
 		newRow := config.NewRow()
 		at := cfg.Cy
 		EditorInsertRow(newRow, at, cfg)
 	} else {
 		// If we are between brackets another row will be inserted in between this row and the previous
 		currentRow := cfg.GetCurrentRow()
-		currentRow.Chars = row.Chars[:cfg.SliceIndex]
+		currentRow.Chars = row.Chars[:cfg.CurrentBuffer.SliceIndex]
 		currentRow.Length = len(cfg.CurrentBuffer.Rows[cfg.Cy].Chars)
 
-		newRow := config.Row{Chars: row.Chars[cfg.SliceIndex:], IndentationLevel: currentRow.IndentationLevel}
+		newRow := config.Row{Chars: row.Chars[cfg.CurrentBuffer.SliceIndex:], IndentationLevel: currentRow.IndentationLevel}
 		indentBytes := make([]byte, newRow.IndentationLevel)
 		for i := 0; i < newRow.IndentationLevel; i++ {
 			indentBytes[i] = byte('\t')
@@ -63,9 +63,9 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 
 		EditorInsertRow(&newRow, cfg.Cy+1, cfg)
 		cfg.Cx = cfg.LineNumberWidth
-		cfg.SliceIndex = 0
+		cfg.CurrentBuffer.SliceIndex = 0
 		if cfg.GetCurrentRow().IndentationLevel > 0 {
-			cfg.SliceIndex = constants.TAB_STOP * cfg.GetCurrentRow().IndentationLevel
+			cfg.CurrentBuffer.SliceIndex = constants.TAB_STOP * cfg.GetCurrentRow().IndentationLevel
 			cfg.Cx = constants.TAB_STOP*cfg.GetCurrentRow().IndentationLevel + 5
 		}
 	}
@@ -90,7 +90,7 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 
 		EditorInsertRow(newRow, cfg.Cy, cfg)
 		cfg.Cx = newRow.Length + cfg.LineNumberWidth
-		cfg.SliceIndex = newRow.Length
+		cfg.CurrentBuffer.SliceIndex = newRow.Length
 		cfg.CurrentBuffer.NumRows++
 	}
 }

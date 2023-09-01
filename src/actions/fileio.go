@@ -16,6 +16,36 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
+func ReadHandler(cfg *config.EditorConfig, arg string) {
+	fileInfo, err := os.Stat(arg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if arg == "." {
+		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
+		currentDir, err := os.Getwd()
+		if err != nil {
+			log.Fatal("Could not get current directory")
+		}
+		cfg.CurrentDirectory = currentDir
+		DirectoryOpen(cfg, currentDir)
+	} else if fileInfo.IsDir() {
+		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
+		// Set the current directory path in the config
+		if cfg.CurrentDirectory == "" {
+			cfg.CurrentDirectory = arg
+		}
+		DirectoryOpen(cfg, arg)
+	} else {
+		err := EditorOpen(cfg, arg)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cfg.EditorMode = constants.EDITOR_MODE_NORMAL
+	}
+}
+
 func DirectoryOpen(cfg *config.EditorConfig, path string) error {
 	// Read the directory
 	dirEntries, err := os.ReadDir(path)
@@ -61,13 +91,13 @@ func DirectoryOpen(cfg *config.EditorConfig, path string) error {
 		return cfg.FileBrowserItems[i].Type == "directory" && cfg.FileBrowserItems[j].Type != "directory"
 	})
 
-	// Set the current directory path in the config
-	cfg.CurrentDirectory = path
-
 	return nil
 }
 
 func EditorOpen(cfg *config.EditorConfig, fileName string) error {
+	if !cfg.FirstRead {
+		cfg.CurrentBuffer = config.NewBuffer()
+	}
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal("Error opening file")
@@ -101,6 +131,12 @@ func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 	}
 	cfg.Dirty = 0
 	cfg.FirstRead = false
+	cfg.CurrentBuffer.Name = fileName
+	if len(cfg.Buffers) < 1 {
+		cfg.Buffers = make([]config.Buffer, 10)
+	}
+	cfg.Buffers = append(cfg.Buffers, *cfg.CurrentBuffer)
+	cfg.CurrentBuffer.Idx = len(cfg.Buffers)
 
 	return nil
 }

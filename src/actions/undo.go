@@ -18,7 +18,7 @@ func UndoAction(cfg *config.EditorConfig) {
 		cfg.CurrentBuffer.ReplaceRowAtIndex(lastAction.Index, lastAction.Row)
 		cfg.Cy = lastAction.Index
 		cfg.Cx = lastAction.Cx
-		cfg.SliceIndex = cfg.Cx - cfg.LineNumberWidth
+		cfg.CurrentBuffer.SliceIndex = cfg.Cx - cfg.LineNumberWidth
 	case constants.ACTION_APPEND_ROW_TO_PREVIOUS:
 		prevRow, ok := lastAction.PrevRow.(config.Row)
 		if !ok {
@@ -28,17 +28,17 @@ func UndoAction(cfg *config.EditorConfig) {
 		cfg.CurrentBuffer.InsertRowAtIndex(lastAction.Index, lastAction.Row)
 		cfg.Cx = lastAction.Cx
 		cfg.Cy = lastAction.Index
-		cfg.SliceIndex = lastAction.Cx - cfg.LineNumberWidth
+		cfg.CurrentBuffer.SliceIndex = lastAction.Cx - cfg.LineNumberWidth
 	case constants.ACTION_INSERT_ROW:
 		cfg.CurrentBuffer.RemoveRowAtIndex(lastAction.Index)
 		cfg.CurrentBuffer.ReplaceRowAtIndex(lastAction.Index, lastAction.Row)
 		cfg.Cx = lastAction.Cx
 		cfg.Cy = lastAction.Index
-		cfg.SliceIndex = cfg.Cx - cfg.LineNumberWidth
+		cfg.CurrentBuffer.SliceIndex = cfg.Cx - cfg.LineNumberWidth
 	case constants.ACTION_INSERT_CHAR_AT_EOF:
 		cfg.CurrentBuffer.RemoveRowAtIndex(lastAction.Index)
 		cfg.Cx = lastAction.Cx
 		cfg.Cy = lastAction.Index
-		cfg.SliceIndex = 0
+		cfg.CurrentBuffer.SliceIndex = 0
 	}
 }

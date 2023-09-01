@@ -55,9 +55,9 @@ func InsertModeKeyPressProcessor(char rune, cfg *config.EditorConfig) {
 		EditorMoveCursor(char, cfg)
 		clearRedos = false
 	default:
-		if IsClosingBracket(char) && cfg.GetCurrentRow().Length > cfg.SliceIndex && IsClosingBracket(rune(cfg.GetCurrentRow().Chars[cfg.SliceIndex])) {
+		if IsClosingBracket(char) && cfg.GetCurrentRow().Length > cfg.CurrentBuffer.SliceIndex && IsClosingBracket(rune(cfg.GetCurrentRow().Chars[cfg.CurrentBuffer.SliceIndex])) {
 			cfg.Cx++
-			cfg.SliceIndex++
+			cfg.CurrentBuffer.SliceIndex++
 		} else {
 			InsertCharHandler(cfg, char)
 		}
@@ -66,6 +66,38 @@ func InsertModeKeyPressProcessor(char rune, cfg *config.EditorConfig) {
 		cfg.ClearRedoStack()
 	}
 	cfg.QuitTimes = constants.QUIT_TIMES
+}
+
+func FileBrowserModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune {
+	switch char {
+	case 'j', constants.ARROW_DOWN:
+		EditorMoveCursor(constants.ARROW_DOWN, cfg)
+		return constants.ARROW_DOWN
+	case 'k', constants.ARROW_UP:
+		EditorMoveCursor(constants.ARROW_UP, cfg)
+		return constants.ARROW_UP
+	case 'l', constants.ARROW_LEFT:
+		EditorMoveCursor(constants.ARROW_RIGHT, cfg)
+		return constants.ARROW_RIGHT
+	case 'h', constants.ARROW_RIGHT:
+		EditorMoveCursor(constants.ARROW_LEFT, cfg)
+		return constants.ARROW_LEFT
+	case constants.ENTER_KEY:
+		ReadHandler(cfg, fmt.Sprintf("%s", cfg.FileBrowserItems[cfg.Cy-5].Path))
+		return constants.INITIAL_REFRESH
+	case utils.CTRL_KEY(constants.QUIT_KEY):
+		success := QuitKeyHandler(cfg)
+		if !success {
+			return char
+		}
+	case constants.HOME_KEY:
+		HomeKeyHandler(cfg)
+	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
+		DeleteHandler(cfg, char)
+	default:
+		return constants.NO_OP
+	}
+	return char
 }
 
 func NormalModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune {
@@ -127,10 +159,12 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) rune {
 		panic(err)
 	}
 
-	if cfg.EditorMode == constants.EDITOR_MODE_NORMAL || cfg.EditorMode == constants.EDITOR_MODE_FILE_BROWSER {
+	if cfg.EditorMode == constants.EDITOR_MODE_NORMAL {
 		char = NormalModeKeyPressProcessor(char, cfg)
 	} else if cfg.EditorMode == constants.EDITOR_MODE_INSERT {
 		InsertModeKeyPressProcessor(char, cfg)
+	} else if cfg.IsBrowsingFiles() {
+		char = FileBrowserModeKeyPressProcessor(char, cfg)
 	}
 	return char
 }
@@ -167,23 +201,23 @@ func EditorCursorMovements(key rune, cfg *config.EditorConfig) {
 	// spacesNeeded := TAB_STOP - (cfg.Cx % TAB_STOP)
 	switch key {
 	case rune(constants.ARROW_LEFT):
-		if cfg.SliceIndex != 0 {
+		if cfg.CurrentBuffer.SliceIndex != 0 {
 			cfg.MoveCursorLeft()
 		} else if cfg.Cy > 0 && cfg.Cy < cfg.CurrentBuffer.NumRows {
 			cfg.MoveCursorUp()
 			cfg.Cx = (cfg.GetCurrentRow().Length) + cfg.LineNumberWidth
-			cfg.SliceIndex = cfg.GetCurrentRow().Length
+			cfg.CurrentBuffer.SliceIndex = cfg.GetCurrentRow().Length
 		}
 	case rune(constants.ARROW_RIGHT):
 		if cfg.Cy == cfg.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.SliceIndex < (cfg.GetCurrentRow().Length) {
+		if cfg.CurrentBuffer.SliceIndex < (cfg.GetCurrentRow().Length) {
 			cfg.MoveCursorRight()
 		} else if cfg.Cx-cfg.LineNumberWidth >= cfg.GetCurrentRow().Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
 			cfg.MoveCursorDown()
 			cfg.Cx = cfg.LineNumberWidth
-			cfg.SliceIndex = 0
+			cfg.CurrentBuffer.SliceIndex = 0
 		}
 	case rune(constants.ARROW_DOWN):
 		if cfg.Cy < cfg.CurrentBuffer.NumRows {
@@ -202,9 +236,9 @@ func EditorCursorMovements(key rune, cfg *config.EditorConfig) {
 	}
 
 	rowLen := len(row)
-	if cfg.SliceIndex > rowLen {
+	if cfg.CurrentBuffer.SliceIndex > rowLen {
 		cfg.Cx = rowLen + cfg.LineNumberWidth
-		cfg.SliceIndex = rowLen
+		cfg.CurrentBuffer.SliceIndex = rowLen
 	}
 }
 
