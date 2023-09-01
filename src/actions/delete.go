@@ -1,8 +1,6 @@
 package actions
 
 import (
-	"fmt"
-
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/highlighting"
@@ -17,7 +15,6 @@ func EditorDelChar(cfg *config.EditorConfig) {
 	}
 	row := &cfg.CurrentBuffer.Rows[cfg.Cy]
 	if cfg.SliceIndex > 0 {
-		config.LogToFile(fmt.Sprintf("Slice Index: %d", cfg.SliceIndex))
 		if cfg.Cx-cfg.ColOff < cfg.LineNumberWidth {
 			cfg.ColOff--
 		}

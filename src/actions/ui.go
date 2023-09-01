@@ -87,8 +87,6 @@ func DrawFileBrowser(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, e
 		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff+headerLines, 0)
 		buffer.WriteString(cursorPosition)
 
-		config.LogToFile(fmt.Sprintf("browserFileRow: %d", fileRow))
-
 		if fileRow >= len(cfg.FileBrowserItems) {
 			buffer.WriteString(" ")
 		} else {
@@ -177,7 +175,7 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	var modeName string
 
 	switch cfg.EditorMode {
-	case constants.EDITOR_MODE_NORMAL:
+	case constants.EDITOR_MODE_NORMAL, constants.EDITOR_MODE_FILE_BROWSER:
 		modeBgColor = "\x1b[48;5;1m" // Subdued Red background
 		modeName = " NORMAL "
 	case constants.EDITOR_MODE_VISUAL:

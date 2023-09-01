@@ -190,6 +190,14 @@ func NewEditorConfig() *EditorConfig {
 	}
 }
 
+func (e *EditorConfig) SpecialRefreshCase() bool {
+	return e.Cx >= e.ScreenCols-e.LineNumberWidth || e.Cy >= e.ScreenRows || e.Cx-e.LineNumberWidth < e.ColOff || e.Cy-e.RowOff < 0 || e.Cx-e.ColOff == 5
+}
+
+func (e *EditorConfig) IsBrowsingFiles() bool {
+	return e.EditorMode == constants.EDITOR_MODE_FILE_BROWSER
+}
+
 func (e *EditorConfig) SetMode(mode int) {
 	e.EditorMode = mode
 }
@@ -213,9 +221,7 @@ func (e *EditorConfig) MoveCursorUp() {
 }
 
 func (e *EditorConfig) MoveCursorDown() {
-	LogToFile(fmt.Sprintf("1cfg.Cy: %d", e.Cy))
 	e.Cy++
-	LogToFile(fmt.Sprintf("1cfg.Cy: %d", e.Cy))
 }
 
 func GetWindowSize(cfg *EditorConfig) error {

@@ -135,28 +135,31 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.EditorConfig) rune {
 	return char
 }
 
-func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
-	if cfg.EditorMode == constants.EDITOR_MODE_FILE_BROWSER {
-		switch key {
-		case rune(constants.ARROW_LEFT):
-			cfg.MoveCursorLeft()
-		case rune(constants.ARROW_RIGHT):
-			if cfg.Cy == len(cfg.FileBrowserItems)+5 {
-				break
-			}
-			cfg.MoveCursorRight()
-		case rune(constants.ARROW_DOWN):
-			if cfg.Cy < len(cfg.FileBrowserItems)+5 {
-				cfg.MoveCursorDown()
-			}
-		case rune(constants.ARROW_UP):
-			if cfg.Cy >= 5 {
-				cfg.MoveCursorUp()
-			}
+func FileBrowserCursorMovements(key rune, cfg *config.EditorConfig) {
+	switch key {
+	case rune(constants.ARROW_LEFT):
+		if cfg.Cx <= 0 {
+			return
 		}
-		return
+		cfg.MoveCursorLeft()
+	case rune(constants.ARROW_RIGHT):
+		if cfg.Cy == len(cfg.FileBrowserItems)+5 {
+			break
+		}
+		cfg.MoveCursorRight()
+	case rune(constants.ARROW_DOWN):
+		if cfg.Cy < len(cfg.FileBrowserItems)+5 {
+			cfg.MoveCursorDown()
+		}
+	case rune(constants.ARROW_UP):
+		if cfg.Cy >= 5 {
+			cfg.MoveCursorUp()
+		}
 	}
-	config.LogToFile(fmt.Sprintf("cfg.Cx: %d, cfg.SliceIndex: %d", cfg.Cx, cfg.SliceIndex))
+	return
+}
+
+func EditorCursorMovements(key rune, cfg *config.EditorConfig) {
 	row := []byte{}
 	if cfg.Cy < cfg.CurrentBuffer.NumRows {
 		row = cfg.CurrentBuffer.Rows[cfg.Cy].Chars
@@ -202,6 +205,14 @@ func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
 	if cfg.SliceIndex > rowLen {
 		cfg.Cx = rowLen + cfg.LineNumberWidth
 		cfg.SliceIndex = rowLen
+	}
+}
+
+func EditorMoveCursor(key rune, cfg *config.EditorConfig) {
+	if cfg.IsBrowsingFiles() {
+		FileBrowserCursorMovements(key, cfg)
+	} else {
+		EditorCursorMovements(key, cfg)
 	}
 }
 
