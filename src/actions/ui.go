@@ -204,7 +204,7 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 		dirty = "\x1b[31m(modified)\x1b[39m" // Red color for modified
 	}
 
-	status := fmt.Sprintf(" \x1b[32m%.20s\x1b[39m - %d lines %s", cfg.FileName, cfg.CurrentBuffer.NumRows, dirty) // Green color for filename
+	status := fmt.Sprintf(" \x1b[32m%.20s\x1b[39m - %d lines %s", cfg.CurrentBuffer.Name, cfg.CurrentBuffer.NumRows, dirty) // Green color for filename
 
 	// Right-aligned Status
 	rStatus := fmt.Sprintf("%s \x1b[34m|\x1b[39m %d/%d", cfg.CurrentBuffer.BufferSyntax.FileType, cfg.Cy+1, cfg.CurrentBuffer.NumRows) // Blue color for separator

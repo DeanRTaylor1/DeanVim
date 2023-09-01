@@ -28,13 +28,15 @@ func ReadHandler(cfg *config.EditorConfig, arg string) {
 		if err != nil {
 			log.Fatal("Could not get current directory")
 		}
-		cfg.CurrentDirectory = currentDir
+		if cfg.RootDirectory == "" {
+			cfg.RootDirectory = currentDir
+		}
 		DirectoryOpen(cfg, currentDir)
 	} else if fileInfo.IsDir() {
 		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
 		// Set the current directory path in the config
-		if cfg.CurrentDirectory == "" {
-			cfg.CurrentDirectory = arg
+		if cfg.RootDirectory == "" {
+			cfg.RootDirectory = arg
 		}
 		DirectoryOpen(cfg, arg)
 	} else {
@@ -91,19 +93,48 @@ func DirectoryOpen(cfg *config.EditorConfig, path string) error {
 		return cfg.FileBrowserItems[i].Type == "directory" && cfg.FileBrowserItems[j].Type != "directory"
 	})
 
+	if path != "/" {
+		parentDir := filepath.Dir(path)
+		parentItem := config.FileBrowserItem{
+			Name:       "..",
+			Path:       parentDir,
+			Type:       "directory",
+			Extension:  "directory",
+			CreatedAt:  time.Time{},
+			ModifiedAt: time.Time{},
+		}
+		cfg.FileBrowserItems = append([]config.FileBrowserItem{parentItem}, cfg.FileBrowserItems...)
+	}
+
+	cfg.CurrentDirectory = path
+
+	EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.RootDirectory))
+
 	return nil
 }
 
 func EditorOpen(cfg *config.EditorConfig, fileName string) error {
+	cfg.EditorMode = constants.EDITOR_MODE_NORMAL
 	if !cfg.FirstRead {
 		cfg.CurrentBuffer = config.NewBuffer()
 	}
+	cfg.Cx = 0
+	cfg.Cy = 0
+	cfg.CurrentBuffer.SliceIndex = 0
+
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal("Error opening file")
 	}
 	defer file.Close()
-	cfg.FileName = file.Name()
+	relativeFileName := strings.TrimPrefix(fileName, cfg.RootDirectory)
+
+	// If the fileName didn't start with RootDirectory, just use the base name
+	if relativeFileName == fileName {
+		relativeFileName = filepath.Base(fileName)
+	}
+
+	cfg.FileName = relativeFileName
 
 	highlighting.EditorSelectSyntaxHighlight(cfg)
 
@@ -131,12 +162,14 @@ func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 	}
 	cfg.Dirty = 0
 	cfg.FirstRead = false
-	cfg.CurrentBuffer.Name = fileName
+	cfg.CurrentBuffer.Name = relativeFileName
 	if len(cfg.Buffers) < 1 {
 		cfg.Buffers = make([]config.Buffer, 10)
 	}
 	cfg.Buffers = append(cfg.Buffers, *cfg.CurrentBuffer)
 	cfg.CurrentBuffer.Idx = len(cfg.Buffers)
+
+	EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
 
 	return nil
 }

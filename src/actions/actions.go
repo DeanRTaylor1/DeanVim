@@ -102,6 +102,10 @@ func FileBrowserModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune 
 
 func NormalModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune {
 	switch char {
+	case ':':
+		cfg.EditorMode = constants.EDITOR_MODE_FILE_BROWSER
+		ReadHandler(cfg, cfg.RootDirectory)
+		return constants.INITIAL_REFRESH
 	case 'i':
 		cfg.SetMode(constants.EDITOR_MODE_INSERT)
 	case 'j':
@@ -182,6 +186,7 @@ func FileBrowserCursorMovements(key rune, cfg *config.EditorConfig) {
 		}
 		cfg.MoveCursorRight()
 	case rune(constants.ARROW_DOWN):
+		config.LogToFile(fmt.Sprintf("Cx: %d, len fileitems: %d", cfg.Cy, len(cfg.FileBrowserItems)))
 		if cfg.Cy < len(cfg.FileBrowserItems)+5 {
 			cfg.MoveCursorDown()
 		}

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 
 	"github.com/deanrtaylor1/go-editor/config"
@@ -77,7 +78,8 @@ func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
 		cfg.Cx = 5
 	}
 
-	if cfg.IsBrowsingFiles() && cfg.Cy < 5 {
+	if cfg.IsBrowsingFiles() && (cfg.Cy < 5 || cfg.Cy > len(cfg.FileBrowserItems)+5) {
+		cfg.Cx = 0
 		cfg.Cy = 5
 	}
 
@@ -98,6 +100,7 @@ func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
 			SingleLineRefresh(cfg, &buffer, 0, cfg.Cy)
 		}
 	}
+	config.LogToFile(fmt.Sprintf("Cx: %d, Cy: %d, SI: %d", cfg.Cx, cfg.Cy, cfg.CurrentBuffer.SliceIndex))
 
 	// Draw status and message bars
 	statusBarPosition := SetCursorPos(cfg.ScreenRows+1, 0)

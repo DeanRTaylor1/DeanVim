@@ -95,6 +95,7 @@ type EditorConfig struct {
 	FirstRead        bool
 	UndoHistory      int
 	CurrentDirectory string
+	RootDirectory    string
 	FileBrowserItems []FileBrowserItem
 }
 

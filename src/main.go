@@ -46,15 +46,10 @@ func main() {
 		actions.ReadHandler(cfg, os.Args[1])
 	}
 
-	if cfg.IsBrowsingFiles() {
-		actions.EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.CurrentDirectory))
-	} else {
-		actions.EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
-	}
-
 	char := constants.INITIAL_REFRESH
 
 	for {
+		config.LogToFile(fmt.Sprintf("Cy: %d, Cx: %d, Mode: %d", cfg.Cy, cfg.Cx, cfg.EditorMode))
 		actions.EditorRefreshScreen(cfg, char)
 		char = actions.ProcessKeyPress(cfg.Reader, cfg)
 
