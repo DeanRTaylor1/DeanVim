@@ -119,6 +119,70 @@ func DirectoryOpen(cfg *config.EditorConfig, path string) error {
 	return nil
 }
 
+func EditorDeleteFile(cfg *config.EditorConfig, fileName string) error {
+	filePath := filepath.Join(cfg.RootDirectory, fileName)
+
+	err := os.Remove(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to delete file: %w", err)
+	}
+
+	// Remove the buffer if it matches the deleted file
+	if cfg.CurrentBuffer.Name == fileName {
+		cfg.CurrentBuffer = config.NewBuffer() // or however you initialize a new buffer
+	}
+
+	// Remove the buffer from the list of buffers
+	for i, buffer := range cfg.Buffers {
+		if buffer.Name == fileName {
+			cfg.Buffers = append(cfg.Buffers[:i], cfg.Buffers[i+1:]...)
+			break
+		}
+	}
+
+	EditorSetStatusMessage(cfg, fmt.Sprintf("File %s deleted", fileName))
+	return nil
+}
+
+func EditorCreateFile(cfg *config.EditorConfig, fileName string) error {
+	filePath := filepath.Join(cfg.RootDirectory, fileName)
+
+	// Create the file
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	file.Close()
+
+	EditorSetStatusMessage(cfg, fmt.Sprintf("File %s created", fileName))
+	return nil
+}
+
+func EditorRenameFile(cfg *config.EditorConfig, oldName, newName string) error {
+	oldPath := filepath.Join(cfg.RootDirectory, oldName)
+	newPath := filepath.Join(cfg.RootDirectory, newName)
+
+	err := os.Rename(oldPath, newPath)
+	if err != nil {
+		return fmt.Errorf("failed to rename file: %w", err)
+	}
+
+	// Update the current buffer name if it matches the old name
+	if cfg.CurrentBuffer.Name == oldName {
+		cfg.CurrentBuffer.Name = newName
+	}
+
+	// Update the name in the list of buffers
+	for i, buffer := range cfg.Buffers {
+		if buffer.Name == oldName {
+			cfg.Buffers[i].Name = newName
+		}
+	}
+
+	EditorSetStatusMessage(cfg, fmt.Sprintf("File renamed from %s to %s", oldName, newName))
+	return nil
+}
+
 func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 	cfg.EditorMode = constants.EDITOR_MODE_NORMAL
 	if !cfg.FirstRead {

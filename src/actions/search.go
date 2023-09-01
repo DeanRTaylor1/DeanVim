@@ -7,6 +7,10 @@ import (
 	"github.com/deanrtaylor1/go-editor/constants"
 )
 
+// func EditorRenameCallback(buf []rune, c rune, cfg * config.EditorConfig){
+//   EditorRenameFile(cfg *config.EditorConfig, oldName string, newName string)
+// }
+
 func EditorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 	if len(cfg.CurrentBuffer.SearchState.SavedHl) > 0 {
 		sl := cfg.CurrentBuffer.SearchState.SavedHlLine
@@ -44,6 +48,7 @@ func EditorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 			cfg.CurrentBuffer.SearchState.LastMatch = current
 			cfg.Cy = current
 			cfg.Cx = matchIndex + cfg.LineNumberWidth
+			cfg.CurrentBuffer.SliceIndex = matchIndex
 			cfg.RowOff = cfg.CurrentBuffer.NumRows
 
 			cfg.CurrentBuffer.SearchState.SavedHlLine = current
@@ -60,7 +65,8 @@ func EditorFindCallback(buf []rune, c rune, cfg *config.EditorConfig) {
 
 func EditorFind(cfg *config.EditorConfig) {
 	cfg.CurrentBuffer.SearchState.Searching = true
-	cx := cfg.Cx + cfg.LineNumberWidth
+	cx := cfg.Cx
+	sliceIndex := cfg.CurrentBuffer.SliceIndex
 	cy := cfg.Cy
 	rowOff := cfg.RowOff
 	colOff := cfg.ColOff
@@ -69,6 +75,7 @@ func EditorFind(cfg *config.EditorConfig) {
 
 	if query == nil {
 		cfg.Cx = cx
+		cfg.CurrentBuffer.SliceIndex = sliceIndex
 		cfg.Cy = cy
 		cfg.RowOff = rowOff
 		cfg.ColOff = colOff

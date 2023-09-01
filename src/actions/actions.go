@@ -71,6 +71,8 @@ func InsertModeKeyPressProcessor(char rune, cfg *config.EditorConfig) {
 
 func FileBrowserModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune {
 	switch char {
+	case 'R':
+		EditorPrompt(fmt.Sprintf("Rename: %s to: ", cfg.CurrentBuffer.Name), EditorFindCallback, cfg)
 	case 'j', constants.ARROW_DOWN:
 		EditorMoveCursor(constants.ARROW_DOWN, cfg)
 		return constants.ARROW_DOWN
