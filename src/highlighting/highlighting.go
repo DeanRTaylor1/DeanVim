@@ -106,9 +106,17 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 				row.Highlighting[i] = constants.HL_STRING
 				i++
 			} else if utils.IsDigit(c) {
-				state = constants.STATE_NUMBER
-				row.Highlighting[i] = constants.HL_NUMBER
+				isPrevCharValid := i == 0 || isDelimiter(row.Chars[i-1])
+				isNextCharValid := i+1 >= row.Length || isDelimiter(row.Chars[i+1])
+
+				if isPrevCharValid && isNextCharValid {
+					state = constants.STATE_NUMBER
+					row.Highlighting[i] = constants.HL_NUMBER
+				} else {
+					state = constants.STATE_NORMAL
+				}
 				i++
+
 			} else if c != ' ' {
 				token, length := parseToken(i, row.Chars)
 				isPrevCharValid := i == 0 || isDelimiter(row.Chars[i-1])
@@ -162,7 +170,10 @@ func SyntaxHighlightStateMachine(row *config.Row, cfg *config.EditorConfig) {
 			inString = byte(0)
 
 		case constants.STATE_NUMBER:
-			if unicode.IsDigit(rune(c)) || (c == '.' && row.Highlighting[i-1] == constants.HL_NUMBER) {
+			isPrevCharValid := i == 0 || isDelimiter(row.Chars[i-1]) || unicode.IsDigit(rune(row.Chars[i-1]))
+			isNextCharValid := i+1 >= row.Length || isDelimiter(row.Chars[i+1]) || unicode.IsDigit(rune(row.Chars[i+1]))
+
+			if unicode.IsDigit(rune(c)) || (c == '.' && row.Highlighting[i-1] == constants.HL_NUMBER && isNextCharValid && isPrevCharValid) {
 				row.Highlighting[i] = constants.HL_NUMBER
 				i++
 			} else {

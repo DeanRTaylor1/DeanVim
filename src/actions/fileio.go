@@ -40,11 +40,17 @@ func ReadHandler(cfg *config.EditorConfig, arg string) {
 		}
 		DirectoryOpen(cfg, arg)
 	} else {
-		err := EditorOpen(cfg, arg)
-		if err != nil {
-			log.Fatal(err)
-		}
 		cfg.EditorMode = constants.EDITOR_MODE_NORMAL
+		if cfg.CurrentBuffer.Name != "" {
+			cfg.ReplaceBuffer()
+		}
+		foundBuffer := cfg.ReloadBuffer(arg)
+		if !foundBuffer {
+			err := EditorOpen(cfg, arg)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 
@@ -160,14 +166,14 @@ func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 	if err := scanner.Err(); err != nil {
 		return err
 	}
-	cfg.Dirty = 0
+	cfg.CurrentBuffer.Dirty = 0
 	cfg.FirstRead = false
 	cfg.CurrentBuffer.Name = relativeFileName
 	if len(cfg.Buffers) < 1 {
 		cfg.Buffers = make([]config.Buffer, 10)
 	}
-	cfg.Buffers = append(cfg.Buffers, *cfg.CurrentBuffer)
-	cfg.CurrentBuffer.Idx = len(cfg.Buffers)
+
+	cfg.LoadNewBuffer()
 
 	EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
 
@@ -175,14 +181,14 @@ func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 }
 
 func EditorSave(cfg *config.EditorConfig) (string, error) {
-	if cfg.FileName == "[Not Selected]" {
+	if cfg.CurrentBuffer.Name == "" {
 		return "", errors.New("no filename provided")
 	}
 
 	startTime := time.Now()
 	content := EditorRowsToString(cfg)
 
-	file, err := os.OpenFile(cfg.FileName, os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile(fmt.Sprintf("%s%s", cfg.RootDirectory, cfg.CurrentBuffer.Name), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
 	}
@@ -203,9 +209,9 @@ func EditorSave(cfg *config.EditorConfig) (string, error) {
 	elapsedTime := time.Since(startTime) // End timing
 	numLines := len(cfg.CurrentBuffer.Rows)
 	numBytes := len(content)
-	message := fmt.Sprintf("\"%s\", %dL, %dB, %.3fms: written", cfg.FileName, numLines, numBytes, float64(elapsedTime.Nanoseconds())/1e6)
+	message := fmt.Sprintf("\"%s\", %dL, %dB, %.3fms: written", cfg.CurrentBuffer.Name, numLines, numBytes, float64(elapsedTime.Nanoseconds())/1e6)
 
-	cfg.Dirty = 0
+	cfg.CurrentBuffer.Dirty = 0
 
 	return message, nil
 }

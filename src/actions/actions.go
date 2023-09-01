@@ -11,6 +11,7 @@ import (
 )
 
 func InsertModeKeyPressProcessor(char rune, cfg *config.EditorConfig) {
+	config.LogToFile(fmt.Sprintf("Cy %d, Cy %d, SliceIndex %d", cfg.Cy, cfg.Cx, cfg.CurrentBuffer.SliceIndex))
 	clearRedos := true
 
 	switch char {
@@ -104,6 +105,10 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune {
 	switch char {
 	case ':':
 		cfg.EditorMode = constants.EDITOR_MODE_FILE_BROWSER
+		cfg.CurrentBuffer.StoredCx = cfg.Cx
+		cfg.CurrentBuffer.StoredCy = cfg.Cy
+		cfg.Cx = 0
+		cfg.Cy = 0
 		ReadHandler(cfg, cfg.RootDirectory)
 		return constants.INITIAL_REFRESH
 	case 'i':
@@ -186,7 +191,6 @@ func FileBrowserCursorMovements(key rune, cfg *config.EditorConfig) {
 		}
 		cfg.MoveCursorRight()
 	case rune(constants.ARROW_DOWN):
-		config.LogToFile(fmt.Sprintf("Cx: %d, len fileitems: %d", cfg.Cy, len(cfg.FileBrowserItems)))
 		if cfg.Cy < len(cfg.FileBrowserItems)+5 {
 			cfg.MoveCursorDown()
 		}

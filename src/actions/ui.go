@@ -200,7 +200,7 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 
 	dirty := ""
-	if cfg.Dirty > 0 {
+	if cfg.CurrentBuffer.Dirty > 0 {
 		dirty = "\x1b[31m(modified)\x1b[39m" // Red color for modified
 	}
 

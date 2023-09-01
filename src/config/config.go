@@ -89,7 +89,6 @@ type EditorConfig struct {
 	FileName         string
 	StatusMsg        string
 	StatusMsgTime    time.Time
-	Dirty            int
 	QuitTimes        int
 	Reader           *bufio.Reader
 	FirstRead        bool
@@ -97,6 +96,37 @@ type EditorConfig struct {
 	CurrentDirectory string
 	RootDirectory    string
 	FileBrowserItems []FileBrowserItem
+}
+
+// ReplaceBuffer replaces the buffer that matches the name of the current buffer with the current buffer's state.
+func (e *EditorConfig) ReplaceBuffer() {
+	for i, bufferItem := range e.Buffers {
+		if bufferItem.Name == e.CurrentBuffer.Name {
+			// Replace the item with the current state
+			e.Buffers[i] = *e.CurrentBuffer
+			break
+		}
+	}
+}
+
+// ReloadBuffer reloads the buffer that matches the name of the current buffer.
+// It returns true if a matching buffer is found, false otherwise.
+func (e *EditorConfig) ReloadBuffer(path string) bool {
+	for _, bufferItem := range e.Buffers {
+		if e.RootDirectory+bufferItem.Name == path {
+			// Load the old buffer into CurrentBuffer
+			e.CurrentBuffer = &bufferItem
+			e.Cx = bufferItem.StoredCx
+			e.Cy = bufferItem.StoredCy
+			return true
+		}
+	}
+	return false
+}
+
+func (e *EditorConfig) LoadNewBuffer() {
+	e.Buffers = append(e.Buffers, *e.CurrentBuffer)
+	e.CurrentBuffer.Idx = len(e.Buffers)
 }
 
 func (c *EditorConfig) ClearRedoStack() {
@@ -181,7 +211,6 @@ func NewEditorConfig() *EditorConfig {
 		FileName:         "[Not Selected]",
 		StatusMsg:        "",
 		StatusMsgTime:    time.Time{},
-		Dirty:            0,
 		QuitTimes:        constants.QUIT_TIMES,
 		Reader:           bufio.NewReader(os.Stdin),
 		FirstRead:        true,

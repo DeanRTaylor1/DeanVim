@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"syscall"
@@ -49,7 +48,6 @@ func main() {
 	char := constants.INITIAL_REFRESH
 
 	for {
-		config.LogToFile(fmt.Sprintf("Cy: %d, Cx: %d, Mode: %d", cfg.Cy, cfg.Cx, cfg.EditorMode))
 		actions.EditorRefreshScreen(cfg, char)
 		char = actions.ProcessKeyPress(cfg.Reader, cfg)
 

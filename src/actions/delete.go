@@ -46,7 +46,7 @@ func EditorRowDelChar(row *config.Row, at int, cfg *config.EditorConfig) {
 
 	row.Length = len(row.Chars) // Update the length of the row
 	EditorUpdateRow(row, cfg)
-	cfg.Dirty++
+	cfg.CurrentBuffer.Dirty++
 }
 
 func EditorDelRow(cfg *config.EditorConfig) {
@@ -61,7 +61,7 @@ func EditorDelRow(cfg *config.EditorConfig) {
 	ResetRowTabs(cfg.Cy-1, cfg)
 	cfg.CurrentBuffer.RemoveRowAtIndex(cfg.Cy)
 	// deleteCurrentRow(cfg)
-	cfg.Dirty++
+	cfg.CurrentBuffer.Dirty++
 }
 
 func ResetRowTabs(idx int, cfg *config.EditorConfig) {

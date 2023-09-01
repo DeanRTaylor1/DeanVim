@@ -18,7 +18,7 @@ func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorC
 
 	highlighting.SyntaxHighlightStateMachine(row, cfg)
 
-	cfg.Dirty++
+	cfg.CurrentBuffer.Dirty++
 }
 
 func EditorInsertChar(char rune, cfg *config.EditorConfig) {

@@ -13,6 +13,9 @@ type Buffer struct {
 	RedoStack          []EditorAction
 	NeedsFullHighlight bool
 	SliceIndex         int
+	Dirty              int
+	StoredCx           int
+	StoredCy           int
 }
 
 type BufferSyntax struct {
@@ -109,5 +112,6 @@ func NewBuffer() *Buffer {
 		RedoStack:          []EditorAction{},
 		NeedsFullHighlight: false,
 		SliceIndex:         0,
+		Dirty:              0,
 	}
 }

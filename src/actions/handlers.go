@@ -29,7 +29,7 @@ func EnterKeyHandler(cfg *config.EditorConfig) {
 }
 
 func QuitKeyHandler(cfg *config.EditorConfig) bool {
-	if cfg.Dirty > 0 && cfg.QuitTimes > 0 {
+	if cfg.CurrentBuffer.Dirty > 0 && cfg.QuitTimes > 0 {
 		EditorSetStatusMessage(cfg, "WARNING!!! File has unsaved changes. Press Ctrl-Q %d more times to quit.", cfg.QuitTimes)
 		cfg.QuitTimes--
 		return false

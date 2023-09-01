@@ -13,6 +13,7 @@ import (
 func FullRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer) {
 	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
+	config.LogToFile(fmt.Sprintf("STORED: CX %d, CY %d, CURRENT: CX %d, CY %d", cfg.CurrentBuffer.StoredCx, cfg.CurrentBuffer.StoredCy, cfg.Cx, cfg.Cy))
 	if cfg.IsBrowsingFiles() {
 		DrawFileBrowser(buffer, cfg, 0, cfg.ScreenRows)
 	} else {
@@ -100,7 +101,6 @@ func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
 			SingleLineRefresh(cfg, &buffer, 0, cfg.Cy)
 		}
 	}
-	config.LogToFile(fmt.Sprintf("Cx: %d, Cy: %d, SI: %d", cfg.Cx, cfg.Cy, cfg.CurrentBuffer.SliceIndex))
 
 	// Draw status and message bars
 	statusBarPosition := SetCursorPos(cfg.ScreenRows+1, 0)
