@@ -101,6 +101,7 @@ const TAB_STOP = 2
 
 const (
 	HL_NORMAL = iota
+	HL_SELECTED
 	HL_NUMBER
 	HL_MATCH
 	HL_STRING

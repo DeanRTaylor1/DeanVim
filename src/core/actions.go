@@ -21,6 +21,8 @@ func ProcessKeyPress(reader *bufio.Reader, cfg *config.Editor) rune {
 		InsertModeKeyPressProcessor(char, cfg)
 	} else if cfg.IsBrowsingFiles() {
 		char = FileBrowserModeKeyPressProcessor(char, cfg)
+	} else if cfg.EditorMode == constants.EDITOR_MODE_VISUAL {
+		char = VisualModeKeyPressProcessor(char, cfg)
 	}
 	return char
 }

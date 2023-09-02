@@ -38,7 +38,6 @@ func InsertModeKeyPressProcessor(char rune, cfg *config.Editor) {
 	case utils.CTRL_KEY('f'):
 		EditorFind(cfg)
 		clearRedos = false
-		break
 	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
 		DeleteHandler(cfg, char)
 	case constants.PAGE_DOWN, constants.PAGE_UP:
@@ -46,7 +45,6 @@ func InsertModeKeyPressProcessor(char rune, cfg *config.Editor) {
 		clearRedos = false
 	case utils.CTRL_KEY('l'), constants.ESCAPE_KEY:
 		cfg.SetMode(constants.EDITOR_MODE_NORMAL)
-		break
 	case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
 		EditorMoveCursor(char, cfg)
 		clearRedos = false

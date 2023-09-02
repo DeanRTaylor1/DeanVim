@@ -8,7 +8,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
+func VisualModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 	if len(cfg.MotionBuffer) > 0 || utils.IsValidStartingChar(char, cfg.EditorMode) {
 		cfg.MotionBuffer = append(cfg.MotionBuffer, char)
 	}
@@ -27,18 +27,8 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 		}
 	} else {
 		switch char {
-		case ':':
-			cfg.EditorMode = constants.EDITOR_MODE_FILE_BROWSER
-			cfg.CurrentBuffer.StoredCx = cfg.Cx
-			cfg.CurrentBuffer.StoredCy = cfg.Cy
-			cfg.Cx = 0
-			cfg.Cy = 0
-			ReadHandler(cfg, cfg.RootDirectory)
-			return constants.INITIAL_REFRESH
-		case 'v':
-			cfg.SetMode(constants.EDITOR_MODE_VISUAL)
-		case 'i':
-			cfg.SetMode(constants.EDITOR_MODE_INSERT)
+		case 'n':
+			cfg.SetMode(constants.EDITOR_MODE_NORMAL)
 		case 'j':
 			EditorMoveCursor(constants.ARROW_DOWN, cfg)
 			return constants.ARROW_DOWN
@@ -51,10 +41,6 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 		case 'h':
 			EditorMoveCursor(constants.ARROW_LEFT, cfg)
 			return constants.ARROW_LEFT
-		case 'u':
-			UndoAction(cfg)
-		case utils.CTRL_KEY('r'):
-			RedoAction(cfg)
 		case constants.TAB_KEY:
 			for i := 0; i < 4; i++ {
 				EditorMoveCursor(constants.ARROW_RIGHT, cfg)
@@ -62,13 +48,6 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 		case constants.ENTER_KEY:
 			EditorMoveCursor(constants.ARROW_DOWN, cfg)
 			return constants.ARROW_DOWN
-		case utils.CTRL_KEY(constants.QUIT_KEY):
-			success := QuitKeyHandler(cfg)
-			if !success {
-				return char
-			}
-		case utils.CTRL_KEY(constants.SAVE_KEY):
-			SaveKeyHandler(cfg)
 		case constants.HOME_KEY:
 			HomeKeyHandler(cfg)
 		case constants.END_KEY:
@@ -77,13 +56,10 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 				config.LogToFile(err.Error())
 				break
 			}
-		case '/':
-			EditorFind(cfg)
-			return constants.INITIAL_REFRESH
-		case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
-			DeleteHandler(cfg, char)
 		case constants.PAGE_DOWN, constants.PAGE_UP:
 			PageJumpHandler(cfg, char)
+		case constants.ESCAPE_KEY, utils.CTRL_KEY('l'):
+			cfg.SetMode(constants.EDITOR_MODE_NORMAL)
 		}
 		return char
 	}

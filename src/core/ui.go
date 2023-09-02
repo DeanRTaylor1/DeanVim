@@ -138,6 +138,8 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.Editor, startRow, endRow i
 						ControlCHandler(buffer, rune(c), cColor)
 					} else if hl == constants.HL_MATCH {
 						FormatFindResultHandler(buffer, c)
+					} else if hl == constants.HL_SELECTED {
+						FormatSelectedTextHandler(buffer, c)
 					} else if hl == constants.HL_NORMAL {
 						NormalFormatHandler(buffer, c, cColor)
 					} else {
