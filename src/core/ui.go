@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func DrawLineNumbers(buffer *bytes.Buffer, fileRow int, cfg *config.EditorConfig) {
+func DrawLineNumbers(buffer *bytes.Buffer, fileRow int, cfg *config.Editor) {
 	relativeLineNumber := int(math.Abs(float64(cfg.Cy - fileRow)))
 	lineNumber := fmt.Sprintf("%4d ", relativeLineNumber)
 
@@ -46,7 +46,7 @@ func DrawWelcomeMessage(buffer *bytes.Buffer, screenCols int) {
 	buffer.WriteString(welcome)
 }
 
-func DrawFileBrowserHeader(buffer *bytes.Buffer, cfg *config.EditorConfig) {
+func DrawFileBrowserHeader(buffer *bytes.Buffer, cfg *config.Editor) {
 	// Instructions
 
 	instructionsLines := cfg.InstructionsLines()
@@ -61,7 +61,7 @@ func DrawFileBrowserHeader(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 }
 
-func DrawFileBrowser(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, endRow int) {
+func DrawFileBrowser(buffer *bytes.Buffer, cfg *config.Editor, startRow, endRow int) {
 	HideCursorIf(buffer, cfg.FileBrowserActionState.Modifying)
 	DrawFileBrowserHeader(buffer, cfg)
 	if cfg.Cy < len(cfg.InstructionsLines()) {
@@ -95,7 +95,7 @@ func DrawFileBrowser(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, e
 	}
 }
 
-func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, endRow int) {
+func EditorDrawRows(buffer *bytes.Buffer, cfg *config.Editor, startRow, endRow int) {
 	screenCols := cfg.ScreenCols
 	HideCursorIfSearching(buffer, cfg)
 
@@ -157,7 +157,7 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, en
 	}
 }
 
-func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
+func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.Editor) {
 	// Set background color for the status bar
 
 	var modeBgColor string
@@ -224,7 +224,7 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	buf.WriteString(constants.ESCAPE_NEW_LINE)
 }
 
-func EditorConfirmationPrompt(prompt string, cfg *config.EditorConfig) bool {
+func EditorConfirmationPrompt(prompt string, cfg *config.Editor) bool {
 	for {
 		EditorSetStatusMessage(cfg, "%s (y/n)", prompt)
 		EditorRefreshScreen(cfg, constants.INITIAL_REFRESH)
@@ -244,7 +244,7 @@ func EditorConfirmationPrompt(prompt string, cfg *config.EditorConfig) bool {
 	}
 }
 
-func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig, bool), cfg *config.EditorConfig) []rune {
+func EditorPrompt(prompt string, cb func([]rune, rune, *config.Editor, bool), cfg *config.Editor) []rune {
 	buf := []rune{}
 	for {
 		EditorSetStatusMessage(cfg, "%s", fmt.Sprintf("%s %s", prompt, string(buf)))
@@ -285,7 +285,7 @@ func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig, boo
 	}
 }
 
-func EditorDrawMessageBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
+func EditorDrawMessageBar(buf *bytes.Buffer, cfg *config.Editor) {
 	buf.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END) // Clear the line
 	msgLen := len(cfg.StatusMsg)
 	if msgLen > cfg.ScreenCols {

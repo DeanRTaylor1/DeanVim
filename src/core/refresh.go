@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func FullRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer) {
+func FullRefresh(cfg *config.Editor, buffer *bytes.Buffer) {
 	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 	if cfg.IsBrowsingFiles() {
@@ -19,7 +19,7 @@ func FullRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer) {
 	}
 }
 
-func DrawAllLineNumbers(buffer *bytes.Buffer, cfg *config.EditorConfig) {
+func DrawAllLineNumbers(buffer *bytes.Buffer, cfg *config.Editor) {
 	for i := 1; i <= cfg.ScreenRows; i++ {
 		fileRow := i + cfg.RowOff - 1
 		if fileRow < 0 {
@@ -31,7 +31,7 @@ func DrawAllLineNumbers(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	}
 }
 
-func PartialRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer, startRow, endRow int) {
+func PartialRefresh(cfg *config.Editor, buffer *bytes.Buffer, startRow, endRow int) {
 	if !cfg.IsBrowsingFiles() {
 		DrawAllLineNumbers(buffer, cfg)
 	}
@@ -49,9 +49,9 @@ func PartialRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer, startRow, en
 	}
 }
 
-func SingleLineRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer, startRow, endRow int) {
+func SingleLineRefresh(cfg *config.Editor, buffer *bytes.Buffer, startRow, endRow int) {
 	if cfg.IsBrowsingFiles() {
-		cursorPosition := SetCursorPos(startRow+6, 0)
+		cursorPosition := SetCursorPos(startRow+len(cfg.InstructionsLines())+1, 0)
 		buffer.WriteString(cursorPosition)
 		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 		DrawFileBrowser(buffer, cfg, startRow, endRow)
@@ -64,7 +64,7 @@ func SingleLineRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer, startRow,
 	}
 }
 
-func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
+func EditorRefreshScreen(cfg *config.Editor, lastKeyPress rune) {
 	if lastKeyPress == constants.NO_OP {
 		return
 	}
@@ -73,13 +73,13 @@ func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
 	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
 
 	// Cursor position adjustment logic for non file browser modes
-	if !cfg.IsBrowsingFiles() && cfg.Cx < 5 {
-		cfg.Cx = 5
+	if !cfg.IsBrowsingFiles() && cfg.Cx < cfg.LineNumberWidth {
+		cfg.Cx = cfg.LineNumberWidth
 	}
 
 	if cfg.IsBrowsingFiles() && (cfg.Cy < 5 || cfg.Cy > len(cfg.FileBrowserItems)+len(cfg.InstructionsLines())) {
 		cfg.Cx = 0
-		cfg.Cy = 5
+		cfg.Cy = len(cfg.InstructionsLines())
 	}
 
 	if !cfg.IsBrowsingFiles() && (cfg.SpecialRefreshCase()) {

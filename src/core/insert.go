@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"github.com/deanrtaylor1/go-editor/config"
@@ -6,7 +6,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorConfig) {
+func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.Editor) {
 	row.Chars = append(row.Chars, 0)
 	copy(row.Chars[at+1:], row.Chars[at:])
 	row.Chars[at] = byte(char)
@@ -21,7 +21,7 @@ func editorRowInsertChar(row *config.Row, at int, char rune, cfg *config.EditorC
 	cfg.CurrentBuffer.Dirty++
 }
 
-func EditorInsertChar(char rune, cfg *config.EditorConfig) {
+func EditorInsertChar(char rune, cfg *config.Editor) {
 	if cfg.Cy == cfg.CurrentBuffer.NumRows {
 		EditorInsertRow(config.NewRow(), -1, cfg)
 		cfg.CurrentBuffer.NumRows++
@@ -31,7 +31,7 @@ func EditorInsertChar(char rune, cfg *config.EditorConfig) {
 	cfg.MoveCursorRight()
 }
 
-func EditorInsertNewLine(cfg *config.EditorConfig) {
+func EditorInsertNewLine(cfg *config.Editor) {
 	row := cfg.CurrentBuffer.Rows[cfg.Cy]
 	isBetweenBrackets := false
 
@@ -95,7 +95,7 @@ func EditorInsertNewLine(cfg *config.EditorConfig) {
 	}
 }
 
-func EditorInsertRow(row *config.Row, at int, cfg *config.EditorConfig) {
+func EditorInsertRow(row *config.Row, at int, cfg *config.Editor) {
 	// Replace tabs with spaces
 	convertedChars := ReplaceTabsWithSpaces(row.Chars)
 	row.Chars = convertedChars

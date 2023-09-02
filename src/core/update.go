@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func EditorUpdateRow(row *config.Row, cfg *config.EditorConfig) {
+func EditorUpdateRow(row *config.Row, cfg *config.Editor) {
 	if cfg.Cy < 0 {
 		return
 	}
@@ -39,7 +39,7 @@ func ReplaceTabsWithSpaces(line []byte) []byte {
 	return result
 }
 
-func MapTabs(cfg *config.EditorConfig) {
+func MapTabs(cfg *config.Editor) {
 	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
 
 	if len(currentRow.Tabs) != len(currentRow.Chars) {
@@ -67,7 +67,7 @@ func MapTabs(cfg *config.EditorConfig) {
 	}
 }
 
-func EditorScroll(cfg *config.EditorConfig) {
+func EditorScroll(cfg *config.Editor) {
 	if cfg.Cy <= cfg.RowOff {
 		cfg.RowOff = cfg.Cy
 	}

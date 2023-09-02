@@ -7,14 +7,14 @@ import (
 
 	"golang.org/x/term"
 
-	"github.com/deanrtaylor1/go-editor/actions"
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/core"
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
 	"github.com/deanrtaylor1/go-editor/mappings"
 )
 
-func enableRawMode(cfg *config.EditorConfig) error {
+func enableRawMode(cfg *config.Editor) error {
 	oldState, err := term.MakeRaw(int(syscall.Stdin))
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func enableRawMode(cfg *config.EditorConfig) error {
 	return nil
 }
 
-func initEditor(cfg *config.EditorConfig) {
+func initEditor(cfg *config.Editor) {
 	err := config.GetWindowSize(cfg)
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +32,7 @@ func initEditor(cfg *config.EditorConfig) {
 }
 
 func main() {
-	cfg := config.NewEditorConfig()
+	cfg := config.NewEditor()
 	motions := mappings.InitializeMotionMap(cfg)
 	cfg.MotionMap = motions
 
@@ -45,14 +45,14 @@ func main() {
 	initEditor(cfg)
 
 	if len(os.Args) >= 2 {
-		actions.ReadHandler(cfg, os.Args[1])
+		core.ReadHandler(cfg, os.Args[1])
 	}
 
 	char := constants.INITIAL_REFRESH
 
 	for {
-		actions.EditorRefreshScreen(cfg, char)
-		char = actions.ProcessKeyPress(cfg.Reader, cfg)
+		core.EditorRefreshScreen(cfg, char)
+		char = core.ProcessKeyPress(cfg.Reader, cfg)
 
 	}
 }

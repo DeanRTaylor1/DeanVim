@@ -78,7 +78,7 @@ type FileBrowserItem struct {
 	ModifiedAt time.Time
 }
 
-type EditorConfig struct {
+type Editor struct {
 	EditorMode             int
 	Cx                     int
 	Cy                     int
@@ -107,11 +107,22 @@ type EditorConfig struct {
 	MotionMap              map[string]func()
 }
 
-func (e *EditorConfig) ClearMotionBuffer() {
+func (e *Editor) ResetCursorCoords() {
+	e.Cx = 0
+	e.Cy = 0
+}
+
+func (e *Editor) CacheCursorCoords() {
+
+	e.CurrentBuffer.StoredCx = e.Cx
+	e.CurrentBuffer.StoredCy = e.Cy
+}
+
+func (e *Editor) ClearMotionBuffer() {
 	e.MotionBuffer = []rune{}
 }
 
-func (e *EditorConfig) ExecuteMotion(motion string) bool {
+func (e *Editor) ExecuteMotion(motion string) bool {
 	if action, exists := e.MotionMap[motion]; exists {
 		action()
 		return true
@@ -119,7 +130,7 @@ func (e *EditorConfig) ExecuteMotion(motion string) bool {
 	return false
 }
 
-func (e *EditorConfig) InstructionsLines() []string {
+func (e *Editor) InstructionsLines() []string {
 	return []string{
 		"==========================================================",
 		fmt.Sprintf("\x1b[36mGVim\x1b[39m Version: %s", constants.VERSION),
@@ -132,16 +143,16 @@ func (e *EditorConfig) InstructionsLines() []string {
 	}
 }
 
-func (e *EditorConfig) IsDir() bool {
+func (e *Editor) IsDir() bool {
 	return e.CurrentSelectedFile().Name == ".." || e.CurrentSelectedFile().Type == "directory"
 }
 
-func (e *EditorConfig) CurrentSelectedFile() *FileBrowserItem {
+func (e *Editor) CurrentSelectedFile() *FileBrowserItem {
 	return &e.FileBrowserItems[e.Cy-len(e.InstructionsLines())]
 }
 
 // ReplaceBuffer replaces the buffer that matches the name of the current buffer with the current buffer's state.
-func (e *EditorConfig) ReplaceBuffer() {
+func (e *Editor) ReplaceBuffer() {
 	for i, bufferItem := range e.Buffers {
 		if bufferItem.Name == e.CurrentBuffer.Name {
 			// Replace the item with the current state
@@ -153,7 +164,7 @@ func (e *EditorConfig) ReplaceBuffer() {
 
 // ReloadBuffer reloads the buffer that matches the name of the current buffer.
 // It returns true if a matching buffer is found, false otherwise.
-func (e *EditorConfig) ReloadBuffer(path string) bool {
+func (e *Editor) ReloadBuffer(path string) bool {
 	for _, bufferItem := range e.Buffers {
 		if e.RootDirectory+bufferItem.Name == path {
 			// Load the old buffer into CurrentBuffer
@@ -166,22 +177,22 @@ func (e *EditorConfig) ReloadBuffer(path string) bool {
 	return false
 }
 
-func (e *EditorConfig) LoadNewBuffer() {
+func (e *Editor) LoadNewBuffer() {
 	e.Buffers = append(e.Buffers, *e.CurrentBuffer)
 	e.CurrentBuffer.Idx = len(e.Buffers)
 }
 
-func (c *EditorConfig) ClearRedoStack() {
+func (c *Editor) ClearRedoStack() {
 	c.CurrentBuffer.RedoStack = []EditorAction{}
 }
 
-func (c *EditorConfig) GetAdjustedCx() int {
+func (c *Editor) GetAdjustedCx() int {
 	adjustedCx := utils.Max(0, c.Cx-c.LineNumberWidth)
 	adjustedCx = utils.Min(adjustedCx, len(c.CurrentBuffer.Rows[c.Cy].Chars))
 	return adjustedCx
 }
 
-func (c *EditorConfig) GetCurrentRow() *Row {
+func (c *Editor) GetCurrentRow() *Row {
 	return &c.CurrentBuffer.Rows[c.Cy]
 }
 
@@ -238,8 +249,8 @@ func (r *Row) DeepCopy() *Row {
 	return newRow
 }
 
-func NewEditorConfig() *EditorConfig {
-	return &EditorConfig{
+func NewEditor() *Editor {
+	return &Editor{
 		EditorMode:       constants.EDITOR_MODE_NORMAL,
 		Cx:               0,
 		Cy:               0,
@@ -263,41 +274,41 @@ func NewEditorConfig() *EditorConfig {
 	}
 }
 
-func (e *EditorConfig) SpecialRefreshCase() bool {
+func (e *Editor) SpecialRefreshCase() bool {
 	return e.Cx >= e.ScreenCols-e.LineNumberWidth || e.Cy >= e.ScreenRows || e.Cx-e.LineNumberWidth < e.ColOff || e.Cy-e.RowOff < 0 || e.Cx-e.ColOff == 5
 }
 
-func (e *EditorConfig) IsBrowsingFiles() bool {
+func (e *Editor) IsBrowsingFiles() bool {
 	return e.EditorMode == constants.EDITOR_MODE_FILE_BROWSER
 }
 
-func (e *EditorConfig) SetMode(mode int) {
+func (e *Editor) SetMode(mode int) {
 	e.EditorMode = mode
 }
 
-func (e *EditorConfig) MoveCursorLeft() {
+func (e *Editor) MoveCursorLeft() {
 	e.Cx--
 	if e.EditorMode != constants.EDITOR_MODE_FILE_BROWSER {
 		e.CurrentBuffer.SliceIndex--
 	}
 }
 
-func (e *EditorConfig) MoveCursorRight() {
+func (e *Editor) MoveCursorRight() {
 	if e.EditorMode != constants.EDITOR_MODE_FILE_BROWSER {
 		e.CurrentBuffer.SliceIndex++
 	}
 	e.Cx++
 }
 
-func (e *EditorConfig) MoveCursorUp() {
+func (e *Editor) MoveCursorUp() {
 	e.Cy--
 }
 
-func (e *EditorConfig) MoveCursorDown() {
+func (e *Editor) MoveCursorDown() {
 	e.Cy++
 }
 
-func GetWindowSize(cfg *EditorConfig) error {
+func GetWindowSize(cfg *Editor) error {
 	width, height, err := term.GetSize(int(os.Stdin.Fd()))
 	if err != nil {
 		return err

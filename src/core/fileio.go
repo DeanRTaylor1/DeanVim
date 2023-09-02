@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"bufio"
@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -16,110 +15,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func ReadHandler(cfg *config.EditorConfig, arg string) {
-	fileInfo, err := os.Stat(arg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if arg == "." {
-		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
-		currentDir, err := os.Getwd()
-		if err != nil {
-			log.Fatal("Could not get current directory")
-		}
-		if cfg.RootDirectory == "" {
-			cfg.RootDirectory = currentDir
-		}
-		DirectoryOpen(cfg, currentDir)
-	} else if fileInfo.IsDir() {
-		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
-		// Set the current directory path in the config
-		if cfg.RootDirectory == "" {
-			cfg.RootDirectory = arg
-		}
-		DirectoryOpen(cfg, arg)
-	} else {
-		cfg.EditorMode = constants.EDITOR_MODE_NORMAL
-		if cfg.CurrentBuffer.Name != "" {
-			cfg.ReplaceBuffer()
-		}
-		foundBuffer := cfg.ReloadBuffer(arg)
-		if !foundBuffer {
-			err := EditorOpen(cfg, arg)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-}
-
-func DirectoryOpen(cfg *config.EditorConfig, path string) error {
-	// Read the directory
-	dirEntries, err := os.ReadDir(path)
-	if err != nil {
-		return err
-	}
-
-	// Clear the existing FileBrowserItems
-	cfg.FileBrowserItems = []config.FileBrowserItem{}
-
-	// Populate the FileBrowserItems slice
-	for _, entry := range dirEntries {
-
-		fullPath := filepath.Join(path, entry.Name())
-		fileInfo, err := os.Stat(fullPath)
-		if err != nil {
-			return err
-		}
-
-		item := config.FileBrowserItem{
-			Name:       entry.Name(),
-			Path:       fullPath,
-			CreatedAt:  fileInfo.ModTime(),
-			ModifiedAt: fileInfo.ModTime(),
-		}
-
-		if entry.Type().IsDir() {
-			item.Type = "directory"
-			item.Extension = "directory" // or leave it empty
-		} else {
-			item.Type = "file"
-			ext := filepath.Ext(entry.Name()) // Remove the leading dot
-			if len(ext) > 1 {
-				item.Extension = ext[1:]
-			}
-		}
-
-		cfg.FileBrowserItems = append(cfg.FileBrowserItems, item)
-	}
-
-	// Sort the FileBrowserItems so that directories appear first
-	sort.Slice(cfg.FileBrowserItems, func(i, j int) bool {
-		return cfg.FileBrowserItems[i].Type == "directory" && cfg.FileBrowserItems[j].Type != "directory"
-	})
-
-	if path != "/" {
-		parentDir := filepath.Dir(path)
-		parentItem := config.FileBrowserItem{
-			Name:       "..",
-			Path:       parentDir,
-			Type:       "directory",
-			Extension:  "directory",
-			CreatedAt:  time.Time{},
-			ModifiedAt: time.Time{},
-		}
-		cfg.FileBrowserItems = append([]config.FileBrowserItem{parentItem}, cfg.FileBrowserItems...)
-	}
-
-	cfg.CurrentDirectory = path
-
-	// EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.RootDirectory))
-
-	return nil
-}
-
-func EditorDeleteFile(cfg *config.EditorConfig, fileName string) error {
+func EditorDeleteFile(cfg *config.Editor, fileName string) error {
 	fileName = strings.TrimSuffix(fileName, "\r")
 
 	filePath := filepath.Join(cfg.RootDirectory, fileName)
@@ -146,7 +42,7 @@ func EditorDeleteFile(cfg *config.EditorConfig, fileName string) error {
 	return nil
 }
 
-func EditorCreateFile(cfg *config.EditorConfig, fileName string) error {
+func EditorCreateFile(cfg *config.Editor, fileName string) error {
 	fileName = strings.TrimSuffix(fileName, "\r")
 
 	filePath := filepath.Join(cfg.RootDirectory, fileName)
@@ -162,7 +58,7 @@ func EditorCreateFile(cfg *config.EditorConfig, fileName string) error {
 	return nil
 }
 
-func EditorRenameFile(cfg *config.EditorConfig, oldName, newName string) error {
+func EditorRenameFile(cfg *config.Editor, oldName, newName string) error {
 	oldName = strings.TrimSuffix(oldName, "\r")
 	newName = strings.TrimSuffix(newName, "\r")
 	oldPath := filepath.Join(cfg.CurrentDirectory, oldName)
@@ -224,7 +120,7 @@ func EditorRenameFile(cfg *config.EditorConfig, oldName, newName string) error {
 	return nil
 }
 
-func EditorOpen(cfg *config.EditorConfig, fileName string) error {
+func FileOpen(cfg *config.Editor, fileName string) error {
 	cfg.EditorMode = constants.EDITOR_MODE_NORMAL
 	if !cfg.FirstRead {
 		cfg.CurrentBuffer = config.NewBuffer()
@@ -285,7 +181,7 @@ func EditorOpen(cfg *config.EditorConfig, fileName string) error {
 	return nil
 }
 
-func EditorSave(cfg *config.EditorConfig) (string, error) {
+func EditorSave(cfg *config.Editor) (string, error) {
 	if cfg.CurrentBuffer.Name == "" {
 		return "", errors.New("no filename provided")
 	}
@@ -321,7 +217,7 @@ func EditorSave(cfg *config.EditorConfig) (string, error) {
 	return message, nil
 }
 
-func EditorRowsToString(cfg *config.EditorConfig) string {
+func EditorRowsToString(cfg *config.Editor) string {
 	var buffer strings.Builder
 	for _, row := range cfg.CurrentBuffer.Rows {
 		buffer.Write(row.Chars)

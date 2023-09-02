@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"github.com/deanrtaylor1/go-editor/config"
@@ -6,7 +6,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func EditorDelChar(cfg *config.EditorConfig) {
+func EditorDelChar(cfg *config.Editor) {
 	if cfg.Cy == cfg.CurrentBuffer.NumRows {
 		return
 	}
@@ -29,7 +29,7 @@ func EditorDelChar(cfg *config.EditorConfig) {
 	}
 }
 
-func EditorRowDelChar(row *config.Row, at int, cfg *config.EditorConfig) {
+func EditorRowDelChar(row *config.Row, at int, cfg *config.Editor) {
 	if at < 0 || at >= len(row.Chars) {
 		return
 	}
@@ -49,7 +49,7 @@ func EditorRowDelChar(row *config.Row, at int, cfg *config.EditorConfig) {
 	cfg.CurrentBuffer.Dirty++
 }
 
-func EditorDelRow(cfg *config.EditorConfig) {
+func EditorDelRow(cfg *config.Editor) {
 	if cfg.Cy <= 0 || cfg.Cy >= cfg.CurrentBuffer.NumRows {
 		return
 	}
@@ -64,12 +64,12 @@ func EditorDelRow(cfg *config.EditorConfig) {
 	cfg.CurrentBuffer.Dirty++
 }
 
-func ResetRowTabs(idx int, cfg *config.EditorConfig) {
+func ResetRowTabs(idx int, cfg *config.Editor) {
 	row := &cfg.CurrentBuffer.Rows[idx]
 	row.Tabs = make([]byte, row.Length)
 }
 
-func mergeCurrentRowWithPrevious(cfg *config.EditorConfig) {
+func mergeCurrentRowWithPrevious(cfg *config.Editor) {
 	prevRow := &cfg.CurrentBuffer.Rows[cfg.Cy-1]
 	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
 
@@ -77,7 +77,7 @@ func mergeCurrentRowWithPrevious(cfg *config.EditorConfig) {
 	prevRow.Length = len(prevRow.Chars)
 }
 
-func updateRowIndicesFromCurrent(cfg *config.EditorConfig) {
+func updateRowIndicesFromCurrent(cfg *config.Editor) {
 	for i := cfg.Cy; i < len(cfg.CurrentBuffer.Rows); i++ {
 		cfg.CurrentBuffer.Rows[i].Idx = i
 	}

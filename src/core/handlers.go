@@ -1,4 +1,4 @@
-package actions
+package core
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func TabKeyHandler(cfg *config.EditorConfig) {
+func TabKeyHandler(cfg *config.Editor) {
 	if cfg.CurrentBuffer.SliceIndex == 0 {
 		cfg.GetCurrentRow().IndentationLevel++
 	}
@@ -22,13 +22,13 @@ func TabKeyHandler(cfg *config.EditorConfig) {
 	MapTabs(cfg)
 }
 
-func EnterKeyHandler(cfg *config.EditorConfig) {
+func EnterKeyHandler(cfg *config.Editor) {
 	action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow().DeepCopy(), cfg.Cy, constants.ACTION_INSERT_ROW, cfg.GetCurrentRow().Length, cfg.Cx, cfg.GetCurrentRow(), func() { EditorInsertNewLine(cfg) })
 	cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
 	EditorInsertNewLine(cfg)
 }
 
-func QuitKeyHandler(cfg *config.EditorConfig) bool {
+func QuitKeyHandler(cfg *config.Editor) bool {
 	if cfg.CurrentBuffer.Dirty > 0 && cfg.QuitTimes > 0 {
 		EditorSetStatusMessage(cfg, "WARNING!!! File has unsaved changes. Press Ctrl-Q %d more times to quit.", cfg.QuitTimes)
 		cfg.QuitTimes--
@@ -40,7 +40,7 @@ func QuitKeyHandler(cfg *config.EditorConfig) bool {
 	return true
 }
 
-func SaveKeyHandler(cfg *config.EditorConfig) {
+func SaveKeyHandler(cfg *config.Editor) {
 	msg, err := EditorSave(cfg)
 	if err != nil {
 		EditorSetStatusMessage(cfg, "%s", err.Error())
@@ -50,12 +50,12 @@ func SaveKeyHandler(cfg *config.EditorConfig) {
 	return
 }
 
-func HomeKeyHandler(cfg *config.EditorConfig) {
+func HomeKeyHandler(cfg *config.Editor) {
 	cfg.Cx = cfg.LineNumberWidth
 	cfg.CurrentBuffer.SliceIndex = 0
 }
 
-func EndKeyHandler(cfg *config.EditorConfig) error {
+func EndKeyHandler(cfg *config.Editor) error {
 	if cfg.Cy == cfg.CurrentBuffer.NumRows {
 		return errors.New("Can not go to end of this row")
 	}
@@ -64,7 +64,7 @@ func EndKeyHandler(cfg *config.EditorConfig) error {
 	return nil
 }
 
-func createActionForUndo(cfg *config.EditorConfig, cb func()) *config.EditorAction {
+func createActionForUndo(cfg *config.Editor, cb func()) *config.EditorAction {
 	prevRowLength := 0
 	action := cfg.CurrentBuffer.NewEditorAction(*cfg.GetCurrentRow().DeepCopy(), cfg.Cy, constants.ACTION_UPDATE_ROW, prevRowLength, cfg.Cx, nil, cb)
 
@@ -77,13 +77,13 @@ func createActionForUndo(cfg *config.EditorConfig, cb func()) *config.EditorActi
 	return action
 }
 
-func handleDeleteKey(cfg *config.EditorConfig, char rune) {
+func handleDeleteKey(cfg *config.Editor, char rune) {
 	if char == constants.DEL_KEY {
 		EditorMoveCursor(constants.ARROW_RIGHT, cfg)
 	}
 }
 
-func deleteTabOrChar(cfg *config.EditorConfig) {
+func deleteTabOrChar(cfg *config.Editor) {
 	currentRow := cfg.GetCurrentRow()
 
 	if cfg.CurrentBuffer.SliceIndex > 0 && len(currentRow.Tabs) > 0 && currentRow.Tabs[cfg.CurrentBuffer.SliceIndex-1] == constants.HL_TAB_KEY {
@@ -108,7 +108,7 @@ func deleteTabOrChar(cfg *config.EditorConfig) {
 	}
 }
 
-func DeleteHandler(cfg *config.EditorConfig, char rune) {
+func DeleteHandler(cfg *config.Editor, char rune) {
 	action := createActionForUndo(cfg, func() { handleDeleteKey(cfg, char); deleteTabOrChar(cfg) })
 	cfg.CurrentBuffer.AppendUndo(*action, cfg.UndoHistory)
 
@@ -116,7 +116,7 @@ func DeleteHandler(cfg *config.EditorConfig, char rune) {
 	deleteTabOrChar(cfg)
 }
 
-func PageJumpHandler(cfg *config.EditorConfig, char rune) {
+func PageJumpHandler(cfg *config.Editor, char rune) {
 	rows := cfg.ScreenRows
 	for rows > 0 {
 		if char == constants.PAGE_UP {
@@ -137,7 +137,7 @@ func IsClosingBracket(char rune) bool {
 	return false
 }
 
-func HandleCharInsertion(cfg *config.EditorConfig, char rune) {
+func HandleCharInsertion(cfg *config.Editor, char rune) {
 	if closingBracket, ok := constants.BracketPairs[char]; ok {
 		EditorInsertChar(char, cfg)
 		EditorInsertChar(closingBracket, cfg)
@@ -148,7 +148,7 @@ func HandleCharInsertion(cfg *config.EditorConfig, char rune) {
 	}
 }
 
-func InsertCharHandler(cfg *config.EditorConfig, char rune) {
+func InsertCharHandler(cfg *config.Editor, char rune) {
 	var currentRow config.Row
 	var action *config.EditorAction
 	if cfg.Cy != cfg.CurrentBuffer.NumRows {
@@ -209,13 +209,13 @@ func HideCursorIf(buffer *bytes.Buffer, propertyTrigger bool) {
 	}
 }
 
-func HideCursorIfSearching(buffer *bytes.Buffer, cfg *config.EditorConfig) {
+func HideCursorIfSearching(buffer *bytes.Buffer, cfg *config.Editor) {
 	if cfg.CurrentBuffer.SearchState.Searching == true {
 		buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
 	}
 }
 
-func WriteWelcomeIfNoFile(buffer *bytes.Buffer, screenCols int, screenRows int, i int, cfg *config.EditorConfig) {
+func WriteWelcomeIfNoFile(buffer *bytes.Buffer, screenCols int, screenRows int, i int, cfg *config.Editor) {
 	if cfg.CurrentBuffer.NumRows == 0 && i == screenRows/3 {
 		DrawWelcomeMessage(buffer, screenCols)
 	} else {
@@ -223,7 +223,7 @@ func WriteWelcomeIfNoFile(buffer *bytes.Buffer, screenCols int, screenRows int, 
 	}
 }
 
-func CountSpaces(cfg *config.EditorConfig, rowLength int, j int, fileRow int) (spaceCount int) {
+func CountSpaces(cfg *config.Editor, rowLength int, j int, fileRow int) (spaceCount int) {
 	spaceCount = 0
 	for k := j; k < j+constants.TAB_STOP; k++ {
 		if k >= rowLength || cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+k] != ' ' {
@@ -234,7 +234,7 @@ func CountSpaces(cfg *config.EditorConfig, rowLength int, j int, fileRow int) (s
 	return spaceCount
 }
 
-func AppendTabOrRowIndentBar(cfg *config.EditorConfig, j *int, buffer *bytes.Buffer, fileRow int, rowLength int) {
+func AppendTabOrRowIndentBar(cfg *config.Editor, j *int, buffer *bytes.Buffer, fileRow int, rowLength int) {
 	nextCharIndex := *j + constants.TAB_STOP
 	if nextCharIndex < rowLength && cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+nextCharIndex] != '}' {
 		buffer.WriteString(strings.Repeat(" ", constants.TAB_STOP-1))

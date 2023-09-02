@@ -1,11 +1,11 @@
-package actions
+package core
 
 import (
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 )
 
-func UndoAction(cfg *config.EditorConfig) {
+func UndoAction(cfg *config.Editor) {
 	lastAction, success := cfg.CurrentBuffer.PopUndo()
 	if !success {
 		return

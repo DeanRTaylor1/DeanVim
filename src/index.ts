@@ -1,6 +1,11 @@
 import pool from "./db.pool";
 import fs from 'node';
 
+function callBack() {
+  for (let i = 0; i <= 20; i++){
+    arr.push(1)
+  }
+}
 
 function newFunction(x: number, y:number){
   //TODO2
