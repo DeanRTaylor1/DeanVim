@@ -11,6 +11,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	_ "github.com/deanrtaylor1/go-editor/highlighting"
+	"github.com/deanrtaylor1/go-editor/mappings"
 )
 
 func enableRawMode(cfg *config.EditorConfig) error {
@@ -32,6 +33,8 @@ func initEditor(cfg *config.EditorConfig) {
 
 func main() {
 	cfg := config.NewEditorConfig()
+	motions := mappings.InitializeMotionMap(cfg)
+	cfg.MotionMap = motions
 
 	err := enableRawMode(cfg)
 	if err != nil {

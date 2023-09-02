@@ -15,7 +15,6 @@ func EditorCreateFileCallback(buf []rune, c rune, cfg *config.EditorConfig, trig
 		fileName := string(buf)
 
 		// Log the create operation
-		config.LogToFile(fmt.Sprintf("FileName to Create: %s", fileName))
 
 		// Show a confirmation prompt
 		confirmationMessage := fmt.Sprintf("Are you sure you want to create %s?", fileName)
@@ -46,7 +45,6 @@ func EditorRenameCallback(buf []rune, c rune, cfg *config.EditorConfig, trigger 
 		newName := string(buf)
 
 		// Log the rename operation
-		config.LogToFile(fmt.Sprintf("OldName: %s, NewName: %s", oldName, newName))
 
 		// Show a confirmation prompt
 		confirmationMessage := "Are you sure you want to rename?"
@@ -126,9 +124,6 @@ func EditorDelete(cfg *config.EditorConfig) {
 	colOff := cfg.ColOff
 
 	fileName := cfg.FileBrowserItems[cfg.Cy-len(cfg.InstructionsLines())].Name
-
-	// Log the delete operation
-	config.LogToFile(fmt.Sprintf("FileName to Delete: %s", fileName))
 
 	// Show a confirmation prompt
 	confirmationMessage := fmt.Sprintf("Are you sure you want to delete %s?", fileName)

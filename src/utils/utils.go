@@ -1,5 +1,11 @@
 package utils
 
+import (
+	"strings"
+
+	"github.com/deanrtaylor1/go-editor/constants"
+)
+
 func IsDigit(b byte) bool {
 	return b >= '0' && b <= '9'
 }
@@ -20,4 +26,18 @@ func Min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func IsValidStartingChar(char rune, mode int) bool {
+	var validChars string
+	switch mode {
+	case constants.EDITOR_MODE_NORMAL:
+		validChars = " wb0$^GgvoOyppV" // Exclude hjkl
+	case constants.EDITOR_MODE_INSERT:
+		validChars = " wbhjkle0$^GgvoOyppV" // Include hjkl
+	// Add other modes as needed
+	default:
+		validChars = " wbhjkle0$^GgvoOyppV"
+	}
+	return strings.ContainsRune(validChars, char)
 }

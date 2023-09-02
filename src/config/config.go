@@ -103,6 +103,20 @@ type EditorConfig struct {
 	FileBrowserItems       []FileBrowserItem
 	FileBrowserActionState FileBrowserActionState
 	FileBrowserIntroLength int
+	MotionBuffer           []rune
+	MotionMap              map[string]func()
+}
+
+func (e *EditorConfig) ClearMotionBuffer() {
+	e.MotionBuffer = []rune{}
+}
+
+func (e *EditorConfig) ExecuteMotion(motion string) bool {
+	if action, exists := e.MotionMap[motion]; exists {
+		action()
+		return true
+	}
+	return false
 }
 
 func (e *EditorConfig) InstructionsLines() []string {
@@ -245,6 +259,7 @@ func NewEditorConfig() *EditorConfig {
 		UndoHistory:      30,
 		FileBrowserItems: []FileBrowserItem{},
 		CurrentDirectory: "",
+		MotionBuffer:     []rune{},
 	}
 }
 
