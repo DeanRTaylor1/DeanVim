@@ -11,7 +11,6 @@ import (
 )
 
 func InsertModeKeyPressProcessor(char rune, cfg *config.EditorConfig) {
-	config.LogToFile(fmt.Sprintf("Cy %d, Cy %d, SliceIndex %d", cfg.Cy, cfg.Cx, cfg.CurrentBuffer.SliceIndex))
 	clearRedos := true
 
 	switch char {
@@ -72,7 +71,20 @@ func InsertModeKeyPressProcessor(char rune, cfg *config.EditorConfig) {
 func FileBrowserModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune {
 	switch char {
 	case 'R':
-		EditorPrompt(fmt.Sprintf("Rename: %s to: ", cfg.CurrentBuffer.Name), EditorFindCallback, cfg)
+		if cfg.IsDir() {
+			return constants.NO_OP
+		}
+		EditorRename(cfg)
+		ReadHandler(cfg, cfg.CurrentDirectory)
+		return constants.INITIAL_REFRESH
+	case '%':
+		EditorCreate(cfg)
+		ReadHandler(cfg, cfg.CurrentDirectory)
+		return constants.INITIAL_REFRESH
+	case 'D':
+		EditorDelete(cfg)
+		ReadHandler(cfg, cfg.CurrentDirectory)
+		return constants.INITIAL_REFRESH
 	case 'j', constants.ARROW_DOWN:
 		EditorMoveCursor(constants.ARROW_DOWN, cfg)
 		return constants.ARROW_DOWN
@@ -86,7 +98,7 @@ func FileBrowserModeKeyPressProcessor(char rune, cfg *config.EditorConfig) rune 
 		EditorMoveCursor(constants.ARROW_LEFT, cfg)
 		return constants.ARROW_LEFT
 	case constants.ENTER_KEY:
-		ReadHandler(cfg, fmt.Sprintf("%s", cfg.FileBrowserItems[cfg.Cy-5].Path))
+		ReadHandler(cfg, fmt.Sprintf("%s", cfg.FileBrowserItems[cfg.Cy-len(cfg.InstructionsLines())].Path))
 		return constants.INITIAL_REFRESH
 	case utils.CTRL_KEY(constants.QUIT_KEY):
 		success := QuitKeyHandler(cfg)
@@ -188,12 +200,12 @@ func FileBrowserCursorMovements(key rune, cfg *config.EditorConfig) {
 		}
 		cfg.MoveCursorLeft()
 	case rune(constants.ARROW_RIGHT):
-		if cfg.Cy == len(cfg.FileBrowserItems)+5 {
+		if cfg.Cy == len(cfg.FileBrowserItems)+len(cfg.InstructionsLines()) {
 			break
 		}
 		cfg.MoveCursorRight()
 	case rune(constants.ARROW_DOWN):
-		if cfg.Cy < len(cfg.FileBrowserItems)+5 {
+		if cfg.Cy < len(cfg.FileBrowserItems)+len(cfg.InstructionsLines()) {
 			cfg.MoveCursorDown()
 		}
 	case rune(constants.ARROW_UP):

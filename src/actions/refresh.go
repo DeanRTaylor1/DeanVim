@@ -2,7 +2,6 @@ package actions
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 
 	"github.com/deanrtaylor1/go-editor/config"
@@ -13,7 +12,6 @@ import (
 func FullRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer) {
 	buffer.WriteString(constants.ESCAPE_MOVE_TO_HOME_POS)
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
-	config.LogToFile(fmt.Sprintf("STORED: CX %d, CY %d, CURRENT: CX %d, CY %d", cfg.CurrentBuffer.StoredCx, cfg.CurrentBuffer.StoredCy, cfg.Cx, cfg.Cy))
 	if cfg.IsBrowsingFiles() {
 		DrawFileBrowser(buffer, cfg, 0, cfg.ScreenRows)
 	} else {
@@ -39,7 +37,7 @@ func PartialRefresh(cfg *config.EditorConfig, buffer *bytes.Buffer, startRow, en
 	}
 	cursorPosition := SetCursorPos(startRow+1, 6)
 	if cfg.IsBrowsingFiles() {
-		cursorPosition = SetCursorPos(startRow+6, 0)
+		cursorPosition = SetCursorPos(startRow+(len(cfg.InstructionsLines())+1), 0)
 	}
 	buffer.WriteString(cursorPosition)
 	buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
@@ -79,7 +77,7 @@ func EditorRefreshScreen(cfg *config.EditorConfig, lastKeyPress rune) {
 		cfg.Cx = 5
 	}
 
-	if cfg.IsBrowsingFiles() && (cfg.Cy < 5 || cfg.Cy > len(cfg.FileBrowserItems)+5) {
+	if cfg.IsBrowsingFiles() && (cfg.Cy < 5 || cfg.Cy > len(cfg.FileBrowserItems)+len(cfg.InstructionsLines())) {
 		cfg.Cx = 0
 		cfg.Cy = 5
 	}

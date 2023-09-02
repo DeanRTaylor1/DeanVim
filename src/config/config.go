@@ -45,6 +45,11 @@ type EditorAction struct {
 	RedoFunction func()
 }
 
+type FileBrowserActionState struct {
+	Modifying    bool
+	ItemToModify FileBrowserItem
+}
+
 type SearchState struct {
 	LastMatch   int
 	Direction   int
@@ -74,28 +79,51 @@ type FileBrowserItem struct {
 }
 
 type EditorConfig struct {
-	EditorMode       int
-	Cx               int
-	Cy               int
-	SliceIndex       int
-	LineNumberWidth  int
-	ScreenRows       int
-	ScreenCols       int
-	TerminalState    *term.State
-	CurrentBuffer    *Buffer
-	Buffers          []Buffer
-	RowOff           int
-	ColOff           int
-	FileName         string
-	StatusMsg        string
-	StatusMsgTime    time.Time
-	QuitTimes        int
-	Reader           *bufio.Reader
-	FirstRead        bool
-	UndoHistory      int
-	CurrentDirectory string
-	RootDirectory    string
-	FileBrowserItems []FileBrowserItem
+	EditorMode             int
+	Cx                     int
+	Cy                     int
+	SliceIndex             int
+	LineNumberWidth        int
+	ScreenRows             int
+	ScreenCols             int
+	TerminalState          *term.State
+	CurrentBuffer          *Buffer
+	Buffers                []Buffer
+	RowOff                 int
+	ColOff                 int
+	FileName               string
+	StatusMsg              string
+	StatusMsgTime          time.Time
+	QuitTimes              int
+	Reader                 *bufio.Reader
+	FirstRead              bool
+	UndoHistory            int
+	CurrentDirectory       string
+	RootDirectory          string
+	FileBrowserItems       []FileBrowserItem
+	FileBrowserActionState FileBrowserActionState
+	FileBrowserIntroLength int
+}
+
+func (e *EditorConfig) InstructionsLines() []string {
+	return []string{
+		"==========================================================",
+		fmt.Sprintf("\x1b[36mGVim\x1b[39m Version: %s", constants.VERSION),
+		"Gvim File Directory Preview",
+		fmt.Sprintf("RootDir: %s", e.RootDirectory),
+		"sorted by: name",
+		"File Management: \x1b[38;5;1m%: Create R: Rename, D: Delete\x1b[39m",
+		"Navigation:\x1b[38;5;1m<Up>/<k> to go up, <Down>/<j> to go down, <Enter> to select\x1b[39m",
+		"==========================================================",
+	}
+}
+
+func (e *EditorConfig) IsDir() bool {
+	return e.CurrentSelectedFile().Name == ".." || e.CurrentSelectedFile().Type == "directory"
+}
+
+func (e *EditorConfig) CurrentSelectedFile() *FileBrowserItem {
+	return &e.FileBrowserItems[e.Cy-len(e.InstructionsLines())]
 }
 
 // ReplaceBuffer replaces the buffer that matches the name of the current buffer with the current buffer's state.

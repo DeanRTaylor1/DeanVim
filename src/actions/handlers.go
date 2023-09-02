@@ -203,6 +203,12 @@ func ColorFormatHandler(buffer *bytes.Buffer, c byte, cColor *int, hl byte) {
 	*cColor = -1
 }
 
+func HideCursorIf(buffer *bytes.Buffer, propertyTrigger bool) {
+	if propertyTrigger == true {
+		buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
+	}
+}
+
 func HideCursorIfSearching(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	if cfg.CurrentBuffer.SearchState.Searching == true {
 		buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)

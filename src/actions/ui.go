@@ -46,45 +46,37 @@ func DrawWelcomeMessage(buffer *bytes.Buffer, screenCols int) {
 	buffer.WriteString(welcome)
 }
 
-func DrawFileBrowserHeader(buffer *bytes.Buffer) int {
+func DrawFileBrowserHeader(buffer *bytes.Buffer, cfg *config.EditorConfig) {
 	// Instructions
-	instructionsLines := []string{
-		"==========================================================",
-		"sorted by: date",
-		"sort sequence: newest to oldest",
-		"Help:<Up> to go up, <Down> to go down, <Enter> to select",
-		"==========================================================",
-	}
 
+	instructionsLines := cfg.InstructionsLines()
 	// Initialize line counter
-	lineCount := 0
 
-	for _, line := range instructionsLines {
-		cursorPosition := SetCursorPos(lineCount+1, 0)
+	for i, line := range instructionsLines {
+		cursorPosition := SetCursorPos(i+1, 0)
 		buffer.WriteString(cursorPosition)
+		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)
 		buffer.WriteString(line)
 		buffer.WriteString("\n")
-		lineCount++
 	}
-
-	return lineCount
 }
 
 func DrawFileBrowser(buffer *bytes.Buffer, cfg *config.EditorConfig, startRow, endRow int) {
-	headerLines := DrawFileBrowserHeader(buffer)
-	if cfg.Cy < headerLines {
-		cfg.Cy = headerLines
+	HideCursorIf(buffer, cfg.FileBrowserActionState.Modifying)
+	DrawFileBrowserHeader(buffer, cfg)
+	if cfg.Cy < len(cfg.InstructionsLines()) {
+		cfg.Cy = len(cfg.InstructionsLines())
 	}
 	var textColor string = "\x1b[32m" // Set text color to green
 	var resetColor string = "\x1b[0m" // Reset all terminal attributes to default
 
-	if endRow >= cfg.ScreenRows-headerLines {
-		endRow = cfg.ScreenRows - headerLines
+	if endRow >= cfg.ScreenRows-len(cfg.InstructionsLines()) {
+		endRow = cfg.ScreenRows - len(cfg.InstructionsLines())
 	}
 
 	for i := startRow; i <= endRow; i++ {
 		fileRow := i + cfg.RowOff
-		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff+headerLines, 0)
+		cursorPosition := SetCursorPos(fileRow+1-cfg.RowOff+len(cfg.InstructionsLines()), 0)
 		buffer.WriteString(cursorPosition)
 
 		if fileRow >= len(cfg.FileBrowserItems) {
@@ -232,7 +224,27 @@ func EditorDrawStatusBar(buf *bytes.Buffer, cfg *config.EditorConfig) {
 	buf.WriteString(constants.ESCAPE_NEW_LINE)
 }
 
-func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig), cfg *config.EditorConfig) []rune {
+func EditorConfirmationPrompt(prompt string, cfg *config.EditorConfig) bool {
+	for {
+		EditorSetStatusMessage(cfg, "%s (y/n)", prompt)
+		EditorRefreshScreen(cfg, constants.INITIAL_REFRESH)
+		c, err := ReadKey(cfg.Reader)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if c == 'y' || c == 'Y' {
+			EditorSetStatusMessage(cfg, "")
+			return true
+		} else if c == 'n' || c == 'N' || c == '\x1b' { // Escape key to cancel
+			EditorSetStatusMessage(cfg, "")
+			return false
+		}
+		// Ignore other keys
+	}
+}
+
+func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig, bool), cfg *config.EditorConfig) []rune {
 	buf := []rune{}
 	for {
 		EditorSetStatusMessage(cfg, "%s", fmt.Sprintf("%s %s", prompt, string(buf)))
@@ -246,20 +258,20 @@ func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig), cf
 			if len(buf) != 0 {
 				buf = buf[:len(buf)-1]
 				if cb != nil {
-					cb(buf, c, cfg)
+					cb(buf, c, cfg, false)
 				}
 			}
 		} else if c == '\x1b' {
 			EditorSetStatusMessage(cfg, "")
 			if cb != nil {
-				cb(buf, c, cfg)
+				cb(buf, c, cfg, false)
 			}
 			return nil
 		} else if c == '\r' {
 			if len(buf) != 0 {
 				EditorSetStatusMessage(cfg, "")
 				if cb != nil {
-					cb(buf, c, cfg)
+					cb(buf, c, cfg, true)
 				}
 				return buf
 			}
@@ -268,7 +280,7 @@ func EditorPrompt(prompt string, cb func([]rune, rune, *config.EditorConfig), cf
 		}
 
 		if cb != nil {
-			cb(buf, c, cfg)
+			cb(buf, c, cfg, false)
 		}
 	}
 }

@@ -114,12 +114,14 @@ func DirectoryOpen(cfg *config.EditorConfig, path string) error {
 
 	cfg.CurrentDirectory = path
 
-	EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.RootDirectory))
+	// EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.RootDirectory))
 
 	return nil
 }
 
 func EditorDeleteFile(cfg *config.EditorConfig, fileName string) error {
+	fileName = strings.TrimSuffix(fileName, "\r")
+
 	filePath := filepath.Join(cfg.RootDirectory, fileName)
 
 	err := os.Remove(filePath)
@@ -145,6 +147,8 @@ func EditorDeleteFile(cfg *config.EditorConfig, fileName string) error {
 }
 
 func EditorCreateFile(cfg *config.EditorConfig, fileName string) error {
+	fileName = strings.TrimSuffix(fileName, "\r")
+
 	filePath := filepath.Join(cfg.RootDirectory, fileName)
 
 	// Create the file
@@ -159,25 +163,68 @@ func EditorCreateFile(cfg *config.EditorConfig, fileName string) error {
 }
 
 func EditorRenameFile(cfg *config.EditorConfig, oldName, newName string) error {
-	oldPath := filepath.Join(cfg.RootDirectory, oldName)
-	newPath := filepath.Join(cfg.RootDirectory, newName)
+	oldName = strings.TrimSuffix(oldName, "\r")
+	newName = strings.TrimSuffix(newName, "\r")
+	oldPath := filepath.Join(cfg.CurrentDirectory, oldName)
+	newPath := filepath.Join(cfg.CurrentDirectory, newName)
+	config.LogToFile(fmt.Sprintf("old: %s, new: %s", oldPath, newPath))
 
-	err := os.Rename(oldPath, newPath)
+	// Check the old file's existence and permissions
+	oldFileInfo, err := os.Stat(oldPath)
 	if err != nil {
-		return fmt.Errorf("failed to rename file: %w", err)
+		config.LogToFile(fmt.Sprintf("Stat failed on old file: %s", err.Error()))
+		return fmt.Errorf("failed to stat old file: %w", err)
+	}
+
+	// Check if the file is currently open in the editor
+	if cfg.CurrentBuffer.Name == oldName {
+		// Save any unsaved changes before renaming
+		_, err := EditorSave(cfg)
+		if err != nil {
+			config.LogToFile(fmt.Sprintf("%s", err.Error()))
+			return fmt.Errorf("failed to save file before renaming: %w", err)
+		}
+	}
+
+	// Perform the rename
+	err = os.Rename(oldPath, newPath)
+	if err != nil {
+		if os.IsPermission(err) {
+			log.Fatal("Permission denied")
+		} else {
+			config.LogToFile(fmt.Sprintf("%s", err.Error()))
+			log.Fatal(err)
+		}
+	}
+
+	// Check the new file's existence and permissions
+	newFileInfo, err := os.Stat(newPath)
+	if err != nil {
+		config.LogToFile(fmt.Sprintf("Stat failed on new file: %s", err.Error()))
+		return fmt.Errorf("failed to stat new file: %w", err)
+	}
+
+	// Optionally, compare old and new FileInfo to ensure they match
+	if oldFileInfo.Size() != newFileInfo.Size() || oldFileInfo.Mode() != newFileInfo.Mode() {
+		config.LogToFile("File info mismatch after rename")
+		return fmt.Errorf("file info mismatch after rename")
 	}
 
 	// Update the current buffer name if it matches the old name
-	if cfg.CurrentBuffer.Name == oldName {
-		cfg.CurrentBuffer.Name = newName
-	}
+	// if cfg.CurrentBuffer.Name == oldName {
+	// 	cfg.CurrentBuffer.Name = newName
+	// }
+	//
+	// // Update the name in the list of buffers
+	// for i, buffer := range cfg.Buffers {
+	// 	if buffer.Name == oldName {
+	// 		cfg.Buffers[i].Name = newName
+	// 	}
+	// }
 
-	// Update the name in the list of buffers
-	for i, buffer := range cfg.Buffers {
-		if buffer.Name == oldName {
-			cfg.Buffers[i].Name = newName
-		}
-	}
+	// Refresh the file list in your editor here, if applicable
+
+	config.LogToFile(fmt.Sprintf("File renamed from %s to %s", oldName, newName))
 
 	EditorSetStatusMessage(cfg, fmt.Sprintf("File renamed from %s to %s", oldName, newName))
 	return nil
