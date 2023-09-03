@@ -6,7 +6,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func InsertModeKeyPressProcessor(char rune, cfg *config.Editor) {
+func InsertModeEventsHandler(char rune, cfg *config.Editor) {
 	clearRedos := true
 
 	switch char {

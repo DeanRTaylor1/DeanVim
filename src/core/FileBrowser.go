@@ -6,7 +6,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func FileBrowserModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
+func FileBrowserEventsHandler(char rune, cfg *config.Editor) rune {
 	switch char {
 	case 'R':
 		if cfg.IsDir() {

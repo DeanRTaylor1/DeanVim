@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/term"
+
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/utils"
-	"golang.org/x/term"
 )
 
 type Editor struct {
@@ -65,13 +66,19 @@ func NewEditor() *Editor {
 	}
 }
 
+func (e *Editor) StartSelectedFromCursorPos() {
+	e.CurrentBuffer.SelectedCxStart = e.Cx
+	e.CurrentBuffer.SelectedCyStart = e.Cy
+	e.CurrentBuffer.SelectedCxEnd = e.Cx
+	e.CurrentBuffer.SelectedCyEnd = e.Cy
+}
+
 func (e *Editor) ResetCursorCoords() {
 	e.Cx = 0
 	e.Cy = 0
 }
 
 func (e *Editor) CacheCursorCoords() {
-
 	e.CurrentBuffer.StoredCx = e.Cx
 	e.CurrentBuffer.StoredCy = e.Cy
 }

@@ -9,20 +9,20 @@ import (
 	"github.com/deanrtaylor1/go-editor/constants"
 )
 
-func ProcessKeyPress(reader *bufio.Reader, cfg *config.Editor) rune {
+func EventHandlerMain(reader *bufio.Reader, cfg *config.Editor) rune {
 	char, err := ReadKey(reader)
 	if err != nil {
 		panic(err)
 	}
 
 	if cfg.EditorMode == constants.EDITOR_MODE_NORMAL {
-		char = NormalModeKeyPressProcessor(char, cfg)
+		char = NormalModeEventsHandler(char, cfg)
 	} else if cfg.EditorMode == constants.EDITOR_MODE_INSERT {
-		InsertModeKeyPressProcessor(char, cfg)
+		InsertModeEventsHandler(char, cfg)
 	} else if cfg.IsBrowsingFiles() {
-		char = FileBrowserModeKeyPressProcessor(char, cfg)
+		char = FileBrowserEventsHandler(char, cfg)
 	} else if cfg.EditorMode == constants.EDITOR_MODE_VISUAL {
-		char = VisualModeKeyPressProcessor(char, cfg)
+		char = VisualModeEventsHandler(char, cfg)
 	}
 	return char
 }

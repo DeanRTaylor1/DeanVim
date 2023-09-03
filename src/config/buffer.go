@@ -16,6 +16,10 @@ type Buffer struct {
 	Dirty              int
 	StoredCx           int
 	StoredCy           int
+	SelectedCxStart    int
+	SelectedCyStart    int
+	SelectedCyEnd      int
+	SelectedCxEnd      int
 }
 
 type BufferSyntax struct {
@@ -26,6 +30,49 @@ type BufferSyntax struct {
 	MultiLineCommentEnd    string
 	Keywords               map[string]byte
 	Syntaxes               []constants.SyntaxHighlighting
+}
+
+// Move the selection right by x columns
+func (b *Buffer) SelectMoveRightBy(x int) {
+	if b.SelectedCxEnd >= b.SelectedCxStart {
+		b.SelectedCxEnd += x
+	} else {
+		b.SelectedCxStart += x
+	}
+}
+
+// Move the selection left by x columns
+func (b *Buffer) SelectMoveLeftBy(x int) {
+	if b.SelectedCxEnd > b.SelectedCxStart {
+		b.SelectedCxEnd -= x
+	} else if b.SelectedCxStart > 0 {
+		b.SelectedCxStart -= x
+	}
+}
+
+// Move the selection up by y rows
+func (b *Buffer) SelectMoveUpBy(y int) {
+	if b.SelectedCyEnd > b.SelectedCyStart {
+		b.SelectedCyEnd -= y
+	} else if b.SelectedCyStart > 0 {
+		b.SelectedCyStart -= y
+	}
+}
+
+// Move the selection down by y rows
+func (b *Buffer) SelectMoveDownBy(y int) {
+	if b.SelectedCyEnd >= b.SelectedCyStart {
+		b.SelectedCyEnd += y
+	} else {
+		b.SelectedCyStart += y
+	}
+}
+
+func (b *Buffer) ClearSelection() {
+	b.SelectedCxEnd = 0
+	b.SelectedCyEnd = 0
+	b.SelectedCxStart = 0
+	b.SelectedCyStart = 0
 }
 
 func (b *Buffer) ReplaceRowAtIndex(index int, newRow Row) {

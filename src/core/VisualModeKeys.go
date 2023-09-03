@@ -8,7 +8,7 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func VisualModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
+func VisualModeEventsHandler(char rune, cfg *config.Editor) rune {
 	if len(cfg.MotionBuffer) > 0 || utils.IsValidStartingChar(char, cfg.EditorMode) {
 		cfg.MotionBuffer = append(cfg.MotionBuffer, char)
 	}
@@ -16,8 +16,6 @@ func VisualModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 	if len(cfg.MotionBuffer) > 4 {
 		cfg.ClearMotionBuffer()
 	}
-
-	config.LogToFile(fmt.Sprintf("MotionBuffer: %s", string(cfg.MotionBuffer)))
 
 	if len(cfg.MotionBuffer) > 1 {
 		success := cfg.ExecuteMotion(string(cfg.MotionBuffer))
@@ -28,21 +26,45 @@ func VisualModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 	} else {
 		switch char {
 		case 'n':
+			cfg.CurrentBuffer.ClearSelection()
 			cfg.SetMode(constants.EDITOR_MODE_NORMAL)
+			return constants.INITIAL_REFRESH
 		case 'j':
+			// Adjust for line number offset
+			adjustedCxEnd := cfg.CurrentBuffer.SelectedCxEnd - cfg.LineNumberWidth
+			currentRowLength := len(cfg.GetCurrentRow().Chars)
+			if adjustedCxEnd < currentRowLength {
+				cfg.CurrentBuffer.SelectMoveRightBy(currentRowLength - adjustedCxEnd)
+			}
+
+			cfg.CurrentBuffer.SelectMoveDownBy(1)
 			EditorMoveCursor(constants.ARROW_DOWN, cfg)
 			return constants.ARROW_DOWN
 		case 'k':
+			// Retract the selection to the original cursor position
+			diff := cfg.CurrentBuffer.SelectedCxEnd - (cfg.Cx - cfg.LineNumberWidth)
+			if diff > 0 && cfg.Cy == cfg.CurrentBuffer.SelectedCyStart {
+				config.LogToFile(fmt.Sprintf("MOVING BACK"))
+				cfg.CurrentBuffer.SelectMoveLeftBy(diff - cfg.LineNumberWidth)
+			}
+			// Move the selection up by one line
+			cfg.CurrentBuffer.SelectMoveUpBy(1)
 			EditorMoveCursor(constants.ARROW_UP, cfg)
 			return constants.ARROW_UP
 		case 'l':
-			EditorMoveCursor(constants.ARROW_RIGHT, cfg)
-			return constants.ARROW_RIGHT
+			if cfg.Cx-cfg.LineNumberWidth < len(cfg.GetCurrentRow().Chars) {
+				cfg.CurrentBuffer.SelectMoveRightBy(1)
+				EditorMoveCursor(constants.ARROW_RIGHT, cfg)
+				return constants.ARROW_RIGHT
+			}
+			return constants.NO_OP
 		case 'h':
+			cfg.CurrentBuffer.SelectMoveLeftBy(1)
 			EditorMoveCursor(constants.ARROW_LEFT, cfg)
 			return constants.ARROW_LEFT
 		case constants.TAB_KEY:
 			for i := 0; i < 4; i++ {
+				cfg.CurrentBuffer.SelectMoveRightBy(1)
 				EditorMoveCursor(constants.ARROW_RIGHT, cfg)
 			}
 		case constants.ENTER_KEY:

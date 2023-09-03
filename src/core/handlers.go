@@ -176,13 +176,18 @@ func ControlCHandler(buffer *bytes.Buffer, c rune, cColor int) {
 	}
 }
 
-func FormatSelectedTextHandler(buffer *bytes.Buffer, c byte) {
-	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
-	buffer.WriteString(constants.FOREGROUND_RESET)
-	buffer.WriteString(constants.BACKGROUND_WHITE)
+func FormatSelectedTextHandler(buffer *bytes.Buffer, c byte, cColor *int, hl byte) {
+	buffer.WriteString(constants.BACKGROUND_BRIGHT_BLACK)
+	color := int(highlighting.EditorSyntaxToColor(hl))
+	if color != *cColor {
+		buffer.WriteString(fmt.Sprintf("\x1b[%dm", color))
+		*cColor = color
+	}
 	buffer.WriteByte(c)
 	buffer.WriteString(constants.BACKGROUND_RESET)
+	*cColor = -1
 }
+
 func FormatFindResultHandler(buffer *bytes.Buffer, c byte) {
 	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
 	buffer.WriteString(constants.FOREGROUND_RESET)

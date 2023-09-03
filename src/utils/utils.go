@@ -33,11 +33,10 @@ func IsValidStartingChar(char rune, mode int) bool {
 	switch mode {
 	case constants.EDITOR_MODE_NORMAL:
 		validChars = " wb0$^GgvoOyppV" // Exclude hjkl
-	case constants.EDITOR_MODE_INSERT:
-		validChars = " wbhjkle0$^GgvoOyppV" // Include hjkl
-	// Add other modes as needed
+	case constants.EDITOR_MODE_VISUAL:
+		validChars = "123456789"
 	default:
-		validChars = " wbhjkle0$^GgvoOyppV"
+		return false
 	}
 	return strings.ContainsRune(validChars, char)
 }

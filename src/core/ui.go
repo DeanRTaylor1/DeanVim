@@ -112,6 +112,11 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.Editor, startRow, endRow i
 		} else {
 			rowLength := cfg.CurrentBuffer.Rows[fileRow].Length - cfg.ColOff
 			availableScreenCols := screenCols - cfg.LineNumberWidth
+			if fileRow < 5 {
+				config.LogToFile(fmt.Sprintf("FileRow: %d, selectedcy: %d, %d", fileRow, cfg.CurrentBuffer.SelectedCyStart, cfg.CurrentBuffer.SelectedCyEnd))
+			}
+			isSelectedRow := fileRow >= cfg.CurrentBuffer.SelectedCyStart && fileRow <= cfg.CurrentBuffer.SelectedCyEnd
+
 			if rowLength < 0 {
 				rowLength = 0
 			}
@@ -124,6 +129,7 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.Editor, startRow, endRow i
 				for j := 0; j < rowLength; j++ {
 
 					c := cfg.CurrentBuffer.Rows[fileRow].Chars[cfg.ColOff+j]
+					isSelectedChar := isSelectedRow && j+cfg.ColOff >= cfg.CurrentBuffer.SelectedCxStart-cfg.LineNumberWidth && j+cfg.ColOff <= cfg.CurrentBuffer.SelectedCxEnd-cfg.LineNumberWidth
 
 					hl := highlights[cfg.ColOff+j]
 					if c == ' ' {
@@ -134,12 +140,13 @@ func EditorDrawRows(buffer *bytes.Buffer, cfg *config.Editor, startRow, endRow i
 							continue
 						}
 					}
+
 					if unicode.IsControl(rune(c)) {
 						ControlCHandler(buffer, rune(c), cColor)
+					} else if isSelectedChar && (fileRow < cfg.CurrentBuffer.SelectedCyEnd || j+cfg.ColOff <= cfg.Cx-cfg.LineNumberWidth) {
+						FormatSelectedTextHandler(buffer, c, &cColor, hl)
 					} else if hl == constants.HL_MATCH {
 						FormatFindResultHandler(buffer, c)
-					} else if hl == constants.HL_SELECTED {
-						FormatSelectedTextHandler(buffer, c)
 					} else if hl == constants.HL_NORMAL {
 						NormalFormatHandler(buffer, c, cColor)
 					} else {

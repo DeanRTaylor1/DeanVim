@@ -52,7 +52,7 @@ func main() {
 
 	for {
 		core.EditorRefreshScreen(cfg, char)
-		char = core.ProcessKeyPress(cfg.Reader, cfg)
+		char = core.EventHandlerMain(cfg.Reader, cfg)
 
 	}
 }

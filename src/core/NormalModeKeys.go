@@ -1,14 +1,12 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
+func NormalModeEventsHandler(char rune, cfg *config.Editor) rune {
 	if len(cfg.MotionBuffer) > 0 || utils.IsValidStartingChar(char, cfg.EditorMode) {
 		cfg.MotionBuffer = append(cfg.MotionBuffer, char)
 	}
@@ -16,8 +14,6 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 	if len(cfg.MotionBuffer) > 4 {
 		cfg.ClearMotionBuffer()
 	}
-
-	config.LogToFile(fmt.Sprintf("MotionBuffer: %s", string(cfg.MotionBuffer)))
 
 	if len(cfg.MotionBuffer) > 1 {
 		success := cfg.ExecuteMotion(string(cfg.MotionBuffer))
@@ -36,7 +32,9 @@ func NormalModeKeyPressProcessor(char rune, cfg *config.Editor) rune {
 			ReadHandler(cfg, cfg.RootDirectory)
 			return constants.INITIAL_REFRESH
 		case 'v':
+			cfg.ClearMotionBuffer()
 			cfg.SetMode(constants.EDITOR_MODE_VISUAL)
+			cfg.StartSelectedFromCursorPos()
 		case 'i':
 			cfg.SetMode(constants.EDITOR_MODE_INSERT)
 		case 'j':
