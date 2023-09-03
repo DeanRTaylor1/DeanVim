@@ -6,50 +6,50 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func FileBrowserEventsHandler(char rune, cfg *config.Editor) rune {
+func FileBrowserEventsHandler(char rune, e *config.Editor) rune {
 	switch char {
 	case 'R':
-		if cfg.IsDir() {
+		if e.IsDir() {
 			return constants.NO_OP
 		}
-		EditorRename(cfg)
-		ReadHandler(cfg, cfg.CurrentDirectory)
+		EditorRename(e)
+		ReadHandler(e, e.CurrentDirectory)
 		return constants.INITIAL_REFRESH
 	case '%':
-		EditorCreate(cfg)
-		ReadHandler(cfg, cfg.CurrentDirectory)
+		EditorCreate(e)
+		ReadHandler(e, e.CurrentDirectory)
 		return constants.INITIAL_REFRESH
 	case utils.CTRL_KEY('l'), constants.ESCAPE_KEY:
-		cfg.ClearMotionBuffer()
+		e.ClearMotionBuffer()
 		return constants.INITIAL_REFRESH
 	case 'D':
-		EditorDelete(cfg)
-		ReadHandler(cfg, cfg.CurrentDirectory)
+		EditorDelete(e)
+		ReadHandler(e, e.CurrentDirectory)
 		return constants.INITIAL_REFRESH
 	case 'j', constants.ARROW_DOWN:
-		EditorMoveCursor(constants.ARROW_DOWN, cfg)
+		EditorMoveCursor(constants.ARROW_DOWN, e)
 		return constants.ARROW_DOWN
 	case 'k', constants.ARROW_UP:
-		EditorMoveCursor(constants.ARROW_UP, cfg)
+		EditorMoveCursor(constants.ARROW_UP, e)
 		return constants.ARROW_UP
 	case 'l', constants.ARROW_LEFT:
-		EditorMoveCursor(constants.ARROW_RIGHT, cfg)
+		EditorMoveCursor(constants.ARROW_RIGHT, e)
 		return constants.ARROW_RIGHT
 	case 'h', constants.ARROW_RIGHT:
-		EditorMoveCursor(constants.ARROW_LEFT, cfg)
+		EditorMoveCursor(constants.ARROW_LEFT, e)
 		return constants.ARROW_LEFT
 	case constants.ENTER_KEY:
-		ReadHandler(cfg, cfg.FileBrowserItems[cfg.Cy-len(cfg.InstructionsLines())].Path)
+		ReadHandler(e, e.FileBrowserItems[e.Cy-len(e.InstructionsLines())].Path)
 		return constants.INITIAL_REFRESH
 	case utils.CTRL_KEY(constants.QUIT_KEY):
-		success := QuitKeyHandler(cfg)
+		success := QuitKeyHandler(e)
 		if !success {
 			return char
 		}
 	case constants.HOME_KEY:
-		HomeKeyHandler(cfg)
+		HomeKeyHandler(e)
 	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
-		DeleteHandler(cfg, char)
+		DeleteHandler(e, char)
 	default:
 		return constants.NO_OP
 	}

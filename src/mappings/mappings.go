@@ -6,17 +6,17 @@ import (
 	"github.com/deanrtaylor1/go-editor/core"
 )
 
-func InitializeMotionMap(cfg *config.Editor) map[string]func() {
+func InitializeMotionMap(e *config.Editor) map[string]func() {
 	return map[string]func(){
 		" pv": func() {
-			ChangeToNormalMode(cfg)
+			ChangeToNormalMode(e)
 		},
 	}
 }
 
-func ChangeToNormalMode(cfg *config.Editor) {
-	cfg.EditorMode = constants.EDITOR_MODE_FILE_BROWSER
-	cfg.CacheCursorCoords()
-	cfg.ResetCursorCoords()
-	core.ReadHandler(cfg, cfg.RootDirectory)
+func ChangeToNormalMode(e *config.Editor) {
+	e.EditorMode = constants.EDITOR_MODE_FILE_BROWSER
+	e.CacheCursorCoords()
+	e.ResetCursorCoords()
+	core.ReadHandler(e, e.RootDirectory)
 }

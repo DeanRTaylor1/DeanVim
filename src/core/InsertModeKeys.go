@@ -6,58 +6,58 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
-func InsertModeEventsHandler(char rune, cfg *config.Editor) {
+func InsertModeEventsHandler(char rune, e *config.Editor) {
 	clearRedos := true
 
 	switch char {
 	case utils.CTRL_KEY('z'):
-		UndoAction(cfg)
+		UndoAction(e)
 		clearRedos = false
 	case utils.CTRL_KEY('y'):
-		RedoAction(cfg)
+		RedoAction(e)
 		clearRedos = false
 	case constants.TAB_KEY:
-		TabKeyHandler(cfg)
+		TabKeyHandler(e)
 	case constants.ENTER_KEY:
-		EnterKeyHandler(cfg)
+		EnterKeyHandler(e)
 	case utils.CTRL_KEY(constants.QUIT_KEY):
-		success := QuitKeyHandler(cfg)
+		success := QuitKeyHandler(e)
 		if !success {
 			return
 		}
 	case utils.CTRL_KEY(constants.SAVE_KEY):
-		SaveKeyHandler(cfg)
+		SaveKeyHandler(e)
 	case constants.HOME_KEY:
-		HomeKeyHandler(cfg)
+		HomeKeyHandler(e)
 	case constants.END_KEY:
-		err := EndKeyHandler(cfg)
+		err := EndKeyHandler(e)
 		if err != nil {
 			config.LogToFile(err.Error())
 			break
 		}
 	case utils.CTRL_KEY('f'):
-		EditorFind(cfg)
+		EditorFind(e)
 		clearRedos = false
 	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
-		DeleteHandler(cfg, char)
+		DeleteHandler(e, char)
 	case constants.PAGE_DOWN, constants.PAGE_UP:
-		PageJumpHandler(cfg, char)
+		PageJumpHandler(e, char)
 		clearRedos = false
 	case utils.CTRL_KEY('l'), constants.ESCAPE_KEY:
-		cfg.SetMode(constants.EDITOR_MODE_NORMAL)
+		e.SetMode(constants.EDITOR_MODE_NORMAL)
 	case rune(constants.ARROW_DOWN), rune(constants.ARROW_UP), rune(constants.ARROW_RIGHT), rune(constants.ARROW_LEFT):
-		EditorMoveCursor(char, cfg)
+		EditorMoveCursor(char, e)
 		clearRedos = false
 	default:
-		if IsClosingBracket(char) && cfg.GetCurrentRow().Length > cfg.CurrentBuffer.SliceIndex && IsClosingBracket(rune(cfg.GetCurrentRow().Chars[cfg.CurrentBuffer.SliceIndex])) {
-			cfg.Cx++
-			cfg.CurrentBuffer.SliceIndex++
+		if IsClosingBracket(char) && e.GetCurrentRow().Length > e.CurrentBuffer.SliceIndex && IsClosingBracket(rune(e.GetCurrentRow().Chars[e.CurrentBuffer.SliceIndex])) {
+			e.Cx++
+			e.CurrentBuffer.SliceIndex++
 		} else {
-			InsertCharHandler(cfg, char)
+			InsertCharHandler(e, char)
 		}
 	}
 	if clearRedos {
-		cfg.ClearRedoStack()
+		e.ClearRedoStack()
 	}
-	cfg.QuitTimes = constants.QUIT_TIMES
+	e.QuitTimes = constants.QUIT_TIMES
 }

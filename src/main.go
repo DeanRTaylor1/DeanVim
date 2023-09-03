@@ -14,45 +14,45 @@ import (
 	"github.com/deanrtaylor1/go-editor/mappings"
 )
 
-func enableRawMode(cfg *config.Editor) error {
+func enableRawMode(e *config.Editor) error {
 	oldState, err := term.MakeRaw(int(syscall.Stdin))
 	if err != nil {
 		return err
 	}
-	cfg.TerminalState = oldState
+	e.TerminalState = oldState
 	return nil
 }
 
-func initEditor(cfg *config.Editor) {
-	err := config.GetWindowSize(cfg)
+func initEditor(e *config.Editor) {
+	err := config.GetWindowSize(e)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfg.ScreenRows -= 2
+	e.ScreenRows -= 2
 }
 
 func main() {
-	cfg := config.NewEditor()
-	motions := mappings.InitializeMotionMap(cfg)
-	cfg.MotionMap = motions
+	e := config.NewEditor()
+	motions := mappings.InitializeMotionMap(e)
+	e.MotionMap = motions
 
-	err := enableRawMode(cfg)
+	err := enableRawMode(e)
 	if err != nil {
 		panic(err)
 	}
-	defer term.Restore(int(syscall.Stdin), cfg.TerminalState)
+	defer term.Restore(int(syscall.Stdin), e.TerminalState)
 
-	initEditor(cfg)
+	initEditor(e)
 
 	if len(os.Args) >= 2 {
-		core.ReadHandler(cfg, os.Args[1])
+		core.ReadHandler(e, os.Args[1])
 	}
 
 	char := constants.INITIAL_REFRESH
 
 	for {
-		core.EditorRefreshScreen(cfg, char)
-		char = core.EventHandlerMain(cfg.Reader, cfg)
+		core.EditorRefreshScreen(e, char)
+		char = core.EventHandlerMain(e.Reader, e)
 
 	}
 }

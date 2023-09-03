@@ -6,30 +6,30 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func EditorDelChar(cfg *config.Editor) {
-	if cfg.Cy == cfg.CurrentBuffer.NumRows {
+func EditorDelChar(e *config.Editor) {
+	if e.Cy == e.CurrentBuffer.NumRows {
 		return
 	}
-	if cfg.CurrentBuffer.SliceIndex == 0 && cfg.Cy == 0 {
+	if e.CurrentBuffer.SliceIndex == 0 && e.Cy == 0 {
 		return
 	}
-	row := &cfg.CurrentBuffer.Rows[cfg.Cy]
-	if cfg.CurrentBuffer.SliceIndex > 0 {
-		if cfg.Cx-cfg.ColOff < cfg.LineNumberWidth {
-			cfg.ColOff--
+	row := &e.CurrentBuffer.Rows[e.Cy]
+	if e.CurrentBuffer.SliceIndex > 0 {
+		if e.Cx-e.ColOff < e.LineNumberWidth {
+			e.ColOff--
 		}
-		cfg.Cx--
-		EditorRowDelChar(row, cfg.CurrentBuffer.SliceIndex-1, cfg)
-		cfg.CurrentBuffer.SliceIndex--
+		e.Cx--
+		EditorRowDelChar(row, e.CurrentBuffer.SliceIndex-1, e)
+		e.CurrentBuffer.SliceIndex--
 	} else {
-		cfg.Cx = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length + cfg.LineNumberWidth
-		cfg.CurrentBuffer.SliceIndex = cfg.CurrentBuffer.Rows[cfg.Cy-1].Length
-		EditorDelRow(cfg)
-		cfg.Cy--
+		e.Cx = e.CurrentBuffer.Rows[e.Cy-1].Length + e.LineNumberWidth
+		e.CurrentBuffer.SliceIndex = e.CurrentBuffer.Rows[e.Cy-1].Length
+		EditorDelRow(e)
+		e.Cy--
 	}
 }
 
-func EditorRowDelChar(row *config.Row, at int, cfg *config.Editor) {
+func EditorRowDelChar(row *config.Row, at int, e *config.Editor) {
 	if at < 0 || at >= len(row.Chars) {
 		return
 	}
@@ -45,40 +45,40 @@ func EditorRowDelChar(row *config.Row, at int, cfg *config.Editor) {
 	row.Chars = row.Chars[:len(row.Chars)-1] // Access the Row field
 
 	row.Length = len(row.Chars) // Update the length of the row
-	EditorUpdateRow(row, cfg)
-	cfg.CurrentBuffer.Dirty++
+	EditorUpdateRow(row, e)
+	e.CurrentBuffer.Dirty++
 }
 
-func EditorDelRow(cfg *config.Editor) {
-	if cfg.Cy <= 0 || cfg.Cy >= cfg.CurrentBuffer.NumRows {
+func EditorDelRow(e *config.Editor) {
+	if e.Cy <= 0 || e.Cy >= e.CurrentBuffer.NumRows {
 		return
 	}
 
-	mergeCurrentRowWithPrevious(cfg)
-	updateRowIndicesFromCurrent(cfg)
-	highlighting.ResetRowHighlights(-1, cfg)
-	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy-1], cfg)
-	ResetRowTabs(cfg.Cy-1, cfg)
-	cfg.CurrentBuffer.RemoveRowAtIndex(cfg.Cy)
-	// deleteCurrentRow(cfg)
-	cfg.CurrentBuffer.Dirty++
+	mergeCurrentRowWithPrevious(e)
+	updateRowIndicesFromCurrent(e)
+	highlighting.ResetRowHighlights(-1, e)
+	highlighting.SyntaxHighlightStateMachine(&e.CurrentBuffer.Rows[e.Cy-1], e)
+	ResetRowTabs(e.Cy-1, e)
+	e.CurrentBuffer.RemoveRowAtIndex(e.Cy)
+	// deleteCurrentRow(e)
+	e.CurrentBuffer.Dirty++
 }
 
-func ResetRowTabs(idx int, cfg *config.Editor) {
-	row := &cfg.CurrentBuffer.Rows[idx]
+func ResetRowTabs(idx int, e *config.Editor) {
+	row := &e.CurrentBuffer.Rows[idx]
 	row.Tabs = make([]byte, row.Length)
 }
 
-func mergeCurrentRowWithPrevious(cfg *config.Editor) {
-	prevRow := &cfg.CurrentBuffer.Rows[cfg.Cy-1]
-	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+func mergeCurrentRowWithPrevious(e *config.Editor) {
+	prevRow := &e.CurrentBuffer.Rows[e.Cy-1]
+	currentRow := &e.CurrentBuffer.Rows[e.Cy]
 
 	prevRow.Chars = append(prevRow.Chars, currentRow.Chars...)
 	prevRow.Length = len(prevRow.Chars)
 }
 
-func updateRowIndicesFromCurrent(cfg *config.Editor) {
-	for i := cfg.Cy; i < len(cfg.CurrentBuffer.Rows); i++ {
-		cfg.CurrentBuffer.Rows[i].Idx = i
+func updateRowIndicesFromCurrent(e *config.Editor) {
+	for i := e.Cy; i < len(e.CurrentBuffer.Rows); i++ {
+		e.CurrentBuffer.Rows[i].Idx = i
 	}
 }

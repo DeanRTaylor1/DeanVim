@@ -12,37 +12,37 @@ import (
 )
 
 // this function checks the type of the item and directs to the relevant function
-func ReadHandler(cfg *config.Editor, arg string) {
+func ReadHandler(e *config.Editor, arg string) {
 	fileInfo, err := os.Stat(arg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if arg == "." {
-		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
+		e.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
 		currentDir, err := os.Getwd()
 		if err != nil {
 			log.Fatal("Could not get current directory")
 		}
-		if cfg.RootDirectory == "" {
-			cfg.RootDirectory = currentDir
+		if e.RootDirectory == "" {
+			e.RootDirectory = currentDir
 		}
-		DirectoryOpen(cfg, currentDir)
+		DirectoryOpen(e, currentDir)
 	} else if fileInfo.IsDir() {
-		cfg.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
+		e.SetMode(constants.EDITOR_MODE_FILE_BROWSER)
 		// Set the current directory path in the config
-		if cfg.RootDirectory == "" {
-			cfg.RootDirectory = arg
+		if e.RootDirectory == "" {
+			e.RootDirectory = arg
 		}
-		DirectoryOpen(cfg, arg)
+		DirectoryOpen(e, arg)
 	} else {
-		cfg.EditorMode = constants.EDITOR_MODE_NORMAL
-		if cfg.CurrentBuffer.Name != "" {
-			cfg.ReplaceBuffer()
+		e.EditorMode = constants.EDITOR_MODE_NORMAL
+		if e.CurrentBuffer.Name != "" {
+			e.ReplaceBuffer()
 		}
-		foundBuffer := cfg.ReloadBuffer(arg)
+		foundBuffer := e.ReloadBuffer(arg)
 		if !foundBuffer {
-			err := FileOpen(cfg, arg)
+			err := FileOpen(e, arg)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -50,7 +50,7 @@ func ReadHandler(cfg *config.Editor, arg string) {
 	}
 }
 
-func DirectoryOpen(cfg *config.Editor, path string) error {
+func DirectoryOpen(e *config.Editor, path string) error {
 	// Read the directory
 	dirEntries, err := os.ReadDir(path)
 	if err != nil {
@@ -58,7 +58,7 @@ func DirectoryOpen(cfg *config.Editor, path string) error {
 	}
 
 	// Clear the existing FileBrowserItems
-	cfg.FileBrowserItems = []config.FileBrowserItem{}
+	e.FileBrowserItems = []config.FileBrowserItem{}
 
 	// Populate the FileBrowserItems slice
 	for _, entry := range dirEntries {
@@ -87,12 +87,12 @@ func DirectoryOpen(cfg *config.Editor, path string) error {
 			}
 		}
 
-		cfg.FileBrowserItems = append(cfg.FileBrowserItems, item)
+		e.FileBrowserItems = append(e.FileBrowserItems, item)
 	}
 
 	// Sort the FileBrowserItems so that directories appear first
-	sort.Slice(cfg.FileBrowserItems, func(i, j int) bool {
-		return cfg.FileBrowserItems[i].Type == "directory" && cfg.FileBrowserItems[j].Type != "directory"
+	sort.Slice(e.FileBrowserItems, func(i, j int) bool {
+		return e.FileBrowserItems[i].Type == "directory" && e.FileBrowserItems[j].Type != "directory"
 	})
 
 	if path != "/" {
@@ -105,12 +105,12 @@ func DirectoryOpen(cfg *config.Editor, path string) error {
 			CreatedAt:  time.Time{},
 			ModifiedAt: time.Time{},
 		}
-		cfg.FileBrowserItems = append([]config.FileBrowserItem{parentItem}, cfg.FileBrowserItems...)
+		e.FileBrowserItems = append([]config.FileBrowserItem{parentItem}, e.FileBrowserItems...)
 	}
 
-	cfg.CurrentDirectory = path
+	e.CurrentDirectory = path
 
-	// EditorSetStatusMessage(cfg, fmt.Sprintf("%s", cfg.RootDirectory))
+	// EditorSetStatusMessage(e, fmt.Sprintf("%s", e.RootDirectory))
 
 	return nil
 }

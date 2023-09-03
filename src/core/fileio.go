@@ -15,10 +15,10 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func EditorDeleteFile(cfg *config.Editor, fileName string) error {
+func EditorDeleteFile(e *config.Editor, fileName string) error {
 	fileName = strings.TrimSuffix(fileName, "\r")
 
-	filePath := filepath.Join(cfg.RootDirectory, fileName)
+	filePath := filepath.Join(e.RootDirectory, fileName)
 
 	err := os.Remove(filePath)
 	if err != nil {
@@ -26,26 +26,26 @@ func EditorDeleteFile(cfg *config.Editor, fileName string) error {
 	}
 
 	// Remove the buffer if it matches the deleted file
-	if cfg.CurrentBuffer.Name == fileName {
-		cfg.CurrentBuffer = config.NewBuffer() // or however you initialize a new buffer
+	if e.CurrentBuffer.Name == fileName {
+		e.CurrentBuffer = config.NewBuffer() // or however you initialize a new buffer
 	}
 
 	// Remove the buffer from the list of buffers
-	for i, buffer := range cfg.Buffers {
+	for i, buffer := range e.Buffers {
 		if buffer.Name == fileName {
-			cfg.Buffers = append(cfg.Buffers[:i], cfg.Buffers[i+1:]...)
+			e.Buffers = append(e.Buffers[:i], e.Buffers[i+1:]...)
 			break
 		}
 	}
 
-	EditorSetStatusMessage(cfg, fmt.Sprintf("File %s deleted", fileName))
+	EditorSetStatusMessage(e, fmt.Sprintf("File %s deleted", fileName))
 	return nil
 }
 
-func EditorCreateFile(cfg *config.Editor, fileName string) error {
+func EditorCreateFile(e *config.Editor, fileName string) error {
 	fileName = strings.TrimSuffix(fileName, "\r")
 
-	filePath := filepath.Join(cfg.RootDirectory, fileName)
+	filePath := filepath.Join(e.RootDirectory, fileName)
 
 	// Create the file
 	file, err := os.Create(filePath)
@@ -54,15 +54,15 @@ func EditorCreateFile(cfg *config.Editor, fileName string) error {
 	}
 	file.Close()
 
-	EditorSetStatusMessage(cfg, fmt.Sprintf("File %s created", fileName))
+	EditorSetStatusMessage(e, fmt.Sprintf("File %s created", fileName))
 	return nil
 }
 
-func EditorRenameFile(cfg *config.Editor, oldName, newName string) error {
+func EditorRenameFile(e *config.Editor, oldName, newName string) error {
 	oldName = strings.TrimSuffix(oldName, "\r")
 	newName = strings.TrimSuffix(newName, "\r")
-	oldPath := filepath.Join(cfg.CurrentDirectory, oldName)
-	newPath := filepath.Join(cfg.CurrentDirectory, newName)
+	oldPath := filepath.Join(e.CurrentDirectory, oldName)
+	newPath := filepath.Join(e.CurrentDirectory, newName)
 
 	// Check the old file's existence and permissions
 	oldFileInfo, err := os.Stat(oldPath)
@@ -71,9 +71,9 @@ func EditorRenameFile(cfg *config.Editor, oldName, newName string) error {
 	}
 
 	// Check if the file is currently open in the editor
-	if cfg.CurrentBuffer.Name == oldName {
+	if e.CurrentBuffer.Name == oldName {
 		// Save any unsaved changes before renaming
-		_, err := EditorSave(cfg)
+		_, err := EditorSave(e)
 		if err != nil {
 			config.LogToFile(fmt.Sprintf("%s", err.Error()))
 			return fmt.Errorf("failed to save file before renaming: %w", err)
@@ -103,47 +103,47 @@ func EditorRenameFile(cfg *config.Editor, oldName, newName string) error {
 	}
 
 	// Update the current buffer name if it matches the old name
-	if cfg.CurrentBuffer.Name == oldName {
-		cfg.CurrentBuffer.Name = newName
+	if e.CurrentBuffer.Name == oldName {
+		e.CurrentBuffer.Name = newName
 	}
 
 	// Update the name in the list of buffers
-	for i, buffer := range cfg.Buffers {
+	for i, buffer := range e.Buffers {
 		if buffer.Name == oldName {
-			cfg.Buffers[i].Name = newName
+			e.Buffers[i].Name = newName
 		}
 	}
 
 	// Refresh the file list in your editor here, if applicable
 
-	EditorSetStatusMessage(cfg, fmt.Sprintf("File renamed from %s to %s", oldName, newName))
+	EditorSetStatusMessage(e, fmt.Sprintf("File renamed from %s to %s", oldName, newName))
 	return nil
 }
 
-func FileOpen(cfg *config.Editor, fileName string) error {
-	cfg.EditorMode = constants.EDITOR_MODE_NORMAL
-	if !cfg.FirstRead {
-		cfg.CurrentBuffer = config.NewBuffer()
+func FileOpen(e *config.Editor, fileName string) error {
+	e.EditorMode = constants.EDITOR_MODE_NORMAL
+	if !e.FirstRead {
+		e.CurrentBuffer = config.NewBuffer()
 	}
-	cfg.Cx = 0
-	cfg.Cy = 0
-	cfg.CurrentBuffer.SliceIndex = 0
+	e.Cx = 0
+	e.Cy = 0
+	e.CurrentBuffer.SliceIndex = 0
 
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal("Error opening file")
 	}
 	defer file.Close()
-	relativeFileName := strings.TrimPrefix(fileName, cfg.RootDirectory)
+	relativeFileName := strings.TrimPrefix(fileName, e.RootDirectory)
 
 	// If the fileName didn't start with RootDirectory, just use the base name
 	if relativeFileName == fileName {
 		relativeFileName = filepath.Base(fileName)
 	}
 
-	cfg.FileName = relativeFileName
+	e.FileName = relativeFileName
 
-	highlighting.EditorSelectSyntaxHighlight(cfg)
+	highlighting.EditorSelectSyntaxHighlight(e)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -155,41 +155,41 @@ func FileOpen(cfg *config.Editor, fileName string) error {
 		row := config.NewRow() // Create a new Row using the NewRow function
 		row.Chars = []byte(line[:linelen])
 		row.Length = linelen
-		row.Idx = len(cfg.CurrentBuffer.Rows)
+		row.Idx = len(e.CurrentBuffer.Rows)
 		row.Highlighting = make([]byte, row.Length)
 		highlighting.Fill(row.Highlighting, constants.HL_NORMAL)
 		row.Tabs = make([]byte, row.Length)
-		EditorInsertRow(row, row.Idx, cfg)
-		cfg.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
+		EditorInsertRow(row, row.Idx, e)
+		e.CurrentBuffer.NumRows++ // Update NumRows within CurrentBuffer
 	}
-	highlighting.HighlightFileFromRow(0, cfg)
+	highlighting.HighlightFileFromRow(0, e)
 
 	if err := scanner.Err(); err != nil {
 		return err
 	}
-	cfg.CurrentBuffer.Dirty = 0
-	cfg.FirstRead = false
-	cfg.CurrentBuffer.Name = relativeFileName
-	if len(cfg.Buffers) < 1 {
-		cfg.Buffers = make([]config.Buffer, 10)
+	e.CurrentBuffer.Dirty = 0
+	e.FirstRead = false
+	e.CurrentBuffer.Name = relativeFileName
+	if len(e.Buffers) < 1 {
+		e.Buffers = make([]config.Buffer, 10)
 	}
 
-	cfg.LoadNewBuffer()
+	e.LoadNewBuffer()
 
-	EditorSetStatusMessage(cfg, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
+	EditorSetStatusMessage(e, "HELP: CTRL-S = Save | Ctrl-Q = quit | Ctr-f = find")
 
 	return nil
 }
 
-func EditorSave(cfg *config.Editor) (string, error) {
-	if cfg.CurrentBuffer.Name == "" {
+func EditorSave(e *config.Editor) (string, error) {
+	if e.CurrentBuffer.Name == "" {
 		return "", errors.New("no filename provided")
 	}
 
 	startTime := time.Now()
-	content := EditorRowsToString(cfg)
+	content := EditorRowsToString(e)
 
-	file, err := os.OpenFile(fmt.Sprintf("%s%s", cfg.RootDirectory, cfg.CurrentBuffer.Name), os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile(fmt.Sprintf("%s%s", e.RootDirectory, e.CurrentBuffer.Name), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
 	}
@@ -208,18 +208,18 @@ func EditorSave(cfg *config.Editor) (string, error) {
 	}
 
 	elapsedTime := time.Since(startTime) // End timing
-	numLines := len(cfg.CurrentBuffer.Rows)
+	numLines := len(e.CurrentBuffer.Rows)
 	numBytes := len(content)
-	message := fmt.Sprintf("\"%s\", %dL, %dB, %.3fms: written", cfg.CurrentBuffer.Name, numLines, numBytes, float64(elapsedTime.Nanoseconds())/1e6)
+	message := fmt.Sprintf("\"%s\", %dL, %dB, %.3fms: written", e.CurrentBuffer.Name, numLines, numBytes, float64(elapsedTime.Nanoseconds())/1e6)
 
-	cfg.CurrentBuffer.Dirty = 0
+	e.CurrentBuffer.Dirty = 0
 
 	return message, nil
 }
 
-func EditorRowsToString(cfg *config.Editor) string {
+func EditorRowsToString(e *config.Editor) string {
 	var buffer strings.Builder
-	for _, row := range cfg.CurrentBuffer.Rows {
+	for _, row := range e.CurrentBuffer.Rows {
 		buffer.Write(row.Chars)
 		buffer.WriteByte('\n')
 	}

@@ -4,17 +4,17 @@ import (
 	"github.com/deanrtaylor1/go-editor/config"
 )
 
-func RedoAction(cfg *config.Editor) {
-	lastAction, success := cfg.CurrentBuffer.PopRedo()
+func RedoAction(e *config.Editor) {
+	lastAction, success := e.CurrentBuffer.PopRedo()
 	if !success {
 		return
 	}
 
-	cfg.CurrentBuffer.AppendUndo(lastAction, cfg.UndoHistory)
+	e.CurrentBuffer.AppendUndo(lastAction, e.UndoHistory)
 
-	cfg.Cx = lastAction.Cx
-	cfg.Cy = lastAction.Index
-	cfg.CurrentBuffer.SliceIndex = lastAction.Cx - cfg.LineNumberWidth
+	e.Cx = lastAction.Cx
+	e.Cy = lastAction.Index
+	e.CurrentBuffer.SliceIndex = lastAction.Cx - e.LineNumberWidth
 
 	lastAction.RedoFunction()
 }

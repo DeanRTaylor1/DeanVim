@@ -39,6 +39,7 @@ type Editor struct {
 	FileBrowserIntroLength int
 	MotionBuffer           []rune
 	MotionMap              map[string]func()
+	Yank                   *Buffer
 }
 
 func NewEditor() *Editor {

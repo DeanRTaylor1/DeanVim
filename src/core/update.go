@@ -8,20 +8,20 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
-func EditorUpdateRow(row *config.Row, cfg *config.Editor) {
-	if cfg.Cy < 0 {
+func EditorUpdateRow(row *config.Row, e *config.Editor) {
+	if e.Cy < 0 {
 		return
 	}
-	currentRow := cfg.GetCurrentRow()
+	currentRow := e.GetCurrentRow()
 
 	currentRow.Chars = row.Chars
 	currentRow.Length = row.Length
 	currentRow.Highlighting = make([]byte, row.Length)
 	highlighting.Fill(currentRow.Highlighting, constants.HL_NORMAL)
 	currentRow.Tabs = make([]byte, currentRow.Length)
-	MapTabs(cfg)
+	MapTabs(e)
 
-	highlighting.SyntaxHighlightStateMachine(&cfg.CurrentBuffer.Rows[cfg.Cy], cfg)
+	highlighting.SyntaxHighlightStateMachine(&e.CurrentBuffer.Rows[e.Cy], e)
 }
 
 func ReplaceTabsWithSpaces(line []byte) []byte {
@@ -39,8 +39,8 @@ func ReplaceTabsWithSpaces(line []byte) []byte {
 	return result
 }
 
-func MapTabs(cfg *config.Editor) {
-	currentRow := &cfg.CurrentBuffer.Rows[cfg.Cy]
+func MapTabs(e *config.Editor) {
+	currentRow := &e.CurrentBuffer.Rows[e.Cy]
 
 	if len(currentRow.Tabs) != len(currentRow.Chars) {
 		currentRow.Tabs = make([]byte, len(currentRow.Chars))
@@ -67,18 +67,18 @@ func MapTabs(cfg *config.Editor) {
 	}
 }
 
-func EditorScroll(cfg *config.Editor) {
-	if cfg.Cy <= cfg.RowOff {
-		cfg.RowOff = cfg.Cy
+func EditorScroll(e *config.Editor) {
+	if e.Cy <= e.RowOff {
+		e.RowOff = e.Cy
 	}
-	if cfg.Cy >= cfg.RowOff+cfg.ScreenRows {
-		cfg.RowOff = cfg.Cy - cfg.ScreenRows + 1
+	if e.Cy >= e.RowOff+e.ScreenRows {
+		e.RowOff = e.Cy - e.ScreenRows + 1
 	}
-	if cfg.Cx >= 5 && cfg.Cx-cfg.LineNumberWidth < cfg.ColOff {
-		cfg.ColOff = cfg.Cx - cfg.LineNumberWidth
+	if e.Cx >= 5 && e.Cx-e.LineNumberWidth < e.ColOff {
+		e.ColOff = e.Cx - e.LineNumberWidth
 	}
-	if cfg.Cx >= cfg.ColOff+cfg.ScreenCols {
-		cfg.ColOff = cfg.Cx - cfg.ScreenCols + 1
+	if e.Cx >= e.ColOff+e.ScreenCols {
+		e.ColOff = e.Cx - e.ScreenCols + 1
 	}
 }
 

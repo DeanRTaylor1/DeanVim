@@ -9,105 +9,105 @@ import (
 	"github.com/deanrtaylor1/go-editor/constants"
 )
 
-func EventHandlerMain(reader *bufio.Reader, cfg *config.Editor) rune {
+func EventHandlerMain(reader *bufio.Reader, e *config.Editor) rune {
 	char, err := ReadKey(reader)
 	if err != nil {
 		panic(err)
 	}
 
-	if cfg.EditorMode == constants.EDITOR_MODE_NORMAL {
-		char = NormalModeEventsHandler(char, cfg)
-	} else if cfg.EditorMode == constants.EDITOR_MODE_INSERT {
-		InsertModeEventsHandler(char, cfg)
-	} else if cfg.IsBrowsingFiles() {
-		char = FileBrowserEventsHandler(char, cfg)
-	} else if cfg.EditorMode == constants.EDITOR_MODE_VISUAL {
-		char = VisualModeEventsHandler(char, cfg)
+	if e.EditorMode == constants.EDITOR_MODE_NORMAL {
+		char = NormalModeEventsHandler(char, e)
+	} else if e.EditorMode == constants.EDITOR_MODE_INSERT {
+		InsertModeEventsHandler(char, e)
+	} else if e.IsBrowsingFiles() {
+		char = FileBrowserEventsHandler(char, e)
+	} else if e.EditorMode == constants.EDITOR_MODE_VISUAL {
+		char = VisualModeEventsHandler(char, e)
 	}
 	return char
 }
 
-func FileBrowserCursorMovements(key rune, cfg *config.Editor) {
+func FileBrowserCursorMovements(key rune, e *config.Editor) {
 	switch key {
 	case rune(constants.ARROW_LEFT):
-		if cfg.Cx <= 0 {
+		if e.Cx <= 0 {
 			return
 		}
-		cfg.MoveCursorLeft()
+		e.MoveCursorLeft()
 	case rune(constants.ARROW_RIGHT):
-		if cfg.Cy == len(cfg.FileBrowserItems)+len(cfg.InstructionsLines()) {
+		if e.Cy == len(e.FileBrowserItems)+len(e.InstructionsLines()) {
 			break
 		}
-		cfg.MoveCursorRight()
+		e.MoveCursorRight()
 	case rune(constants.ARROW_DOWN):
-		if cfg.Cy < len(cfg.FileBrowserItems)+len(cfg.InstructionsLines()) {
-			cfg.MoveCursorDown()
+		if e.Cy < len(e.FileBrowserItems)+len(e.InstructionsLines()) {
+			e.MoveCursorDown()
 		}
 	case rune(constants.ARROW_UP):
-		if cfg.Cy >= 5 {
-			cfg.MoveCursorUp()
+		if e.Cy >= 5 {
+			e.MoveCursorUp()
 		}
 	}
 }
 
-func EditorCursorMovements(key rune, cfg *config.Editor) {
+func EditorCursorMovements(key rune, e *config.Editor) {
 	var row []byte = []byte{}
-	if cfg.Cy < cfg.CurrentBuffer.NumRows {
-		row = cfg.CurrentBuffer.Rows[cfg.Cy].Chars
+	if e.Cy < e.CurrentBuffer.NumRows {
+		row = e.CurrentBuffer.Rows[e.Cy].Chars
 	}
-	// spacesNeeded := TAB_STOP - (cfg.Cx % TAB_STOP)
+	// spacesNeeded := TAB_STOP - (e.Cx % TAB_STOP)
 	switch key {
 	case rune(constants.ARROW_LEFT):
-		if cfg.CurrentBuffer.SliceIndex != 0 {
-			cfg.MoveCursorLeft()
-		} else if cfg.Cy > 0 && cfg.Cy < cfg.CurrentBuffer.NumRows {
-			cfg.MoveCursorUp()
-			cfg.Cx = (cfg.GetCurrentRow().Length) + cfg.LineNumberWidth
-			cfg.CurrentBuffer.SliceIndex = cfg.GetCurrentRow().Length
+		if e.CurrentBuffer.SliceIndex != 0 {
+			e.MoveCursorLeft()
+		} else if e.Cy > 0 && e.Cy < e.CurrentBuffer.NumRows {
+			e.MoveCursorUp()
+			e.Cx = (e.GetCurrentRow().Length) + e.LineNumberWidth
+			e.CurrentBuffer.SliceIndex = e.GetCurrentRow().Length
 		}
 	case rune(constants.ARROW_RIGHT):
-		if cfg.Cy == cfg.CurrentBuffer.NumRows {
+		if e.Cy == e.CurrentBuffer.NumRows {
 			break
 		}
-		if cfg.CurrentBuffer.SliceIndex < (cfg.GetCurrentRow().Length) {
-			cfg.MoveCursorRight()
-		} else if cfg.Cx-cfg.LineNumberWidth >= cfg.GetCurrentRow().Length && cfg.Cy < len(cfg.CurrentBuffer.Rows)-1 {
-			cfg.MoveCursorDown()
-			cfg.Cx = cfg.LineNumberWidth
-			cfg.CurrentBuffer.SliceIndex = 0
+		if e.CurrentBuffer.SliceIndex < (e.GetCurrentRow().Length) {
+			e.MoveCursorRight()
+		} else if e.Cx-e.LineNumberWidth >= e.GetCurrentRow().Length && e.Cy < len(e.CurrentBuffer.Rows)-1 {
+			e.MoveCursorDown()
+			e.Cx = e.LineNumberWidth
+			e.CurrentBuffer.SliceIndex = 0
 		}
 	case rune(constants.ARROW_DOWN):
-		if cfg.Cy < cfg.CurrentBuffer.NumRows {
-			cfg.MoveCursorDown()
+		if e.Cy < e.CurrentBuffer.NumRows {
+			e.MoveCursorDown()
 		}
 	case rune(constants.ARROW_UP):
-		if cfg.Cy != 0 {
-			cfg.MoveCursorUp()
+		if e.Cy != 0 {
+			e.MoveCursorUp()
 		}
 	}
 
-	if cfg.Cy < cfg.CurrentBuffer.NumRows {
-		row = cfg.CurrentBuffer.Rows[cfg.Cy].Chars
+	if e.Cy < e.CurrentBuffer.NumRows {
+		row = e.CurrentBuffer.Rows[e.Cy].Chars
 	} else {
 		row = []byte{}
 	}
 
 	rowLen := len(row)
-	if cfg.CurrentBuffer.SliceIndex > rowLen {
-		cfg.Cx = rowLen + cfg.LineNumberWidth
-		cfg.CurrentBuffer.SliceIndex = rowLen
+	if e.CurrentBuffer.SliceIndex > rowLen {
+		e.Cx = rowLen + e.LineNumberWidth
+		e.CurrentBuffer.SliceIndex = rowLen
 	}
 }
 
-func EditorMoveCursor(key rune, cfg *config.Editor) {
-	if cfg.IsBrowsingFiles() {
-		FileBrowserCursorMovements(key, cfg)
+func EditorMoveCursor(key rune, e *config.Editor) {
+	if e.IsBrowsingFiles() {
+		FileBrowserCursorMovements(key, e)
 	} else {
-		EditorCursorMovements(key, cfg)
+		EditorCursorMovements(key, e)
 	}
 }
 
-func EditorSetStatusMessage(cfg *config.Editor, format string, a ...interface{}) {
-	cfg.StatusMsg = fmt.Sprintf(format, a...)
-	cfg.StatusMsgTime = time.Now()
+func EditorSetStatusMessage(e *config.Editor, format string, a ...interface{}) {
+	e.StatusMsg = fmt.Sprintf(format, a...)
+	e.StatusMsgTime = time.Now()
 }
