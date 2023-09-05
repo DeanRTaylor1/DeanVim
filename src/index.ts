@@ -6,7 +6,11 @@ function callBack() {
     arr.push(1)
   }
 }
-
+function newFunction() {
+  if 1 + 1 === 2 {
+    return 5
+  }
+}
 function newFunction(x: number, y:number){
   //TODO2
 }

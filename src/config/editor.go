@@ -39,7 +39,7 @@ type Editor struct {
 	FileBrowserIntroLength int
 	MotionBuffer           []rune
 	MotionMap              map[string]func()
-	Yank                   *Buffer
+	Yank                   Yank
 }
 
 func NewEditor() *Editor {
@@ -64,6 +64,79 @@ func NewEditor() *Editor {
 		FileBrowserItems: []FileBrowserItem{},
 		CurrentDirectory: "",
 		MotionBuffer:     []rune{},
+	}
+}
+
+func (e *Editor) YankSelected() {
+	startX := e.CurrentBuffer.SelectedCxStart
+	startY := e.CurrentBuffer.SelectedCyStart
+	endX := e.CurrentBuffer.SelectedCxEnd
+	endY := e.CurrentBuffer.SelectedCyEnd
+
+	logMessage := fmt.Sprintf(
+		"YankSelected called with startX: %d, startY: %d, endX: %d, endY: %d",
+		startX, startY, endX, endY,
+	)
+	LogToFile(logMessage)
+
+	// if startY == endY {
+	// 	if startX == 0 && endX == len(e.CurrentBuffer.Rows[startY].Chars) {
+	// 		e.YankLine()
+	// 	} else {
+	// 		e.YankChars()
+	// 	}
+	// } else {
+	// 	e.YankBlock()
+	// }
+}
+
+func (e *Editor) YankChars() {
+}
+
+func (e *Editor) YankLine() {
+}
+
+func (e *Editor) YankBlock() {
+}
+
+// Move the selection up by y rows
+func (e *Editor) SelectMoveUpBy(y int) {
+	if e.Cy-e.RowOff > 0 {
+		if e.CurrentBuffer.MultiLineHighlight() && e.Cy == e.CurrentBuffer.SelectedCyEnd {
+			e.CurrentBuffer.SelectedCyEnd -= y
+		} else if e.Cy == e.CurrentBuffer.SelectedCyStart {
+			e.CurrentBuffer.SelectedCyStart -= y
+		}
+	}
+}
+
+// Move the selection down by y rows
+func (e *Editor) SelectMoveDownBy(y int) {
+	if e.Cy-e.RowOff <= e.ScreenCols { // Check if cursor is not at the bottom of the screen
+		if e.CurrentBuffer.SelectedCyEnd >= e.CurrentBuffer.SelectedCyStart {
+			e.CurrentBuffer.SelectedCyEnd += y
+		} else {
+			e.CurrentBuffer.SelectedCyStart += y
+		}
+	}
+}
+
+// Move the selection right by x columns
+func (e *Editor) SelectMoveRightBy(x int) {
+	if e.Cx >= e.CurrentBuffer.SelectedCxEnd || e.Cy > e.CurrentBuffer.SelectedCyStart {
+		e.CurrentBuffer.SelectedCxEnd += x
+	} else {
+		e.CurrentBuffer.SelectedCxStart += x
+	}
+}
+
+func (e *Editor) SelectMoveLeftBy(x int) {
+	if e.Cx >= e.LineNumberWidth {
+		if e.Cx > e.CurrentBuffer.SelectedCxStart {
+			e.CurrentBuffer.SelectedCxEnd -= x
+		} else {
+			e.CurrentBuffer.SelectedCxStart -= x
+		}
 	}
 }
 

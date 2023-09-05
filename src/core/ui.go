@@ -112,10 +112,12 @@ func EditorDrawRows(buffer *bytes.Buffer, e *config.Editor, startRow, endRow int
 		} else {
 			rowLength := e.CurrentBuffer.Rows[fileRow].Length - e.ColOff
 			availableScreenCols := screenCols - e.LineNumberWidth
-			if fileRow < 5 {
-				config.LogToFile(fmt.Sprintf("FileRow: %d, selectedcy: %d, %d", fileRow, e.CurrentBuffer.SelectedCyStart, e.CurrentBuffer.SelectedCyEnd))
-			}
 			isSelectedRow := fileRow >= e.CurrentBuffer.SelectedCyStart && fileRow <= e.CurrentBuffer.SelectedCyEnd
+
+			if isSelectedRow && e.CurrentBuffer.Rows[fileRow].Length == 0 {
+				tempColor := -1 // Temporary variable for color
+				FormatSelectedTextHandler(buffer, ' ', &tempColor, constants.HL_SELECTED)
+			}
 
 			if rowLength < 0 {
 				rowLength = 0
@@ -129,8 +131,8 @@ func EditorDrawRows(buffer *bytes.Buffer, e *config.Editor, startRow, endRow int
 				for j := 0; j < rowLength; j++ {
 
 					c := e.CurrentBuffer.Rows[fileRow].Chars[e.ColOff+j]
-					isSelectedChar := isSelectedRow && j+e.ColOff >= e.CurrentBuffer.SelectedCxStart-e.LineNumberWidth && j+e.ColOff <= e.CurrentBuffer.SelectedCxEnd-e.LineNumberWidth
-
+					isSelectedChar := false
+					config.IsSelectedChar(j, fileRow, &isSelectedChar, e)
 					hl := highlights[e.ColOff+j]
 					if c == ' ' {
 						spaceCount := CountSpaces(e, rowLength, j, fileRow)
@@ -143,7 +145,7 @@ func EditorDrawRows(buffer *bytes.Buffer, e *config.Editor, startRow, endRow int
 
 					if unicode.IsControl(rune(c)) {
 						ControlCHandler(buffer, rune(c), cColor)
-					} else if isSelectedChar && (fileRow < e.CurrentBuffer.SelectedCyEnd || j+e.ColOff <= e.Cx-e.LineNumberWidth) {
+					} else if isSelectedChar {
 						FormatSelectedTextHandler(buffer, c, &cColor, hl)
 					} else if hl == constants.HL_MATCH {
 						FormatFindResultHandler(buffer, c)

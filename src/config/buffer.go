@@ -1,6 +1,8 @@
 package config
 
-import "github.com/deanrtaylor1/go-editor/constants"
+import (
+	"github.com/deanrtaylor1/go-editor/constants"
+)
 
 type Buffer struct {
 	Idx                int
@@ -32,40 +34,8 @@ type BufferSyntax struct {
 	Syntaxes               []constants.SyntaxHighlighting
 }
 
-// Move the selection right by x columns
-func (b *Buffer) SelectMoveRightBy(x int) {
-	if b.SelectedCxEnd >= b.SelectedCxStart {
-		b.SelectedCxEnd += x
-	} else {
-		b.SelectedCxStart += x
-	}
-}
-
-// Move the selection left by x columns
-func (b *Buffer) SelectMoveLeftBy(x int) {
-	if b.SelectedCxEnd > b.SelectedCxStart {
-		b.SelectedCxEnd -= x
-	} else if b.SelectedCxStart > 0 {
-		b.SelectedCxStart -= x
-	}
-}
-
-// Move the selection up by y rows
-func (b *Buffer) SelectMoveUpBy(y int) {
-	if b.SelectedCyEnd > b.SelectedCyStart {
-		b.SelectedCyEnd -= y
-	} else if b.SelectedCyStart > 0 {
-		b.SelectedCyStart -= y
-	}
-}
-
-// Move the selection down by y rows
-func (b *Buffer) SelectMoveDownBy(y int) {
-	if b.SelectedCyEnd >= b.SelectedCyStart {
-		b.SelectedCyEnd += y
-	} else {
-		b.SelectedCyStart += y
-	}
+func (b *Buffer) MultiLineHighlight() bool {
+	return b.SelectedCyStart != b.SelectedCyEnd
 }
 
 func (b *Buffer) ClearSelection() {
