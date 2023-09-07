@@ -31,6 +31,28 @@ func NormalModeEventsHandler(char rune, e *config.Editor) rune {
 			e.Cy = 0
 			ReadHandler(e, e.RootDirectory)
 			return constants.INITIAL_REFRESH
+		case 'V':
+			e.EditorMode = constants.EDITOR_MODE_VISUAL
+			e.ClearMotionBuffer()
+			e.HighlightLine()
+			err := EndKeyHandler(e)
+			if err != nil {
+				config.LogToFile(err.Error())
+				break
+			}
+		case 'I':
+			e.Cx = e.LineNumberWidth
+			index := 0
+			if e.GetCurrentRow().Chars[index] == ' ' {
+				index++
+				e.Cx++
+			}
+			e.CurrentBuffer.SliceIndex = index
+			e.SetMode(constants.EDITOR_MODE_INSERT)
+		case 'p':
+			PasteYank(e)
+			e.ClearMotionBuffer()
+			return constants.INITIAL_REFRESH
 		case 'v':
 			e.ClearMotionBuffer()
 			e.SetMode(constants.EDITOR_MODE_VISUAL)

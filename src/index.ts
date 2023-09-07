@@ -1,4 +1,3 @@
-import pool from "./db.pool";
 import fs from 'node';
 
 function callBack() {
@@ -6,6 +5,16 @@ function callBack() {
     arr.push(1)
   }
 }
+function callBack() {
+  for (let i = 0; i <= 20; i++){
+    arr.push(1)
+  }
+
+function callBack() {
+  for (let i = 0; i <= 20; i++){
+    arr.push(1)
+  }
+
 function newFunction() {
   if 1 + 1 === 2 {
     return 5
@@ -39,7 +48,12 @@ const PORT = process.env.PORT || 8080;
     console.log(colors.Reset, "");
     process.exit(1);
   }
-
+function newFunction() {
+  "if this is"
+}
+function newFunction() {
+  "if this is"
+}
   try {
     console.log(colors.FgCyan, "initializing api...");
     pool.connect({

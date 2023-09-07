@@ -11,6 +11,14 @@ func InitializeMotionMap(e *config.Editor) map[string]func() {
 		" pv": func() {
 			ChangeToNormalMode(e)
 		},
+		"yy": func() {
+			e.EditorMode = constants.EDITOR_MODE_VISUAL
+			e.HighlightLine()
+			e.YankSelection()
+			e.Yank.Type = config.LineWise
+			e.ClearSelection()
+			e.EditorMode = constants.EDITOR_MODE_NORMAL
+		},
 	}
 }
 

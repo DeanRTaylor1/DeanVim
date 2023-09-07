@@ -3,7 +3,8 @@ package config
 type YankType int
 
 const (
-	LineWise YankType = iota
+	EMPTY_YANK YankType = iota
+	LineWise
 	CharWise
 	BlockWise
 )

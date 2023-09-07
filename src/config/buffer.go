@@ -40,6 +40,22 @@ func (b *Buffer) ReplaceRowAtIndex(index int, newRow Row) {
 	b.Rows[index] = newRow
 }
 
+func (b *Buffer) RemoveRowsFromIndex(index int, count int) {
+	if index < 0 || index >= len(b.Rows) {
+		return
+	}
+
+	if index+count > len(b.Rows) {
+		count = len(b.Rows) - index
+	}
+
+	beforeRows := b.Rows[:index]
+	afterRows := b.Rows[index+count:]
+
+	b.Rows = append(beforeRows, afterRows...)
+	b.NumRows -= count
+}
+
 func (b *Buffer) RemoveRowAtIndex(index int) {
 	if index < 0 || index >= len(b.Rows) {
 		return

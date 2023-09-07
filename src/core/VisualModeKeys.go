@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/highlighting"
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
@@ -24,8 +25,23 @@ func VisualModeEventsHandler(char rune, e *config.Editor) rune {
 	} else {
 		switch char {
 		case 'y':
-			e.YankSelected()
-			return constants.NO_OP
+			e.YankSelection()
+			e.SetMode(constants.EDITOR_MODE_NORMAL)
+			e.ClearSelection()
+			return constants.INITIAL_REFRESH
+		case 'V':
+			e.HighlightLine()
+			err := EndKeyHandler(e)
+			if err != nil {
+				config.LogToFile(err.Error())
+				break
+			}
+		case 'd':
+			e.DeleteSelection()
+			highlighting.HighlightFileFromRow(e.CurrentBuffer.SelectionStart.Row, e)
+			e.SetMode(constants.EDITOR_MODE_NORMAL)
+			e.ClearSelection()
+			return constants.INITIAL_REFRESH
 		case 'n':
 			e.SetMode(constants.EDITOR_MODE_NORMAL)
 			e.ClearSelection()

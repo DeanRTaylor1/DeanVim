@@ -6,6 +6,50 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
+func PasteYankLines(e *config.Editor) {
+	// Determine the starting row index for pasting
+	startIdx := e.Cy + 1 // Assuming you want to paste below the current row
+
+	for i, row := range e.Yank.PartialBuffer.Rows {
+		EditorInsertRow(&row, startIdx+i, e)
+	}
+
+	e.CurrentBuffer.Dirty += len(e.Yank.PartialBuffer.Rows)
+}
+
+func PasteYankChars(e *config.Editor) {
+	cRow := e.GetCurrentRow()
+	yankChars := e.Yank.PartialBuffer.Rows[0].Chars
+
+	insertIdx := e.Cx - e.LineNumberWidth + e.ColOff + 1
+	if insertIdx > len(cRow.Chars) {
+		insertIdx = len(cRow.Chars)
+	}
+
+	newChars := append(cRow.Chars[:insertIdx], append(yankChars, cRow.Chars[insertIdx:]...)...)
+
+	cRow.Chars = newChars
+	cRow.Length = len(newChars)
+
+	cRow.Highlighting = make([]byte, cRow.Length)
+	highlighting.Fill(cRow.Highlighting, constants.HL_NORMAL)
+	cRow.Tabs = make([]byte, cRow.Length)
+	highlighting.SyntaxHighlightStateMachine(cRow, e)
+
+	e.ClearYank()
+	e.CurrentBuffer.Dirty++
+}
+
+func PasteYank(e *config.Editor) {
+	if e.Yank.Type == config.EMPTY_YANK {
+		return
+	} else if e.Yank.Type == config.CharWise {
+		PasteYankChars(e)
+	} else if e.Yank.Type == config.LineWise {
+		PasteYankLines(e)
+	}
+}
+
 func editorRowInsertChar(row *config.Row, at int, char rune, e *config.Editor) {
 	row.Chars = append(row.Chars, 0)
 	copy(row.Chars[at+1:], row.Chars[at:])
