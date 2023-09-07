@@ -18,10 +18,8 @@ type Buffer struct {
 	Dirty              int
 	StoredCx           int
 	StoredCy           int
-	SelectedCxStart    int
-	SelectedCyStart    int
-	SelectedCyEnd      int
-	SelectedCxEnd      int
+	SelectionStart     Point
+	SelectionEnd       Point
 }
 
 type BufferSyntax struct {
@@ -32,17 +30,6 @@ type BufferSyntax struct {
 	MultiLineCommentEnd    string
 	Keywords               map[string]byte
 	Syntaxes               []constants.SyntaxHighlighting
-}
-
-func (b *Buffer) MultiLineHighlight() bool {
-	return b.SelectedCyStart != b.SelectedCyEnd
-}
-
-func (b *Buffer) ClearSelection() {
-	b.SelectedCxEnd = 0
-	b.SelectedCyEnd = 0
-	b.SelectedCxStart = 0
-	b.SelectedCyStart = 0
 }
 
 func (b *Buffer) ReplaceRowAtIndex(index int, newRow Row) {

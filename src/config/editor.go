@@ -12,6 +12,11 @@ import (
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
+type Point struct {
+	Row int
+	Col int
+}
+
 type Editor struct {
 	EditorMode             int
 	Cx                     int
@@ -67,18 +72,33 @@ func NewEditor() *Editor {
 	}
 }
 
+// Get the normalized selection start and end points
+func (e *Editor) GetNormalizedSelection() (Point, Point) {
+	start := e.CurrentBuffer.SelectionStart
+	end := e.CurrentBuffer.SelectionEnd
+
+	if start.Row > end.Row || (start.Row == end.Row && start.Col > end.Col) {
+		return end, start
+	}
+	return start, end
+}
+
+func (e *Editor) ClearSelection() {
+	neutralPoint := Point{Col: -1, Row: -1}
+	e.CurrentBuffer.SelectionStart = neutralPoint
+	e.CurrentBuffer.SelectionEnd = neutralPoint
+}
+
+func (e *Editor) MoveSelection() {
+	e.CurrentBuffer.SelectionEnd = Point{Col: e.Cx, Row: e.Cy}
+}
+
+func (e *Editor) HighlightSelection() {
+	e.CurrentBuffer.SelectionStart = Point{Col: e.Cx, Row: e.Cy}
+	e.CurrentBuffer.SelectionEnd = Point{Col: e.Cx, Row: e.Cy}
+}
+
 func (e *Editor) YankSelected() {
-	startX := e.CurrentBuffer.SelectedCxStart
-	startY := e.CurrentBuffer.SelectedCyStart
-	endX := e.CurrentBuffer.SelectedCxEnd
-	endY := e.CurrentBuffer.SelectedCyEnd
-
-	logMessage := fmt.Sprintf(
-		"YankSelected called with startX: %d, startY: %d, endX: %d, endY: %d",
-		startX, startY, endX, endY,
-	)
-	LogToFile(logMessage)
-
 	// if startY == endY {
 	// 	if startX == 0 && endX == len(e.CurrentBuffer.Rows[startY].Chars) {
 	// 		e.YankLine()
@@ -97,54 +117,6 @@ func (e *Editor) YankLine() {
 }
 
 func (e *Editor) YankBlock() {
-}
-
-// Move the selection up by y rows
-func (e *Editor) SelectMoveUpBy(y int) {
-	if e.Cy-e.RowOff > 0 {
-		if e.CurrentBuffer.MultiLineHighlight() && e.Cy == e.CurrentBuffer.SelectedCyEnd {
-			e.CurrentBuffer.SelectedCyEnd -= y
-		} else if e.Cy == e.CurrentBuffer.SelectedCyStart {
-			e.CurrentBuffer.SelectedCyStart -= y
-		}
-	}
-}
-
-// Move the selection down by y rows
-func (e *Editor) SelectMoveDownBy(y int) {
-	if e.Cy-e.RowOff <= e.ScreenCols { // Check if cursor is not at the bottom of the screen
-		if e.CurrentBuffer.SelectedCyEnd >= e.CurrentBuffer.SelectedCyStart {
-			e.CurrentBuffer.SelectedCyEnd += y
-		} else {
-			e.CurrentBuffer.SelectedCyStart += y
-		}
-	}
-}
-
-// Move the selection right by x columns
-func (e *Editor) SelectMoveRightBy(x int) {
-	if e.Cx >= e.CurrentBuffer.SelectedCxEnd || e.Cy > e.CurrentBuffer.SelectedCyStart {
-		e.CurrentBuffer.SelectedCxEnd += x
-	} else {
-		e.CurrentBuffer.SelectedCxStart += x
-	}
-}
-
-func (e *Editor) SelectMoveLeftBy(x int) {
-	if e.Cx >= e.LineNumberWidth {
-		if e.Cx > e.CurrentBuffer.SelectedCxStart {
-			e.CurrentBuffer.SelectedCxEnd -= x
-		} else {
-			e.CurrentBuffer.SelectedCxStart -= x
-		}
-	}
-}
-
-func (e *Editor) StartSelectedFromCursorPos() {
-	e.CurrentBuffer.SelectedCxStart = e.Cx
-	e.CurrentBuffer.SelectedCyStart = e.Cy
-	e.CurrentBuffer.SelectedCxEnd = e.Cx
-	e.CurrentBuffer.SelectedCyEnd = e.Cy
 }
 
 func (e *Editor) ResetCursorCoords() {

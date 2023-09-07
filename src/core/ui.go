@@ -99,6 +99,9 @@ func EditorDrawRows(buffer *bytes.Buffer, e *config.Editor, startRow, endRow int
 	screenCols := e.ScreenCols
 	HideCursorIfSearching(buffer, e)
 
+	startPoint, endPoint := e.GetNormalizedSelection()
+	cColor := -1
+
 	for i := startRow; i <= endRow; i++ {
 		fileRow := i + e.RowOff
 
@@ -112,55 +115,66 @@ func EditorDrawRows(buffer *bytes.Buffer, e *config.Editor, startRow, endRow int
 		} else {
 			rowLength := e.CurrentBuffer.Rows[fileRow].Length - e.ColOff
 			availableScreenCols := screenCols - e.LineNumberWidth
-			isSelectedRow := fileRow >= e.CurrentBuffer.SelectedCyStart && fileRow <= e.CurrentBuffer.SelectedCyEnd
-
-			if isSelectedRow && e.CurrentBuffer.Rows[fileRow].Length == 0 {
-				tempColor := -1 // Temporary variable for color
-				FormatSelectedTextHandler(buffer, ' ', &tempColor, constants.HL_SELECTED)
-			}
 
 			if rowLength < 0 {
 				rowLength = 0
 			}
-			if rowLength > availableScreenCols {
-				rowLength = availableScreenCols
-			}
-			if e.ColOff < e.CurrentBuffer.Rows[fileRow].Length {
-				highlights := e.CurrentBuffer.Rows[fileRow].Highlighting
-				cColor := -1
-				for j := 0; j < rowLength; j++ {
+			if rowLength == 0 {
+				withinSelection := (fileRow >= startPoint.Row && fileRow <= endPoint.Row)
+				if withinSelection {
+					// Insert a highlighted placeholder character (e.g., a space)
+					FormatSelectedTextHandler(buffer, ' ', &cColor, constants.HL_NORMAL)
+				}
 
-					c := e.CurrentBuffer.Rows[fileRow].Chars[e.ColOff+j]
-					isSelectedChar := false
-					config.IsSelectedChar(j, fileRow, &isSelectedChar, e)
-					hl := highlights[e.ColOff+j]
-					if c == ' ' {
-						spaceCount := CountSpaces(e, rowLength, j, fileRow)
-						if j > constants.TAB_STOP && spaceCount == constants.TAB_STOP {
-							AppendTabOrRowIndentBar(e, &j, buffer, fileRow, rowLength)
-							j += constants.TAB_STOP - 1
-							continue
+			} else {
+				if rowLength > availableScreenCols {
+					rowLength = availableScreenCols
+				}
+				if e.ColOff < e.CurrentBuffer.Rows[fileRow].Length {
+					highlights := e.CurrentBuffer.Rows[fileRow].Highlighting
+					cColor := -1
+					for j := 0; j < rowLength; j++ {
+
+						c := e.CurrentBuffer.Rows[fileRow].Chars[e.ColOff+j]
+						hl := highlights[e.ColOff+j]
+						if c == ' ' {
+							spaceCount := CountSpaces(e, rowLength, j, fileRow)
+							if j > constants.TAB_STOP && spaceCount == constants.TAB_STOP {
+								AppendTabOrRowIndentBar(e, &j, buffer, fileRow, rowLength)
+								j += constants.TAB_STOP - 1
+								continue
+							}
+						}
+
+						withinSelection := false
+						if fileRow == startPoint.Row && fileRow == endPoint.Row {
+							withinSelection = (e.ColOff+j >= startPoint.Col-e.LineNumberWidth && j <= endPoint.Col-e.LineNumberWidth)
+						} else if fileRow == startPoint.Row {
+							withinSelection = (e.ColOff+j >= startPoint.Col-e.LineNumberWidth)
+						} else if fileRow == endPoint.Row {
+							withinSelection = (e.ColOff+j <= endPoint.Col-e.LineNumberWidth)
+						} else if fileRow > startPoint.Row && fileRow < endPoint.Row {
+							withinSelection = true
+						}
+
+						if withinSelection {
+							FormatSelectedTextHandler(buffer, c, &cColor, hl)
+						} else if unicode.IsControl(rune(c)) {
+							ControlCHandler(buffer, rune(c), cColor)
+						} else if hl == constants.HL_MATCH {
+							FormatFindResultHandler(buffer, c)
+						} else if hl == constants.HL_NORMAL {
+							NormalFormatHandler(buffer, c, cColor)
+						} else {
+							ColorFormatHandler(buffer, c, &cColor, hl)
 						}
 					}
-
-					if unicode.IsControl(rune(c)) {
-						ControlCHandler(buffer, rune(c), cColor)
-					} else if isSelectedChar {
-						FormatSelectedTextHandler(buffer, c, &cColor, hl)
-					} else if hl == constants.HL_MATCH {
-						FormatFindResultHandler(buffer, c)
-					} else if hl == constants.HL_NORMAL {
-						NormalFormatHandler(buffer, c, cColor)
-					} else {
-						ColorFormatHandler(buffer, c, &cColor, hl)
-					}
+					buffer.WriteString(constants.FOREGROUND_RESET)
+					cColor = -1
+				} else {
+					buffer.Write([]byte{})
 				}
-				buffer.WriteString(constants.FOREGROUND_RESET)
-				cColor = -1
-			} else {
-				buffer.Write([]byte{})
 			}
-
 		}
 
 		buffer.WriteString(constants.ESCAPE_CLEAR_TO_LINE_END)

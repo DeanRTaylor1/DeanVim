@@ -34,7 +34,7 @@ func NormalModeEventsHandler(char rune, e *config.Editor) rune {
 		case 'v':
 			e.ClearMotionBuffer()
 			e.SetMode(constants.EDITOR_MODE_VISUAL)
-			e.StartSelectedFromCursorPos()
+			e.HighlightSelection()
 		case 'i':
 			e.SetMode(constants.EDITOR_MODE_INSERT)
 		case 'j':

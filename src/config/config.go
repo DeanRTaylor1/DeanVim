@@ -13,31 +13,6 @@ import (
 
 const logging = true
 
-func IsSelectedChar(j int, fileRow int, isSelectedChar *bool, e *Editor) {
-	if fileRow == 1 {
-	}
-
-	// Condition 1
-	if fileRow > e.CurrentBuffer.SelectedCyStart && fileRow < e.CurrentBuffer.SelectedCyEnd {
-		*isSelectedChar = true
-	}
-
-	// Condition 2
-	if fileRow == e.CurrentBuffer.SelectedCyStart && e.CurrentBuffer.MultiLineHighlight() {
-		*isSelectedChar = j+e.ColOff >= e.CurrentBuffer.SelectedCxStart-e.LineNumberWidth
-	}
-
-	// Condition 3
-	if fileRow == e.CurrentBuffer.SelectedCyEnd && e.CurrentBuffer.MultiLineHighlight() {
-		*isSelectedChar = j+e.ColOff <= e.Cx-e.LineNumberWidth
-	}
-
-	// Condition 4
-	if fileRow == e.CurrentBuffer.SelectedCyEnd && e.CurrentBuffer.SelectedCyStart == e.CurrentBuffer.SelectedCyEnd {
-		*isSelectedChar = j+e.ColOff >= e.CurrentBuffer.SelectedCxStart-e.LineNumberWidth && j+e.ColOff <= e.CurrentBuffer.SelectedCxEnd-e.LineNumberWidth
-	}
-}
-
 func LogToFile(message string) {
 	if !logging {
 		return
