@@ -146,7 +146,8 @@ func EditorDrawRows(buffer *bytes.Buffer, e *config.Editor, startRow, endRow int
 							}
 						}
 
-						withinSelection := false
+						withinSelection := e.IsWithinSelection(fileRow, j, startPoint, endPoint)
+
 						if fileRow == startPoint.Row && fileRow == endPoint.Row {
 							withinSelection = (e.ColOff+j >= startPoint.Col-e.LineNumberWidth && j <= endPoint.Col-e.LineNumberWidth)
 						} else if fileRow == startPoint.Row {

@@ -72,6 +72,51 @@ func NewEditor() *Editor {
 	}
 }
 
+func (e *Editor) YankSelection() {
+	startPoint, endPoint := e.GetNormalizedSelection()
+	partialBuffer := Buffer{
+		Rows:    []Row{},
+		NumRows: 0,
+	}
+
+	for i := startPoint.Row; i <= endPoint.Row; i++ {
+		row := e.CurrentBuffer.Rows[i]
+		newRow := Row{}
+		if i == startPoint.Row && i == endPoint.Row {
+			newRow.Chars = row.Chars[startPoint.Col:endPoint.Col]
+		} else if i == startPoint.Row {
+			newRow.Chars = row.Chars[startPoint.Col:]
+		} else if i == endPoint.Row {
+			newRow.Chars = row.Chars[:endPoint.Col]
+		} else {
+			newRow.Chars = row.Chars
+		}
+		partialBuffer.Rows = append(partialBuffer.Rows, newRow)
+		partialBuffer.NumRows++
+	}
+
+	e.Yank.PartialBuffer = partialBuffer
+	if partialBuffer.NumRows == 1 {
+		e.Yank.Type = CharWise
+	} else {
+		e.Yank.Type = LineWise
+	}
+}
+
+func (e *Editor) IsWithinSelection(fileRow, col int, startPoint, endPoint Point) bool {
+	withinSelection := false
+	if fileRow == startPoint.Row && fileRow == endPoint.Row {
+		withinSelection = (e.ColOff+col >= startPoint.Col-e.LineNumberWidth && col <= endPoint.Col-e.LineNumberWidth)
+	} else if fileRow == startPoint.Row {
+		withinSelection = (e.ColOff+col >= startPoint.Col-e.LineNumberWidth)
+	} else if fileRow == endPoint.Row {
+		withinSelection = (e.ColOff+col <= endPoint.Col-e.LineNumberWidth)
+	} else if fileRow > startPoint.Row && fileRow < endPoint.Row {
+		withinSelection = true
+	}
+	return withinSelection
+}
+
 // Get the normalized selection start and end points
 func (e *Editor) GetNormalizedSelection() (Point, Point) {
 	start := e.CurrentBuffer.SelectionStart
