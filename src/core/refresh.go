@@ -65,6 +65,7 @@ func SingleLineRefresh(e *config.Editor, buffer *bytes.Buffer, startRow, endRow 
 }
 
 func EditorRefreshScreen(e *config.Editor, lastKeyPress rune) {
+	var cursorPosition string
 	if lastKeyPress == constants.NO_OP {
 		return
 	}
@@ -72,31 +73,38 @@ func EditorRefreshScreen(e *config.Editor, lastKeyPress rune) {
 	EditorScroll(e)
 	buffer.WriteString(constants.ESCAPE_HIDE_CURSOR)
 
-	// Cursor position adjustment logic for non file browser modes
-	if !e.IsBrowsingFiles() && e.Cx < e.LineNumberWidth {
-		e.Cx = e.LineNumberWidth
-	}
-
-	if e.IsBrowsingFiles() && (e.Cy < 5 || e.Cy > len(e.FileBrowserItems)+len(e.InstructionsLines())) {
-		e.Cx = 0
-		e.Cy = len(e.InstructionsLines())
-	}
-
-	if !e.IsBrowsingFiles() && (e.SpecialRefreshCase()) {
-		FullRefresh(e, &buffer)
+	if e.ModalOpen {
+		buffer.WriteString(constants.ESCAPE_CURSOR_THIN)
+		cursorPosition = EditorDrawModal(&buffer, e)
 	} else {
-		startRow := e.Cy - 2
-		endRow := e.Cy + 2
-		if startRow < 0 {
-			startRow = 0
+		buffer.WriteString(constants.ESCAPE_CURSOR_THICK)
+
+		// Cursor position adjustment logic for non file browser modes
+		if !e.IsBrowsingFiles() && e.Cx < e.LineNumberWidth {
+			e.Cx = e.LineNumberWidth
 		}
-		switch lastKeyPress {
-		case constants.INITIAL_REFRESH, constants.ENTER_KEY, constants.BACKSPACE, constants.DEL_KEY, utils.CTRL_KEY(lastKeyPress), constants.PAGE_DOWN, constants.PAGE_UP:
+
+		if e.IsBrowsingFiles() && (e.Cy < 5 || e.Cy > len(e.FileBrowserItems)+len(e.InstructionsLines())) {
+			e.Cx = 0
+			e.Cy = len(e.InstructionsLines())
+		}
+
+		if !e.IsBrowsingFiles() && (e.SpecialRefreshCase()) {
 			FullRefresh(e, &buffer)
-		case constants.ARROW_DOWN, constants.ARROW_UP, constants.ARROW_LEFT, constants.ARROW_RIGHT:
-			PartialRefresh(e, &buffer, startRow, endRow)
-		default:
-			SingleLineRefresh(e, &buffer, 0, e.Cy)
+		} else {
+			startRow := e.Cy - 2
+			endRow := e.Cy + 2
+			if startRow < 0 {
+				startRow = 0
+			}
+			switch lastKeyPress {
+			case constants.INITIAL_REFRESH, constants.ENTER_KEY, constants.BACKSPACE, constants.DEL_KEY, utils.CTRL_KEY(lastKeyPress), constants.PAGE_DOWN, constants.PAGE_UP:
+				FullRefresh(e, &buffer)
+			case constants.ARROW_DOWN, constants.ARROW_UP, constants.ARROW_LEFT, constants.ARROW_RIGHT:
+				PartialRefresh(e, &buffer, startRow, endRow)
+			default:
+				SingleLineRefresh(e, &buffer, 0, e.Cy)
+			}
 		}
 	}
 
@@ -107,7 +115,9 @@ func EditorRefreshScreen(e *config.Editor, lastKeyPress rune) {
 	EditorDrawMessageBar(&buffer, e)
 
 	// Set cursor position
-	cursorPosition := SetCursorPos((e.Cy-e.RowOff)+1, (e.Cx-e.ColOff)+1)
+	if !e.ModalOpen {
+		cursorPosition = SetCursorPos((e.Cy-e.RowOff)+1, (e.Cx-e.ColOff)+1)
+	}
 	buffer.WriteString(cursorPosition)
 
 	buffer.WriteString(constants.ESCAPE_SHOW_CURSOR)

@@ -10,7 +10,6 @@ import (
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/core"
-	_ "github.com/deanrtaylor1/go-editor/highlighting"
 	"github.com/deanrtaylor1/go-editor/mappings"
 )
 

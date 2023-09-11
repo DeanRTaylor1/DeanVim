@@ -1,0 +1,31 @@
+package core
+
+import (
+	"github.com/deanrtaylor1/go-editor/config"
+	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/utils"
+)
+
+func ModalModeEventsHandler(char rune, e *config.Editor) rune {
+	switch char {
+	case constants.ESCAPE_KEY:
+		e.ModalOpen = false
+	case constants.ARROW_DOWN:
+		EditorMoveCursor(constants.ARROW_DOWN, e)
+		return constants.ARROW_DOWN
+	case constants.ARROW_UP:
+		EditorMoveCursor(constants.ARROW_UP, e)
+		return constants.ARROW_UP
+	case constants.ARROW_RIGHT:
+		EditorMoveCursor(constants.ARROW_RIGHT, e)
+		return constants.ARROW_RIGHT
+	case constants.ARROW_LEFT:
+		EditorMoveCursor(constants.ARROW_LEFT, e)
+		return constants.ARROW_LEFT
+	case constants.BACKSPACE, utils.CTRL_KEY('h'), constants.DEL_KEY:
+		DeleteHandler(e, char)
+	default:
+		insertCharModalInput(char, e)
+	}
+	return constants.INITIAL_REFRESH
+}

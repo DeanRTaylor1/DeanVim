@@ -6,6 +6,15 @@ const VERSION = "0.0.1"
 type SyntaxState int
 
 const (
+	LEFT_TOP_CORNER     = "\u256D"
+	RIGHT_TOP_CORNER    = "\u256E"
+	LEFT_BOTTOM_CORNER  = "\u2570"
+	RIGHT_BOTTOM_CORNER = "\u256F"
+	HORIZONTAL_LINE     = "\u2500"
+	VERTICAL_LINE       = "\u2502"
+)
+
+const (
 	EDITOR_MODE_NORMAL = iota
 	EDITOR_MODE_INSERT
 	EDITOR_MODE_VISUAL
@@ -63,6 +72,8 @@ const (
 	ESCAPE_MOVE_TO_COORDS = "\x1b[%d;%dH"
 	ESCAPE_SHOW_CURSOR    = "\x1b[?25h"
 	ESCAPE_CLEAR_SCREEN   = "\033[2J"
+	ESCAPE_CURSOR_THIN    = "\x1b[6 q"
+	ESCAPE_CURSOR_THICK   = "\x1b[2 q"
 )
 
 const (

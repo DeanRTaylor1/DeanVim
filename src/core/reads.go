@@ -36,6 +36,14 @@ func ReadHandler(e *config.Editor, arg string) {
 		}
 		DirectoryOpen(e, arg)
 	} else {
+		if e.RootDirectory == "" {
+			currentDir, err := os.Getwd()
+			if err != nil {
+				log.Fatal("Could Not Get the current directory")
+			}
+			e.RootDirectory = currentDir
+
+		}
 		e.EditorMode = constants.EDITOR_MODE_NORMAL
 		if e.CurrentBuffer.Name != "" {
 			e.ReplaceBuffer()

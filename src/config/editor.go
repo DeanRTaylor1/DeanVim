@@ -18,6 +18,11 @@ type Point struct {
 	Col int
 }
 
+type Modal struct {
+	ModalInput     []byte
+	CursorPosition int
+}
+
 type Editor struct {
 	EditorMode             int
 	Cx                     int
@@ -46,6 +51,12 @@ type Editor struct {
 	MotionBuffer           []rune
 	MotionMap              map[string]func()
 	Yank                   Yank
+	ModalOpen              bool
+	Modal                  Modal
+}
+
+func (e *Editor) ClearModalInput() {
+	e.Modal.ModalInput = []byte{}
 }
 
 func NewEditor() *Editor {
@@ -70,6 +81,15 @@ func NewEditor() *Editor {
 		FileBrowserItems: []FileBrowserItem{},
 		CurrentDirectory: "",
 		MotionBuffer:     []rune{},
+		ModalOpen:        false,
+		Modal:            InitModal(),
+	}
+}
+
+func InitModal() Modal {
+	return Modal{
+		ModalInput:     []byte{},
+		CursorPosition: 0,
 	}
 }
 

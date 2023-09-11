@@ -84,36 +84,46 @@ func handleDeleteKey(e *config.Editor, char rune) {
 }
 
 func deleteTabOrChar(e *config.Editor) {
-	currentRow := e.GetCurrentRow()
+	if e.ModalOpen {
+	} else {
 
-	if e.CurrentBuffer.SliceIndex > 0 && len(currentRow.Tabs) > 0 && currentRow.Tabs[e.CurrentBuffer.SliceIndex-1] == constants.HL_TAB_KEY {
-		startOfTab := e.CurrentBuffer.SliceIndex - 1
-		endOfTab := startOfTab
-		i := 1
-		for startOfTab > 0 && currentRow.Tabs[startOfTab-1] == constants.HL_TAB_KEY {
-			startOfTab--
-			i++
-			if i == constants.TAB_STOP {
-				break // Stop after finding one complete tab
+		currentRow := e.GetCurrentRow()
+
+		if e.CurrentBuffer.SliceIndex > 0 && len(currentRow.Tabs) > 0 && currentRow.Tabs[e.CurrentBuffer.SliceIndex-1] == constants.HL_TAB_KEY {
+			startOfTab := e.CurrentBuffer.SliceIndex - 1
+			endOfTab := startOfTab
+			i := 1
+			for startOfTab > 0 && currentRow.Tabs[startOfTab-1] == constants.HL_TAB_KEY {
+				startOfTab--
+				i++
+				if i == constants.TAB_STOP {
+					break // Stop after finding one complete tab
+				}
 			}
-		}
 
-		// Delete the entire tab
-		for j := endOfTab; j >= startOfTab; j-- {
+			// Delete the entire tab
+			for j := endOfTab; j >= startOfTab; j-- {
+				EditorDelChar(e)
+			}
+			e.GetCurrentRow().IndentationLevel--
+		} else {
 			EditorDelChar(e)
 		}
-		e.GetCurrentRow().IndentationLevel--
-	} else {
-		EditorDelChar(e)
 	}
 }
 
 func DeleteHandler(e *config.Editor, char rune) {
-	action := createActionForUndo(e, func() { handleDeleteKey(e, char); deleteTabOrChar(e) })
-	e.CurrentBuffer.AppendUndo(*action, e.UndoHistory)
+	if e.ModalOpen {
+		handleDeleteKey(e, char)
+		ModalSearchDelChar(e)
+	} else {
+		action := createActionForUndo(e, func() { handleDeleteKey(e, char); deleteTabOrChar(e) })
+		e.CurrentBuffer.AppendUndo(*action, e.UndoHistory)
 
-	handleDeleteKey(e, char)
-	deleteTabOrChar(e)
+		handleDeleteKey(e, char)
+		deleteTabOrChar(e)
+
+	}
 }
 
 func PageJumpHandler(e *config.Editor, char rune) {

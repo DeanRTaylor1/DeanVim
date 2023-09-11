@@ -15,7 +15,9 @@ func EventHandlerMain(reader *bufio.Reader, e *config.Editor) rune {
 		panic(err)
 	}
 
-	if e.EditorMode == constants.EDITOR_MODE_NORMAL {
+	if e.ModalOpen {
+		char = ModalModeEventsHandler(char, e)
+	} else if e.EditorMode == constants.EDITOR_MODE_NORMAL {
 		char = NormalModeEventsHandler(char, e)
 	} else if e.EditorMode == constants.EDITOR_MODE_INSERT {
 		InsertModeEventsHandler(char, e)
@@ -25,6 +27,21 @@ func EventHandlerMain(reader *bufio.Reader, e *config.Editor) rune {
 		char = VisualModeEventsHandler(char, e)
 	}
 	return char
+}
+
+func ModalSearchCursorMovements(key rune, e *config.Editor) {
+	switch key {
+	case rune(constants.ARROW_LEFT):
+		if e.Modal.CursorPosition <= 0 {
+			return
+		}
+		e.Modal.CursorPosition--
+	case rune(constants.ARROW_RIGHT):
+		if e.Modal.CursorPosition >= len(e.Modal.ModalInput) {
+			return
+		}
+		e.Modal.CursorPosition++
+	}
 }
 
 func FileBrowserCursorMovements(key rune, e *config.Editor) {
@@ -100,7 +117,9 @@ func EditorCursorMovements(key rune, e *config.Editor) {
 }
 
 func EditorMoveCursor(key rune, e *config.Editor) {
-	if e.IsBrowsingFiles() {
+	if e.ModalOpen {
+		ModalSearchCursorMovements(key, e)
+	} else if e.IsBrowsingFiles() {
 		FileBrowserCursorMovements(key, e)
 	} else {
 		EditorCursorMovements(key, e)

@@ -6,6 +6,16 @@ import (
 	"github.com/deanrtaylor1/go-editor/highlighting"
 )
 
+func ModalSearchDelChar(e *config.Editor) {
+	if e.Modal.CursorPosition == 0 || len(e.Modal.ModalInput) == 0 {
+		return
+	}
+
+	e.Modal.ModalInput = append(e.Modal.ModalInput[:e.Modal.CursorPosition-1], e.Modal.ModalInput[e.Modal.CursorPosition:]...)
+
+	e.Modal.CursorPosition--
+}
+
 func EditorDelChar(e *config.Editor) {
 	if e.Cy == e.CurrentBuffer.NumRows {
 		return

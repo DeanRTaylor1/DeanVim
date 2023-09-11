@@ -82,6 +82,6 @@ func EditorScroll(e *config.Editor) {
 	}
 }
 
-func SetCursorPos(x int, y int) string {
-	return fmt.Sprintf(constants.ESCAPE_MOVE_TO_COORDS, x, y)
+func SetCursorPos(y int, x int) string {
+	return fmt.Sprintf(constants.ESCAPE_MOVE_TO_COORDS, y, x)
 }
