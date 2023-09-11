@@ -21,12 +21,25 @@ func EditorDrawModal(buffer *bytes.Buffer, e *config.Editor) string {
 	buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, modalWidth-2)) // Horizontal line
 	buffer.WriteString(constants.RIGHT_TOP_CORNER)                              // Right-top corner
 
-	// Draw the sides and the content area
 	for i := 1; i < modalHeight-5; i++ {
 		buffer.WriteString(SetCursorPos(startY+i, startX))
-		buffer.WriteString(constants.VERTICAL_LINE)           // Vertical line
-		buffer.WriteString(strings.Repeat(" ", modalWidth-2)) // Content area
-		buffer.WriteString(constants.VERTICAL_LINE)           // Vertical line
+		buffer.WriteString(constants.VERTICAL_LINE) // Vertical line
+
+		// Check if the index exists in e.Modal.Data
+		dataIndex := i - 1 // Adjusting the index
+		if dataIndex < len(e.Modal.Data) {
+			// Write the data at the index
+			buffer.WriteString(e.Modal.Data[dataIndex])
+
+			// Fill the remaining space with empty characters
+			remainingSpace := modalWidth - 2 - len(e.Modal.Data[dataIndex])
+			buffer.WriteString(strings.Repeat(" ", remainingSpace))
+		} else {
+			// If the index doesn't exist, fill the entire space with empty characters
+			buffer.WriteString(strings.Repeat(" ", modalWidth-2))
+		}
+
+		buffer.WriteString(constants.VERTICAL_LINE) // Vertical line
 	}
 
 	// Draw the bottom border with rounded corners
@@ -35,8 +48,8 @@ func EditorDrawModal(buffer *bytes.Buffer, e *config.Editor) string {
 	buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, modalWidth-2)) // Horizontal line
 	buffer.WriteString(constants.RIGHT_BOTTOM_CORNER)                           // Right-bottom corner
 
-	searchBoxStartY := modalHeight // 3 lines from the bottom of the modal
-	searchBoxWidth := modalWidth   // 2 spaces padding on each side
+	searchBoxStartY := modalHeight + 1 // 3 lines from the bottom of the modal
+	searchBoxWidth := modalWidth       // 2 spaces padding on each side
 
 	// Draw the top border of the search box with rounded corners
 	buffer.WriteString(SetCursorPos(searchBoxStartY, startX))

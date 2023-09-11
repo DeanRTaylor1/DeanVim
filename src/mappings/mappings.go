@@ -1,6 +1,8 @@
 package mappings
 
 import (
+	"strings"
+
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/core"
@@ -37,5 +39,13 @@ func yankLine(e *config.Editor) {
 }
 
 func OpenModal(e *config.Editor) {
+	files, err := config.ListFiles(e.RootDirectory)
+	if err != nil {
+		config.LogToFile(err.Error())
+		return
+	}
 	e.ModalOpen = !e.ModalOpen
+	e.Modal.Data = files
+	filesString := strings.Join(files, ", ")
+	config.LogToFile("Files listed: " + filesString)
 }

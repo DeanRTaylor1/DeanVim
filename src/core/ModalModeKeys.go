@@ -11,13 +11,10 @@ func ModalModeEventsHandler(char rune, e *config.Editor) rune {
 	case constants.ESCAPE_KEY:
 		e.ModalOpen = false
 	case constants.ARROW_DOWN:
-		EditorMoveCursor(constants.ARROW_DOWN, e)
 		return constants.ARROW_DOWN
 	case constants.ARROW_UP:
-		EditorMoveCursor(constants.ARROW_UP, e)
 		return constants.ARROW_UP
 	case constants.ARROW_RIGHT:
-		EditorMoveCursor(constants.ARROW_RIGHT, e)
 		return constants.ARROW_RIGHT
 	case constants.ARROW_LEFT:
 		EditorMoveCursor(constants.ARROW_LEFT, e)

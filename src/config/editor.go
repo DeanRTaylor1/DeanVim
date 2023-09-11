@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"golang.org/x/term"
@@ -21,6 +23,7 @@ type Point struct {
 type Modal struct {
 	ModalInput     []byte
 	CursorPosition int
+	Data           []string
 }
 
 type Editor struct {
@@ -86,10 +89,30 @@ func NewEditor() *Editor {
 	}
 }
 
+func ListFiles(dir string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			// Remove the dir prefix from the path
+			relativePath := strings.TrimPrefix(path, dir)
+			if strings.HasPrefix(relativePath, string(os.PathSeparator)) {
+				relativePath = strings.TrimPrefix(relativePath, string(os.PathSeparator))
+			}
+			files = append(files, relativePath)
+		}
+		return nil
+	})
+	return files, err
+}
+
 func InitModal() Modal {
 	return Modal{
 		ModalInput:     []byte{},
 		CursorPosition: 0,
+		Data:           []string{},
 	}
 }
 
