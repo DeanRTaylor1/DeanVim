@@ -1,11 +1,10 @@
 package mappings
 
 import (
-	"strings"
-
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/core"
+	"github.com/deanrtaylor1/go-editor/fuzzy"
 )
 
 func InitializeMotionMap(e *config.Editor) map[string]func() {
@@ -45,8 +44,12 @@ func OpenModal(e *config.Editor) {
 		return
 	}
 	e.ModalOpen = !e.ModalOpen
-	e.Modal.Data = files
-	e.Modal.Results = files
-	filesString := strings.Join(files, ", ")
-	config.LogToFile("Files listed: " + filesString)
+	e.Modal.Data = make([]fuzzy.Match, len(files))
+	for i, str := range files {
+		e.Modal.Data[i] = fuzzy.Match{
+			Str:            str,
+			MatchedIndexes: []int{}, // Empty because no characters are matched
+		}
+	}
+	e.Modal.Results = e.Modal.Data
 }

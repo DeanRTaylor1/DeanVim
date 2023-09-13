@@ -14,7 +14,7 @@ func ModalModeEventsHandler(char rune, e *config.Editor) rune {
 	case constants.ENTER_KEY:
 		e.CacheCursorCoords()
 		e.ResetCursorCoords()
-		fullPath := filepath.Join(e.RootDirectory, e.Modal.Results[e.Modal.ItemIndex])
+		fullPath := filepath.Join(e.RootDirectory, e.Modal.Results[e.Modal.ItemIndex].Str)
 		e.Modal.ItemIndex = 0
 		e.Modal.DataRowOffset = 0
 		e.Modal.SearchColOffset = 0
@@ -72,5 +72,5 @@ func updateResults(e *config.Editor) {
 	}
 
 	// Update Modal.Data with the filtered data
-	e.Modal.Results = filteredData
+	e.Modal.Results = matches
 }

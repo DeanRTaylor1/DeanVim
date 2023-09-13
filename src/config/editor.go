@@ -12,6 +12,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/fuzzy"
 	"github.com/deanrtaylor1/go-editor/utils"
 )
 
@@ -23,8 +24,8 @@ type Point struct {
 type Modal struct {
 	ModalInput      []byte
 	CursorPosition  int
-	Data            []string
-	Results         []string
+	Data            fuzzy.Matches
+	Results         fuzzy.Matches
 	ItemIndex       int
 	DataRowOffset   int
 	SearchColOffset int
@@ -99,7 +100,7 @@ func (m *Modal) ResetToFirstItem() {
 }
 
 func (m *Modal) String(i int) string {
-	return m.Data[i]
+	return m.Data[i].Str
 }
 
 func (m *Modal) Len() int {
@@ -129,7 +130,7 @@ func InitModal() Modal {
 	return Modal{
 		ModalInput:      []byte{},
 		CursorPosition:  0,
-		Data:            []string{},
+		Data:            []fuzzy.Match{},
 		ItemIndex:       0,
 		DataRowOffset:   0,
 		SearchColOffset: 0,
@@ -137,8 +138,8 @@ func InitModal() Modal {
 	}
 }
 
-func NewResults() []string {
-	return []string{}
+func NewResults() fuzzy.Matches {
+	return []fuzzy.Match{}
 }
 
 func (e *Editor) DeleteSelection() {
