@@ -46,6 +46,7 @@ func OpenModal(e *config.Editor) {
 	}
 	e.ModalOpen = !e.ModalOpen
 	e.Modal.Data = files
+	e.Modal.Results = files
 	filesString := strings.Join(files, ", ")
 	config.LogToFile("Files listed: " + filesString)
 }

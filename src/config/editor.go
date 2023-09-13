@@ -21,9 +21,13 @@ type Point struct {
 }
 
 type Modal struct {
-	ModalInput     []byte
-	CursorPosition int
-	Data           []string
+	ModalInput      []byte
+	CursorPosition  int
+	Data            []string
+	Results         []string
+	ItemIndex       int
+	DataRowOffset   int
+	SearchColOffset int
 }
 
 type Editor struct {
@@ -89,6 +93,19 @@ func NewEditor() *Editor {
 	}
 }
 
+func (m *Modal) ResetToFirstItem() {
+	m.ItemIndex = 0
+	m.DataRowOffset = 0
+}
+
+func (m *Modal) String(i int) string {
+	return m.Data[i]
+}
+
+func (m *Modal) Len() int {
+	return len(m.Data)
+}
+
 func ListFiles(dir string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -110,10 +127,18 @@ func ListFiles(dir string) ([]string, error) {
 
 func InitModal() Modal {
 	return Modal{
-		ModalInput:     []byte{},
-		CursorPosition: 0,
-		Data:           []string{},
+		ModalInput:      []byte{},
+		CursorPosition:  0,
+		Data:            []string{},
+		ItemIndex:       0,
+		DataRowOffset:   0,
+		SearchColOffset: 0,
+		Results:         NewResults(),
 	}
+}
+
+func NewResults() []string {
+	return []string{}
 }
 
 func (e *Editor) DeleteSelection() {

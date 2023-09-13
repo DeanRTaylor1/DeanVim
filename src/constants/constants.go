@@ -77,22 +77,26 @@ const (
 )
 
 const (
-	TEXT_BLACK              = "\x1b[30m"
-	TEXT_RED                = "\x1b[31m"
-	TEXT_GREEN              = "\x1b[32m"
-	TEXT_YELLOW             = "\x1b[33m"
-	TEXT_BLUE               = "\x1b[34m"
-	TEXT_MAGENTA            = "\x1b[35m"
-	TEXT_CYAN               = "\x1b[36m"
-	TEXT_WHITE              = "\x1b[37m"
-	TEXT_BRIGHT_BLACK       = "\x1b[90m"
-	TEXT_BRIGHT_RED         = "\x1b[91m"
-	TEXT_BRIGHT_GREEN       = "\x1b[92m"
-	TEXT_BRIGHT_YELLOW      = "\x1b[93m"
-	TEXT_BRIGHT_BLUE        = "\x1b[94m"
-	TEXT_BRIGHT_MAGENTA     = "\x1b[95m"
-	TEXT_BRIGHT_CYAN        = "\x1b[96m"
-	TEXT_BRIGHT_WHITE       = "\x1b[97m"
+	TEXT_BLACK          = "\x1b[30m"
+	TEXT_RED            = "\x1b[31m"
+	TEXT_GREEN          = "\x1b[32m"
+	TEXT_YELLOW         = "\x1b[33m"
+	TEXT_BLUE           = "\x1b[34m"
+	TEXT_MAGENTA        = "\x1b[35m"
+	TEXT_CYAN           = "\x1b[36m"
+	TEXT_WHITE          = "\x1b[37m"
+	TEXT_BRIGHT_BLACK   = "\x1b[90m"
+	TEXT_BRIGHT_RED     = "\x1b[91m"
+	TEXT_BRIGHT_GREEN   = "\x1b[92m"
+	TEXT_BRIGHT_YELLOW  = "\x1b[93m"
+	TEXT_BRIGHT_BLUE    = "\x1b[94m"
+	TEXT_BRIGHT_MAGENTA = "\x1b[95m"
+	TEXT_BRIGHT_CYAN    = "\x1b[96m"
+	TEXT_BRIGHT_WHITE   = "\x1b[97m"
+	TEXT_BOLD           = "\x1b[1m" // Bold text
+
+	TEXT_SPECIAL_DARK_GREY = "\x1b[38;5;236m" // Dark gray text
+
 	BACKGROUND_BLACK        = "\x1b[40m"
 	BACKGROUND_RED          = "\x1b[41m"
 	BACKGROUND_GREEN        = "\x1b[42m"
