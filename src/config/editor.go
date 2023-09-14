@@ -21,14 +21,21 @@ type Point struct {
 	Col int
 }
 
+const (
+	MODAL_TYPE_FUZZY = iota
+	MODAL_TYPE_GENERIC
+)
+
 type Modal struct {
+	Type            int
 	ModalInput      []byte
 	CursorPosition  int
-	Data            fuzzy.Matches
-	Results         fuzzy.Matches
+	Data            interface{}
+	Results         interface{}
 	ItemIndex       int
 	DataRowOffset   int
 	SearchColOffset int
+	ModalDrawn      bool
 }
 
 type Editor struct {
@@ -90,7 +97,6 @@ func NewEditor() *Editor {
 		CurrentDirectory: "",
 		MotionBuffer:     []rune{},
 		ModalOpen:        false,
-		Modal:            InitModal(),
 	}
 }
 
@@ -100,11 +106,35 @@ func (m *Modal) ResetToFirstItem() {
 }
 
 func (m *Modal) String(i int) string {
-	return m.Data[i].Str
+	switch m.Type {
+	case MODAL_TYPE_FUZZY:
+		data, ok := m.Data.(fuzzy.Matches)
+		if ok && i < len(data) {
+			return data[i].Str
+		}
+	default:
+		data, ok := m.Data.([]string)
+		if ok && i < len(data) {
+			return data[i]
+		}
+	}
+	return ""
 }
 
 func (m *Modal) Len() int {
-	return len(m.Data)
+	switch m.Type {
+	case MODAL_TYPE_FUZZY:
+		data, ok := m.Data.(fuzzy.Matches)
+		if ok {
+			return len(data)
+		}
+	default:
+		data, ok := m.Data.([]string)
+		if ok {
+			return len(data)
+		}
+	}
+	return 0
 }
 
 func ListFiles(dir string) ([]string, error) {
@@ -126,20 +156,35 @@ func ListFiles(dir string) ([]string, error) {
 	return files, err
 }
 
-func InitModal() Modal {
-	return Modal{
-		ModalInput:      []byte{},
-		CursorPosition:  0,
-		Data:            []fuzzy.Match{},
-		ItemIndex:       0,
-		DataRowOffset:   0,
-		SearchColOffset: 0,
-		Results:         NewResults(),
+func InitModal(modalType int) Modal {
+	switch modalType {
+	case MODAL_TYPE_FUZZY:
+		return Modal{
+			Type:            modalType,
+			ModalInput:      []byte{},
+			CursorPosition:  0,
+			Data:            fuzzy.Matches{},
+			ItemIndex:       0,
+			DataRowOffset:   0,
+			SearchColOffset: 0,
+			Results:         NewResults(),
+		}
+	default:
+		return Modal{
+			Type:            modalType,
+			ModalInput:      []byte{},
+			CursorPosition:  0,
+			Data:            []string{},
+			ItemIndex:       0,
+			DataRowOffset:   0,
+			SearchColOffset: 0,
+			Results:         []string{},
+		}
 	}
 }
 
 func NewResults() fuzzy.Matches {
-	return []fuzzy.Match{}
+	return fuzzy.Matches{}
 }
 
 func (e *Editor) DeleteSelection() {
@@ -274,11 +319,15 @@ func (e *Editor) YankBlock() {
 func (e *Editor) ResetCursorCoords() {
 	e.Cx = 0
 	e.Cy = 0
+	e.ColOff = 0
+	e.RowOff = 0
 }
 
 func (e *Editor) CacheCursorCoords() {
 	e.CurrentBuffer.StoredCx = e.Cx
 	e.CurrentBuffer.StoredCy = e.Cy
+	e.CurrentBuffer.StoredOffsetY = e.RowOff
+	e.CurrentBuffer.StoredOffsetX = e.ColOff
 }
 
 func (e *Editor) ClearMotionBuffer() {
@@ -334,6 +383,8 @@ func (e *Editor) ReloadBuffer(path string) bool {
 			e.CurrentBuffer = &bufferItem
 			e.Cx = bufferItem.StoredCx
 			e.Cy = bufferItem.StoredCy
+			e.ColOff = bufferItem.StoredOffsetX
+			e.RowOff = bufferItem.StoredOffsetY
 			return true
 		}
 	}

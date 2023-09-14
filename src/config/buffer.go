@@ -18,6 +18,8 @@ type Buffer struct {
 	Dirty              int
 	StoredCx           int
 	StoredCy           int
+	StoredOffsetY      int
+	StoredOffsetX      int
 	SelectionStart     Point
 	SelectionEnd       Point
 }

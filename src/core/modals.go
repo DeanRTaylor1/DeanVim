@@ -2,10 +2,12 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
+	"github.com/deanrtaylor1/go-editor/fuzzy"
 )
 
 func DrawTopLabel(buffer *bytes.Buffer, startX, startY, width int, label, bgColor, textColor string) {
@@ -19,13 +21,67 @@ func DrawTopLabel(buffer *bytes.Buffer, startX, startY, width int, label, bgColo
 	buffer.WriteString(constants.ESCAPE_RESET_ATTRIBUTES) // Reset all attributes
 }
 
-func DrawContentArea(buffer *bytes.Buffer, startX, startY, width, height int, e *config.Editor) {
-	// Draw the top border with rounded corners
-	buffer.WriteString(SetCursorPos(startY, startX))
-	buffer.WriteString(constants.LEFT_TOP_CORNER)                          // Left-top corner
-	buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, width-2)) // Horizontal line
-	buffer.WriteString(constants.RIGHT_TOP_CORNER)                         // Right-top corner
+func DrawContent(buffer *bytes.Buffer, startX, startY, width, height int, e *config.Editor) {
+	results, ok := e.Modal.Results.([]string)
+	if !ok {
+		return
+	}
 
+	for i := 0; i < 3 && i < len(results); i++ {
+		config.LogToFile(fmt.Sprintf("Result %d: %s", i+1, results[i]))
+	}
+
+	for i := 1; i < height-5; i++ {
+		cursorPos := SetCursorPos(startY+i, startX)
+		config.LogToFile(fmt.Sprintf("Cursor Position Before Vertical Line: %s", cursorPos))
+
+		buffer.WriteString(cursorPos)
+		buffer.WriteString(constants.VERTICAL_LINE)
+
+		dataIndex := i - 1 + e.Modal.DataRowOffset
+
+		if dataIndex == e.Modal.ItemIndex {
+			buffer.WriteString(constants.BACKGROUND_BRIGHT_BLACK)
+			buffer.WriteString(constants.TEXT_BOLD)
+		}
+
+		if dataIndex < len(results) {
+			str := results[dataIndex]
+			strLen := len(str)
+			maxStrLen := width - 2
+			config.LogToFile(fmt.Sprintf("String Length: %d, Max String Length: %d, Width: %d", strLen, maxStrLen, width))
+
+			if strLen > maxStrLen {
+				str = str[:maxStrLen]
+			}
+
+			buffer.WriteString(str)
+
+			remainingSpace := maxStrLen - len(str)
+			config.LogToFile(fmt.Sprintf("Remaining Space: %d", remainingSpace))
+
+			buffer.WriteString(strings.Repeat(" ", remainingSpace))
+		} else {
+			buffer.WriteString(strings.Repeat(" ", width-2))
+		}
+
+		if dataIndex == e.Modal.ItemIndex {
+			buffer.WriteString(constants.BACKGROUND_RESET)
+			buffer.WriteString(constants.FOREGROUND_RESET)
+			buffer.WriteString(constants.ESCAPE_RESET_ATTRIBUTES)
+		}
+
+		cursorPosBeforeLastVerticalLine := SetCursorPos(startY+i, startX+width-1)
+		config.LogToFile(fmt.Sprintf("Cursor Position Just Before Last Vertical Line: %s", cursorPosBeforeLastVerticalLine))
+		buffer.WriteString(constants.VERTICAL_LINE)
+	}
+}
+
+func DrawFuzzyContent(buffer *bytes.Buffer, startX, startY, width, height int, e *config.Editor) {
+	results, ok := e.Modal.Results.(fuzzy.Matches)
+	if !ok {
+		return
+	}
 	for i := 1; i < height-5; i++ {
 		buffer.WriteString(SetCursorPos(startY+i, startX))
 		buffer.WriteString(constants.VERTICAL_LINE) // Vertical line
@@ -39,10 +95,10 @@ func DrawContentArea(buffer *bytes.Buffer, startX, startY, width, height int, e 
 			buffer.WriteString(constants.TEXT_BOLD)
 		}
 
-		if dataIndex < len(e.Modal.Results) {
+		if dataIndex < len(results) {
 			// Write the data at the index
-			str := e.Modal.Results[dataIndex].Str
-			matchedIndexes := e.Modal.Results[dataIndex].MatchedIndexes
+			str := results[dataIndex].Str
+			matchedIndexes := results[dataIndex].MatchedIndexes
 
 			for j, char := range str {
 				if contains(matchedIndexes, j) {
@@ -71,12 +127,35 @@ func DrawContentArea(buffer *bytes.Buffer, startX, startY, width, height int, e 
 
 		buffer.WriteString(constants.VERTICAL_LINE) // Vertical line
 	}
+}
 
-	// Draw the bottom border with rounded corners
-	buffer.WriteString(SetCursorPos(startY+height-5, startX))
-	buffer.WriteString(constants.LEFT_BOTTOM_CORNER)                       // Left-bottom corner
-	buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, width-2)) // Horizontal line
-	buffer.WriteString(constants.RIGHT_BOTTOM_CORNER)                      // Right-bottom corner
+func DrawContentArea(buffer *bytes.Buffer, startX, startY, width, height int, e *config.Editor) {
+	// Draw the top border with rounded corners
+	if !e.Modal.ModalDrawn {
+		// Draw the top border with rounded corners
+		buffer.WriteString(SetCursorPos(startY, startX))
+		buffer.WriteString(constants.LEFT_TOP_CORNER)                          // Left-top corner
+		buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, width-2)) // Horizontal line
+		buffer.WriteString(constants.RIGHT_TOP_CORNER)                         // Right-top corner
+	}
+
+	switch e.Modal.Type {
+	case config.MODAL_TYPE_FUZZY:
+		DrawFuzzyContent(buffer, startX, startY, width, height, e)
+
+	default:
+		DrawContent(buffer, startX, startY, width, height, e)
+	}
+
+	if !e.Modal.ModalDrawn {
+		// Draw the bottom border with rounded corners
+		buffer.WriteString(SetCursorPos(startY+height-5, startX))
+		buffer.WriteString(constants.LEFT_BOTTOM_CORNER)                       // Left-bottom corner
+		buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, width-2)) // Horizontal line
+		buffer.WriteString(constants.RIGHT_BOTTOM_CORNER)                      // Right-bottom corner
+	}
+
+	e.Modal.ModalDrawn = true
 }
 
 // Helper function to check if a slice contains an element
@@ -91,6 +170,7 @@ func contains(slice []int, val int) bool {
 
 func DrawSearchBox(buffer *bytes.Buffer, startX, startY, width int, e *config.Editor) {
 	// Draw the top border of the search box with rounded corners
+
 	buffer.WriteString(SetCursorPos(startY, startX))
 	buffer.WriteString(constants.LEFT_TOP_CORNER)                          // Left-top corner of the search box
 	buffer.WriteString(strings.Repeat(constants.HORIZONTAL_LINE, width-2)) // Horizontal line
