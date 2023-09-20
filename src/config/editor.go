@@ -392,8 +392,23 @@ func (e *Editor) ReloadBuffer(path string) bool {
 }
 
 func (e *Editor) LoadNewBuffer() {
-	e.Buffers = append(e.Buffers, *e.CurrentBuffer)
-	e.CurrentBuffer.Idx = len(e.Buffers)
+	newBuffer := *e.CurrentBuffer
+	newBuffer.Idx = len(e.Buffers)
+	e.Buffers = append(e.Buffers, newBuffer)
+}
+
+func (e *Editor) RemoveBuffer(name string) {
+	idx := -1
+	for i, v := range e.Buffers {
+		if v.Name == name {
+			idx = i
+			break
+		}
+	}
+
+	if idx != -1 {
+		e.Buffers = append(e.Buffers[:idx], e.Buffers[idx+1:]...)
+	}
 }
 
 func (c *Editor) ClearRedoStack() {

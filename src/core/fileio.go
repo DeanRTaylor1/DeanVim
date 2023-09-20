@@ -171,7 +171,7 @@ func FileOpen(e *config.Editor, fileName string) error {
 	e.FirstRead = false
 	e.CurrentBuffer.Name = relativeFileName
 	if len(e.Buffers) < 1 {
-		e.Buffers = make([]config.Buffer, 10)
+		e.Buffers = make([]config.Buffer, 0, 15)
 	}
 
 	e.LoadNewBuffer()

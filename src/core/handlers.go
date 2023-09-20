@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/deanrtaylor1/go-editor/config"
@@ -34,6 +35,17 @@ func QuitKeyHandler(e *config.Editor) bool {
 		e.QuitTimes--
 		return false
 	}
+
+	e.RemoveBuffer(e.CurrentBuffer.Name) // Remove the current buffer
+
+	if len(e.Buffers) > 0 {
+		fullPath := filepath.Join(e.RootDirectory, e.Buffers[0].Name)
+		// Load the next buffer if there's any remaining
+		ReadHandler(e, fullPath)
+		return false
+	}
+
+	// Clear screen and exit if no more buffers
 	fmt.Print(constants.ESCAPE_CLEAR_SCREEN)
 	fmt.Print(constants.ESCAPE_MOVE_TO_HOME_POS)
 	os.Exit(0)
