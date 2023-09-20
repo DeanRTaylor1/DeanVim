@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/deanrtaylor1/go-editor/config"
@@ -27,13 +26,8 @@ func DrawContent(buffer *bytes.Buffer, startX, startY, width, height int, e *con
 		return
 	}
 
-	for i := 0; i < 3 && i < len(results); i++ {
-		config.LogToFile(fmt.Sprintf("Result %d: %s", i+1, results[i]))
-	}
-
 	for i := 1; i < height-5; i++ {
 		cursorPos := SetCursorPos(startY+i, startX)
-		config.LogToFile(fmt.Sprintf("Cursor Position Before Vertical Line: %s", cursorPos))
 
 		buffer.WriteString(cursorPos)
 		buffer.WriteString(constants.VERTICAL_LINE)
@@ -49,7 +43,6 @@ func DrawContent(buffer *bytes.Buffer, startX, startY, width, height int, e *con
 			str := results[dataIndex]
 			strLen := len(str)
 			maxStrLen := width - 2
-			config.LogToFile(fmt.Sprintf("String Length: %d, Max String Length: %d, Width: %d", strLen, maxStrLen, width))
 
 			if strLen > maxStrLen {
 				str = str[:maxStrLen]
@@ -58,7 +51,6 @@ func DrawContent(buffer *bytes.Buffer, startX, startY, width, height int, e *con
 			buffer.WriteString(str)
 
 			remainingSpace := maxStrLen - len(str)
-			config.LogToFile(fmt.Sprintf("Remaining Space: %d", remainingSpace))
 
 			buffer.WriteString(strings.Repeat(" ", remainingSpace))
 		} else {
@@ -71,15 +63,23 @@ func DrawContent(buffer *bytes.Buffer, startX, startY, width, height int, e *con
 			buffer.WriteString(constants.ESCAPE_RESET_ATTRIBUTES)
 		}
 
-		cursorPosBeforeLastVerticalLine := SetCursorPos(startY+i, startX+width-1)
-		config.LogToFile(fmt.Sprintf("Cursor Position Just Before Last Vertical Line: %s", cursorPosBeforeLastVerticalLine))
 		buffer.WriteString(constants.VERTICAL_LINE)
+	}
+}
+
+func DrawBlankContent(buffer *bytes.Buffer, startX, startY, width, height int) {
+	for i := 1; i < height-5; i++ {
+		buffer.WriteString(SetCursorPos(startY+i, startX))
+		buffer.WriteString(constants.VERTICAL_LINE)      // Left vertical line
+		buffer.WriteString(strings.Repeat(" ", width-2)) // Empty space
+		buffer.WriteString(constants.VERTICAL_LINE)      // Right vertical line
 	}
 }
 
 func DrawFuzzyContent(buffer *bytes.Buffer, startX, startY, width, height int, e *config.Editor) {
 	results, ok := e.Modal.Results.(fuzzy.Matches)
 	if !ok {
+		DrawBlankContent(buffer, startX, startY, width, height)
 		return
 	}
 	for i := 1; i < height-5; i++ {
@@ -100,6 +100,12 @@ func DrawFuzzyContent(buffer *bytes.Buffer, startX, startY, width, height int, e
 			str := results[dataIndex].Str
 			matchedIndexes := results[dataIndex].MatchedIndexes
 
+			// Ensure that the string does not exceed the defined width
+			maxStrWidth := width - 2
+			if len(str) > maxStrWidth {
+				str = str[:maxStrWidth]
+			}
+
 			for j, char := range str {
 				if contains(matchedIndexes, j) {
 					buffer.WriteString(constants.TEXT_BLUE)
@@ -111,7 +117,7 @@ func DrawFuzzyContent(buffer *bytes.Buffer, startX, startY, width, height int, e
 			}
 
 			// Fill the remaining space with empty characters
-			remainingSpace := width - 2 - len(str)
+			remainingSpace := maxStrWidth - len(str)
 			buffer.WriteString(strings.Repeat(" ", remainingSpace))
 		} else {
 			// If the index doesn't exist, fill the entire space with empty characters
@@ -144,7 +150,7 @@ func DrawContentArea(buffer *bytes.Buffer, startX, startY, width, height int, e 
 		DrawFuzzyContent(buffer, startX, startY, width, height, e)
 
 	default:
-		DrawContent(buffer, startX, startY, width, height, e)
+		DrawFuzzyContent(buffer, startX, startY, width, height, e)
 	}
 
 	if !e.Modal.ModalDrawn {

@@ -1,8 +1,6 @@
 package mappings
 
 import (
-	"fmt"
-
 	"github.com/deanrtaylor1/go-editor/config"
 	"github.com/deanrtaylor1/go-editor/constants"
 	"github.com/deanrtaylor1/go-editor/core"
@@ -62,9 +60,6 @@ func OpenFuzzyModal(e *config.Editor) {
 
 	e.Modal.Data = data
 	e.Modal.Results = data
-
-	config.LogToFile(fmt.Sprintf("Initial Modal Results: %v", e.Modal.Results))
-	config.LogToFile(fmt.Sprintf("Initial Modal Data: %v", e.Modal.Data))
 }
 
 func OpenGrepModal(e *config.Editor) {

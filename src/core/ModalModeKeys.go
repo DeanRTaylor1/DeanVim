@@ -25,9 +25,9 @@ func ModalModeEventsHandler(char rune, e *config.Editor) rune {
 				fullPath = filepath.Join(e.RootDirectory, results[e.Modal.ItemIndex].Str)
 			}
 		default:
-			results, ok := e.Modal.Results.([]string)
+			results, ok := e.Modal.Results.(fuzzy.Matches)
 			if ok {
-				selectedResult := results[e.Modal.ItemIndex]
+				selectedResult := results[e.Modal.ItemIndex].Str
 				parts := strings.Split(selectedResult, ":")
 				if len(parts) >= 1 {
 					filename := parts[0]
@@ -119,6 +119,7 @@ func updateResults(e *config.Editor) {
 			return
 		}
 		e.Modal.Data = data
-		e.Modal.Results = data
+		matches := fuzzy.FindFrom(string(e.Modal.ModalInput), &e.Modal)
+		e.Modal.Results = matches
 	}
 }
